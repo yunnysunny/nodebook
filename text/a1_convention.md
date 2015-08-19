@@ -1,0 +1,47 @@
+## 书籍写作规范
+
+### 专有名词
+
+技术类专有名词依循官方常见用法。
+
+-   Node.js
+-   npm
+-   JavaScript
+
+### 标点符号
+
+以中文全角标点符号为主。
+
+-   ，、。！“”（）
+
+遇英文段落（整句）采用一般（半角）标点符号。
+
+中文与英文单字之间以一个空白字符隔开，标点符号与英文单字之间不需要空隔。
+
+这是为了让排版显示的自动断词断句可以正确运作，以及增加中英文混杂段落的阅读舒适。
+
+-   Node.js 是一种适合用于 Server-side 的开发框架（Framework），相当
+    Nice！
+
+### 特殊排版说明
+
+中文同一段落为了方便编辑，可以将句子断行；
+但行尾必须加上半角“”倒斜线符号。
+因为在 HTML、EPUB 或 MOBI 格式中，
+换行字符会被当做空白字符处理，导致增加过多影响版面美观的空隔。
+
+###程序码
+
+只有一行、不需要 Highlight，或是一般的 command line 操作指令说明，
+使用 reStructuredText 标准 Code 写法。
+
+    This is line One
+    This is line Two
+
+片段程序码（snippets），使用 inline code block，并指定 language type。
+
+```javascript
+if (something) {
+    alert('test');
+}
+```

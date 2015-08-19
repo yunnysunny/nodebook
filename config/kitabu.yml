@@ -1,0 +1,44 @@
+# The book's title. Will be used everywhere!
+title: "nodebook"
+
+# The book's language.
+language: zh-cn
+
+# Your book copyright info.
+# Here's some examples:
+#
+#   Copyright 2015 by John Doe.
+#   Copyright 2015 by John Doe. This work is licensed under MIT License.
+#   This work is licensed under a Creative Commons Attribution-ShareAlike 3.0 Unported License.
+#   This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+#   This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
+#
+copyright: "Copyright (C) 2015 yunnysunny."
+
+# Who's publishing this book.
+publisher: "yunnysunny"
+
+# When this book was published.
+published_at: "2015-08-13"
+
+# Some book description.
+subject: "整理自台湾nodejs社区的电子书（https://github.com/nodejs-tw/nodejs-wiki-book）."
+
+# Some keywords that identify this book.
+keywords: "nodejs, e-book, kindlegen, epub, mobi, pdf, prince"
+
+# Some unique identification. Works great with your domain
+# like `http://yourbook.example.com`.
+uid: "5c6990af18d0c8349b874eb6830091a8"
+
+# Your book identification like ISBN or ISSN.
+identifier:
+  id: "http://yourbook.example.com"
+  type: "URL" # can be ISBN, ISSN or URL
+
+# This book authors.
+authors:
+  - "yunnysunny"
+
+# Syntax highlight theme. Can be any of supported by Rouge.
+theme: github
