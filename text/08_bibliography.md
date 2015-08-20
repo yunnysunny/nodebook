@@ -1,6 +1,6 @@
-## 参考资源
+## 8 参考资源
 
-### Node.js 书籍
+### 8.1 Node.js 书籍
 
 -   [Programming
     Node.js](http://shop.oreilly.com/product/9781934356890.do), April
@@ -36,7 +36,7 @@
 -   [Mastering Node.js](http://visionmedia.github.com/masteringnode/),
     visionmedia
 
-### Node.js 影音教学
+### 8.2 Node.js 影音教学
 
 -   [The Node Sessions: The Best of OSCON
     2011](http://shop.oreilly.com/product/0636920022183.do), August
@@ -45,11 +45,11 @@
     Node](http://shop.oreilly.com/product/0636920017080.do), March 2011,
     O'Reilly Media (Video)
 
-### Node.js 教学网站
+### 8.3 Node.js 教学网站
 
 -   [Node Tuts](http://nodetuts.com/)
 
-### Node.js 课程
+### 8.4 Node.js 课程
 
 -   [Introduction To
     Node.js](http://codelesson.com/courses/view/introduction-to-node-js),

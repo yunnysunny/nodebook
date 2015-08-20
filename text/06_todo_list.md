@@ -1,4 +1,4 @@
-## 用 Express 和 MongoDB 写一个 todo list
+## 6 用 Express 和 MongoDB 写一个 todo list
 
 
 练习一种语言或是 framework 最快的入门方式就是写一个 todo list 了.他包含了基本的 C.R.U.D. ( 新增, 读取, 更新, 删除 ). 这篇文章将用 node.js里最通用的 framework Express 架构 application 和 MongoDB 来储存资料.
@@ -16,18 +16,18 @@
 - 安装
 
 开发环境 开始之前请确定你已经安装了 node.js, Express 和 MongoDB,
-如果没有可以参考下列文章. \*
+如果没有可以参考下列文章. 
 How to setup a node.js development environment on Mac OSX Lion &lt;http://dreamerslab.com/blog/tw/how-to-setup-a-node-js-development-environment-on-mac-osx-lion/&gt;
-\*
+
 How to setup a node.js development environment on Ubuntu 11.04 &lt;http://dreamerslab.com/blog/tw/how-to-setup-a-node-js-development-environment-on-ubuntu-11-04/&gt;
-\*
+
 How to setup a node.js development environment on Windows &lt;http://dreamerslab.com/blog/tw/how-to-setup-a-node-js-development-environment-on-windows/&gt;
 
-### node.js 套件
+### 6.1 node.js 套件
 
 参考文档 :
 npm basic commands<http://dreamerslab.com/blog/en/npm-basic-commands/>
-\* 安装 Express
+- 安装 Express
 
     $ npm install express@2.5.11 -g
 
@@ -77,7 +77,7 @@ template engine 是 jade, 在这里我们改用比较平易近人的 ejs.
       }
     }
 
-### 安装 dependencies
+### 6.2 安装 dependencies
 
     $ cd todo && npm install -l
 
@@ -113,14 +113,14 @@ Project 档案结构
     |
     `-- package.json
 
--   node\_modules - 包含所有 project 相关套件.
+-   node_modules - 包含所有 project 相关套件.
 -   public - 包含所有静态档案.
 -   routes - 所有动作包含商业逻辑.
 -   views - 包含 action views, partials 还有 layouts.
 -   app.js - 包含设定, middlewares, 和 routes 的分配.
 -   package.json - 相关套件的设定档.
 
-### MongoDB 以及 Mongoose 设定
+### 6.3 MongoDB 以及 Mongoose 设定
 
 在 Ubuntu 上 MongoDB 开机后便会自动开启. 在 Mac
 上你需要手动输入下面的指令.
@@ -196,7 +196,7 @@ exports.index = function ( req, res ){
 };
 ```
 
-### 修改 index view
+### 6.4 修改 index view
 
 
 我们需要一个 text input 来新增待办事项. 在这里我们用 POST form
@@ -290,11 +290,12 @@ views/index.ejs
 将这个删除的动作加到 routes 里. app.js
 
 ```javascript
-// 新增下列语法到 routes
+//新增下列语法到routes
 app.get( '/destroy/:id', routes.destroy );
 ```
 
 编辑待办事项 当鼠标点击待办事项时将他转成一个 text input.
+
 routes/index.js
 
 ```javascript
@@ -309,8 +310,9 @@ exports.edit = function ( req, res ){
 };
 ```
 
-Edit view 基本上和 index view 差不多,
-唯一的不同是在选取的那个待办事项变成 text input. views/edit.ejs
+Edit view 基本上和 index view 差不多,唯一的不同是在选取的那个待办事项变成 text input.
+
+views/edit.ejs
 
     <h1><%= title %></h1>
     <form action="/create" method="post" accept-charset="utf-8">
@@ -378,6 +380,7 @@ exports.update = function ( req, res ){
     app.post( '/update/:id', routes.update );
 
 排序 现在待办事项是最早产生的排最前面, 我们要将他改为最晚产生的放最前面.
+
 routes/index.js
 
 ```javascript
@@ -407,11 +410,9 @@ exports.edit = function ( req, res ){
 };
 ```
 
-多重用户 现在所有用户看到的都是同一份资料. 意思就是说每一个人的 todo
-list 都长得一样, 资料都有可能被其他人修改. 我们可以用 cookie
-来记录用户资讯让每个人有自己的 todo list. Express 已经有内建的 cookie,
-只要在 app.js 新增一个 middleware 就好. 另外我们也会需要新增一个依据
-cookie 来抓取当下的用户的 middleware. app.js
+多重用户 现在所有用户看到的都是同一份资料. 意思就是说每一个人的 todo list 都长得一样, 资料都有可能被其他人修改. 我们可以用 cookie来记录用户资讯让每个人有自己的 todo list. Express 已经有内建的 cookie,只要在 app.js 新增一个 middleware 就好. 另外我们也会需要新增一个依据cookie 来抓取当下的用户的 middleware. 
+
+app.js
 
 ```javascript
 var express = require( 'express' );
@@ -546,10 +547,11 @@ exports.current_user = function ( req, res, next ){
 };
 ```
 
-### Error handling
+### 6.5 Error handling
 
-要处理错误我们需要新增 next 参数到每个 action 里.
-一旦错误发生遍将他传给下一个 middleware 去处理. routes/index.js
+要处理错误我们需要新增 next 参数到每个 action 里.一旦错误发生遍将他传给下一个 middleware 去处理. 
+
+routes/index.js
 
 ```javascript
 ... function ( req, res, next ){
@@ -563,10 +565,9 @@ exports.current_user = function ( req, res, next ){
 });
 ```
 
-### Run application
+### 6.6 Run application
 
 
     $ node app.js
 
-到此为止我们已经完成了大部分的功能了. 原始码里有多加了一点 css
-让他看起来更美观. 赶快开启你的 server 来玩玩看吧 :)
+到此为止我们已经完成了大部分的功能了. 原始码里有多加了一点 css让他看起来更美观. 赶快开启你的 server 来玩玩看吧 :)
