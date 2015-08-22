@@ -116,7 +116,7 @@ npm 目前拥有超过 6000 种套件（packages），可以在 [npm registry](h
 
 举例来说，在关键字栏位输入“coffee-script”，下方的清单就会自动列出包含 coffee-script 关键字的套件。
 
-![image](../images/zh-tw/node_npm_registry.png)
+![image](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/zh-tw/node_npm_registry.png)
 
 接着我们回到终端机模式的操作，`npm` 的指令工具本身就可以完成套件搜寻的任务。
 
@@ -126,7 +126,7 @@ npm 目前拥有超过 6000 种套件（packages），可以在 [npm registry](h
 
 以下是搜寻结果的参考画面：
 
-![image](../images/zh-tw/node_npm_search.png)
+![image](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/zh-tw/node_npm_search.png)
 
 找到需要的套件后（例如 express），即可使用以下指令安装：
 

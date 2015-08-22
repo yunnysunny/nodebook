@@ -105,6 +105,7 @@ app.get(/^\/ip?(?:\/(\d{2,3})(?:\.(\d{2,3}))(?:\.(\d{2,3}))(?:\.(\d{2,3})))?/, f
 ```
 
 此章节全部范例程序码如下，
+
 ```javascript
     /**
      * @overview
@@ -165,6 +166,7 @@ app.use(express.session());
 ```
 
 上面都是一种 middleware 的使用方式，透过 app.use方式里面载入函数执行方法，回应函数会包含叁个基本参数，response，request， next，其中next 表示下一个 middleware执行函数，同时会自动将预设叁个参数继续带往下个函数执行，底下有个实验，
+
 ```javascript
     /**
      * Module dependencies.
@@ -208,6 +210,7 @@ app.use(express.session());
 ### 5.5 Express 路由应用
 
 在实际开发上可能会遇到需要使用参数等方式，混和变数一起使用，express里面提供了一个很棒的处理方法 app.all这个方式，可以先采用基本路由配对，再将设定为每个不同的处理方式，开发者可以透过这个方式简化自己的程序逻辑，
+
 ```javascript
     /**
      * @overview
@@ -262,10 +265,8 @@ app.use(express.session());
 express作为一个mvc框架，肯定不能仅仅是处理静态页，作为MVC中的V（视图），是其的有机组成部分。谈到视图，则不得不谈模板引擎，C（控制器）处理完请求后需要将处理后的数据发挥给视图层，这就没法回避从控制器中传递参数到视图层的问题，而在视图层解析这些参数正式模板引擎所要完成的任务。express中是没有内置的模板引擎的，他所使用的都是第三方的模板引擎，比如ejs、jade等。
 下面通过命令行来快速生成一个express项目：
 `express -e ejs myapp`
-命令会在当前执行目录下创建一个myapp文件夹，进入myapp目录下，会发现我们熟悉的pagekage.json文件，很明显里面含有对于express、ejs依赖的说明，但是目录下却没有文件夹node_modules，所以需要运行
-`npm install`
-来安装所有所需的依赖。
-接着打开文件夹中的app.js，会发现生成的代码如下：
+命令会在当前执行目录下创建一个myapp文件夹，进入myapp目录下，会发现我们熟悉的pagekage.json文件，很明显里面含有对于express、ejs依赖的说明，但是目录下却没有文件夹node_modules，所以需要运行`npm install`来安装所有所需的依赖。接着打开文件夹中的app.js，会发现生成的代码如下：
+
 ```javascript	
 	/**
 	 * Module dependencies.
@@ -304,21 +305,23 @@ express作为一个mvc框架，肯定不能仅仅是处理静态页，作为MVC�
 ```
 **代码片段 5.5.1**    
 注意这两行： 
+
 ```javascript  
 	app.set('views', __dirname + '/views');   
 	app.set('view engine', 'ejs');      
 ```
-它代表使用的模板引擎为ejs，并且把所有的模板文件都放到了当前文件夹下的views目录中。
-然后看一下：
+它代表使用的模板引擎为ejs，并且把所有的模板文件都放到了当前文件夹下的views目录中。然后看一下：
+
  ```javascript  
 	app.use(express.static(path.join(__dirname, 'public')));
 ```
-这代表将静态页放到了当前文件夹下的public目录中。
-最后看一下路由设置：
+这代表将静态页放到了当前文件夹下的public目录中。最后看一下路由设置：
+
 ```javascript
 	app.get('/', routes.index);
 ```
 我们找到routes.index文件的定义（位于routes目录下index.js文件中）：
+
 ```javascript
 	exports.index = function(req, res){
 	  res.render('index', { title: 'Express' });
@@ -326,6 +329,7 @@ express作为一个mvc框架，肯定不能仅仅是处理静态页，作为MVC�
 ```
 这里面遇到了一个render函数，这个函数就是express中用于加载模板的函数。通过代码也可以大体看出，第一个参数是模板的名字，它所代表的文件位于视图文件夹views目录下的index.ejs（ejs文件后缀是ejs模板引擎的默认后缀）；而第二个参数即为传递给这个模板的参数。
 接着看一下在模板中，是怎样使用刚才传递的那个titile参数的，打开views文件夹下的index.ejs：
+
 ```html
 	<!DOCTYPE html>
 	<html>
@@ -354,6 +358,7 @@ express作为一个mvc框架，肯定不能仅仅是处理静态页，作为MVC�
 ### 5.7  Express 中的GET和POST ###
 
 接下来的内容来讲一下express中怎样使用get和post，首先我们在views文件夹下新建目录user,然后在user目录下新建文件sign.ejs(当然你也可以把它当成静态页，放到public中；但是正常环境下，对于html一般都是通过视图的方式来加载)。
+
 ```html
 	<!DOCTYPE html>
 	<html>
@@ -373,8 +378,8 @@ express作为一个mvc框架，肯定不能仅仅是处理静态页，作为MVC�
 ```
 **代码5.7.1 sign.ejs代码**
 
-这里表单method是get（虽然一般情况下网服务器添加数据都是用post方式，但是这里为了演示方便，现将其写成get）。接下来看一下express中怎样在GET方式下获取表单中的数据。
-为了演示用户注册这个流程，我们在routes/user.js中添加两个方法：
+这里表单method是get（虽然一般情况下网服务器添加数据都是用post方式，但是这里为了演示方便，现将其写成get）。接下来看一下express中怎样在GET方式下获取表单中的数据。为了演示用户注册这个流程，我们在routes/user.js中添加两个方法：
+
 ```javascript
 	exports.showSign = function(req, res) {
 		res.render('user/sign');
@@ -389,6 +394,7 @@ express作为一个mvc框架，肯定不能仅仅是处理静态页，作为MVC�
 **代码5.7.2 新增user.js文件中处理函数**
 
 然后在app.js中添加相应的路由如下：
+
 ```javascript
 	app.get('/users/sign', user.showSign);
 	app.get('/users/do/sign', user.doSign);
@@ -404,17 +410,20 @@ express作为一个mvc框架，肯定不能仅仅是处理静态页，作为MVC�
 ![注册成功显示界面](https://raw.github.com/yunnysunny/expressdemo/master/do.png)
 
 这就完成了get操作，但是前面提到了类似于这种注册操作一般都是用post的，将上面的代码改成post是很简单的，只需在代码代码5.7.1 中将表单的method改成post，代码5.7.2中获取请求数据是这么写的：
+
 ```javascript
 	var name = req.query.name;
 	var email = req.query.email;
 ```
 如果改成post，只需将其改为
+
 ```javascript
 	var name = req.body.name;
 	var email = req.body.email;
 ```
 ### 5.8  Express AJAX 应用示例 ###
 还是上面的例子，只不过这次换成用ajax来提交数据，我们在views/user文件夹下再新建文件sign2.ejs：
+
 ```html
 	<!DOCTYPE html>
 	<html>
@@ -454,6 +463,7 @@ express作为一个mvc框架，肯定不能仅仅是处理静态页，作为MVC�
 **代码5.8.1 sign2.ejs**
 
 为了使用ajax，我们引入了jquery，并将jquery-1.10.2.js放到了public/javascripts文件夹下，为了演示ajax和普通请求处理的区别，这里仅仅给出处理post请求的代码：
+
 ```javascript
 	exports.doSign2 = function(req, res) {
 		var name = req.body.name;

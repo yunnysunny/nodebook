@@ -1,9 +1,6 @@
 ## 3 Node.js 基础
 
-前篇文章已经由介绍、安装至设定都有完整介绍，nodeJS 内部除了javascript
-常用的函数(function)、对象(object)之外，也有许多不同的自订对象，nodeJS
-预设建立这些对象为核心对象，是为了要让开发流程更为，这些资料在官方文档已经具有许多具体说明。接下来将会介绍在开发nodeJS
-程序时常见的对象特性与使用方法。
+前篇文章已经由介绍、安装至设定都有完整介绍，nodeJS 内部除了javascript常用的函数(function)、对象(object)之外，也有许多不同的自订对象，nodeJS预设建立这些对象为核心对象，是为了要让开发流程更为，这些资料在官方文档已经具有许多具体说明。接下来将会介绍在开发nodeJS程序时常见的对象特性与使用方法。
 
 ### 3.1 node.js http 服务器建立
 
@@ -11,6 +8,7 @@
 在\`node.js官方网站&lt;<http://nodejs.org>&gt;里面有举一个最简单的HTTP 服务器建立，一开始初步就是建立一个服务器平台，让node.js 可以与浏览器互相行为。每种语言一开始的程序建立都是以 Hello world 开始，最初也从Hello world 带各位进入node.js 的世界。
 
 输入以下程序码，储存档案为 node\_basic\_http\_hello\_world.js 
+
 ```javascript
 var server,
     ip   = "127.0.0.1",
@@ -67,6 +65,7 @@ Http 服务器需要设定port, ip，在最后需要设定Http 监听，需要�
 当在浏览器输入http://127.0.0.1:1337/test ，在服务器端会收到两个要求，一个是我们输入的/test 要求，另外一个则是 /favicon.ico。/test 的路径要求，http 服务器本身需要经过程序设定才有办法回应给浏览器端所需要的回应，在服务器中所有的路径要求都是需要被解析才有办法取得资料。
 
 从上面解说可以了解到在node.js 当中所有的路径都需要经过设定，未经过设定的路由会让浏览器无法取得任何资料导致错误页面的发生，底下将会解说如何设定路由，同时避免发生错误情形。先前node.js 程序需要增加一些修改，才能让用户透过浏览器，在不同路径时有不同的结果。根据刚才的程序做如下的修改，
+
 ```javascript
 var server,
     ip   = "127.0.0.1",
@@ -123,6 +122,7 @@ console.log("Server running at http://" + ip + ":" + port);
 档案管理最重要的部分就是File system
 <http://nodejs.org/docs/latest/api/fs.html>
 这个模组，此模组可以针对档案做管理、监控、读取等行为，里面有许多预设的方法，底下是档案输出的基本范例，底下会有两个档案，第一个是静态html档案，
+
 ```html
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" lang="zh-CN">
@@ -136,6 +136,7 @@ console.log("Server running at http://" + ip + ":" + port);
 </html>
 ```
 另一个为node.js 程序，
+
 ```javascript
 var fs = require("fs"),
 filename = "static/index.html",
@@ -147,7 +148,7 @@ fs.readFile(filename, encode, function(err, file) {
 一开始直接载入file system 模组，载入名称为fs。读取档案主要使用的方法为readFile ，里面以叁个参数 **路径(file path)**, **编码方式(encoding)** ， **回应函数(callback)**，路径必须要设定为静态html
 所在位置，才能指定到正确的档案。静态档案的编码方式也必须正确，这边使用静态档案的编码为**utf8** ，如果编码设定错误，node.js 读取出来档案结果会使用 byte raw格式输出，如果 **错误编码格式，会导致输出资料为 byte raw**
 
-![image](../images/zh-tw/node_basic_file_byte.png)
+![image](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/zh-tw/node_basic_file_byte.png)
 
 **回应函数** 中里面会使用两个变数，error
 为错误资讯，如果读取的档案不存在，或者发生错误，error 数值会是 true
@@ -156,7 +157,7 @@ fs.readFile(filename, encode, function(err, file) {
 
 最后程序的输出结果画面如下，
 
-![image](../images/zh-tw/node_basic_file_read.png)
+![image](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/zh-tw/node_basic_file_read.png)
 
 ### 3.4node.js http 静态档案输出
 
@@ -200,6 +201,7 @@ fs.readFile(filePath, encode, function(err, file) {
 接着将浏览器发出要求路径与资料夹组合，读取正确html静态档案。用户有可能会输入错误路径，所以在读取档案的时候要加入错误处理，同时回应**404** 服务器无法正确回应的 http header 格式。
 
 加入这些细节的修改，一个基本的http 静态 html输出服务器就完成了，完整程序码如下，
+
 ```javascript
 var server,
     ip   = "127.0.0.1",
@@ -262,6 +264,7 @@ parameter = qs.parse(path.query);
 ```
 
 整个node.js http GET 参数完整采集程序码如下，
+
 ```javascript
 var server,
     ip   = "127.0.0.1",
