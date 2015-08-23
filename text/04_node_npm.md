@@ -34,7 +34,7 @@ Node.js for Windows 于 0.6.2 版开始内建 npm，使用 nodejs.org 官方提�
 解压缩后，在 Node.js 的安装路径下，应该有以下的档案及资料夹。
 
 -   npm.cmd （档案）
--   node\_modules （资料夹）
+-   node_modules （资料夹）
 
 #### 4.1.2 安装于 Linux 系统
 
@@ -110,11 +110,7 @@ npm 是指令列工具（command-line tool），使用时请先打开系统的�
 
 ### 4.2 使用 NPM 安装套件
 
-npm 目前拥有超过 6000 种套件（packages），可以在 [npm registry](http://search.npmjs.org/) 使用关键字搜寻套件。
-
-<http://search.npmjs.org/>
-
-举例来说，在关键字栏位输入“coffee-script”，下方的清单就会自动列出包含 coffee-script 关键字的套件。
+npm 目前拥有超过 6000 种套件（packages），可以在 [npm registry](http://search.npmjs.org/) 使用关键字搜寻套件。举例来说，在关键字栏位输入“coffee-script”，下方的清单就会自动列出包含 coffee-script 关键字的套件。
 
 ![image](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/zh-tw/node_npm_registry.png)
 
@@ -189,7 +185,7 @@ npm 目前拥有超过 6000 种套件（packages），可以在 [npm registry](h
 
     CoffeeScript version 1.2.0
 
-若未将 Node.js 套件安装路径加入环境变数 NODE\_PATH，在引入时会回报错误。
+若未将 Node.js 套件安装路径加入环境变数 NODE_PATH，在引入时会回报错误。
 
 **报错范例**
 
@@ -210,9 +206,7 @@ npm 目前拥有超过 6000 种套件（packages），可以在 [npm registry](h
 
 **使用 ubuntu PPA 安装 Node.js 的设定范例**
 
-::
-
-:   echo 'NODE\_PATH="/usr/lib/node\_modules"' | sudo tee -a
+    echo 'NODE_PATH="/usr/lib/node_modules"' | sudo tee -a
     /etc/environment
 
 ### 4.3 套件的更新及维护

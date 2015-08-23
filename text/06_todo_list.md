@@ -31,10 +31,7 @@ npm basic commands<http://dreamerslab.com/blog/en/npm-basic-commands/>
 
     $ npm install express@2.5.11 -g
 
-这个练习里我们用 Mongoose 这个 ORM. 为何会需要一个必须定义 schema 的 ORM
-来操作一个 schema-less 的资料库呢? 原因是在一般的网站资料结构的关联,
-验证都是必须处理的问题. Mongoose 在这方面可以帮你省去很多功夫.
-我们会在后面才看如何安装.
+这个练习里我们用 Mongoose 这个 ORM. 为何会需要一个必须定义 schema 的 ORM来操作一个 schema-less 的资料库呢? 原因是在一般的网站资料结构的关联,验证都是必须处理的问题. Mongoose 在这方面可以帮你省去很多功夫.我们会在后面才看如何安装.
 
 - 步骤
 
@@ -81,8 +78,7 @@ template engine 是 jade, 在这里我们改用比较平易近人的 ejs.
 
     $ cd todo && npm install -l
 
-Hello world 开启 express server 然后打开浏览器浏览 127.0.0.1:3000
-就会看到欢迎页面.
+Hello world 开启 express server 然后打开浏览器浏览 127.0.0.1:3000就会看到欢迎页面.
 
     $ node app.js
 
@@ -122,8 +118,7 @@ Project 档案结构
 
 ### 6.3 MongoDB 以及 Mongoose 设定
 
-在 Ubuntu 上 MongoDB 开机后便会自动开启. 在 Mac
-上你需要手动输入下面的指令.
+在 Ubuntu 上 MongoDB 开机后便会自动开启. 在 Mac上你需要手动输入下面的指令.
 
     $ mongod --dbpath /usr/local/db
 
@@ -199,16 +194,16 @@ exports.index = function ( req, res ){
 ### 6.4 修改 index view
 
 
-我们需要一个 text input 来新增待办事项. 在这里我们用 POST form
-来传送资料. views/index.ejs
+我们需要一个 text input 来新增待办事项. 在这里我们用 POST form来传送资料. 
+
+views/index.ejs
 
     <h1><%= title %></h1>
     <form action="/create" method="post" accept-charset="utf-8">
       <input type="text" name="content" />
     </form>
 
-新增待办事项以及存档，routes/index.js，首先先 require mongoose 和 Todo
-model.
+新增待办事项以及存档，routes/index.js，首先先 require mongoose 和 Todo model.
 
 ```javascript
 var mongoose = require( 'mongoose' );

@@ -97,7 +97,7 @@ server.listen(port, ip);
 console.log("Server running at http://" + ip + ":" + port);
 ```
 
-程序做了片段的修改，首先载入url 模组，另外增加一个path 变数。url 模组就跟如同他的命名一般，专门处理url 字符串处理，里面提供了许多方法来解决路径上的问题。因为从浏览器发出的要求路径可能会带有多种需求，或者GET 参数组合等。因此我们需要将路径单纯化，取用路径部分的资料即可，例如用户可能会送出 http://127.0.0.1:1337/test?send=1 ，如果直接信任\*\*req.url\*\* 就会收到结果为 /test?send=1 ，所以需要透过url 模组的方法将路径资料过滤。
+程序做了片段的修改，首先载入url 模组，另外增加一个path 变数。url 模组就跟如同他的命名一般，专门处理url 字符串处理，里面提供了许多方法来解决路径上的问题。因为从浏览器发出的要求路径可能会带有多种需求，或者GET 参数组合等。因此我们需要将路径单纯化，取用路径部分的资料即可，例如用户可能会送出 http://127.0.0.1:1337/test?send=1 ，如果直接信任**req.url** 就会收到结果为 /test?send=1 ，所以需要透过url 模组的方法将路径资料过滤。
 
 在这边使用url.parse 的方法，里面带入网址格式资料，会回传路径资料。为了后需方便使用，将回传的资料设定到path 变数当中。在回传的路径资料，里面包含资讯，如下图，
 
@@ -119,9 +119,7 @@ console.log("Server running at http://" + ip + ":" + port);
 
 前面已经介绍如何使用路由（rount）做出不同的回应，实际应用只有在浏览器只有输出几个文字资料总是不够的，在本章节中将介绍如何使用档案读取，输出档案资料，让用户在前端浏览器也可以读取到完整的html, css, javascript 档案输出。
 
-档案管理最重要的部分就是File system
-<http://nodejs.org/docs/latest/api/fs.html>
-这个模组，此模组可以针对档案做管理、监控、读取等行为，里面有许多预设的方法，底下是档案输出的基本范例，底下会有两个档案，第一个是静态html档案，
+档案管理最重要的部分就是[File system](http://nodejs.org/docs/latest/api/fs.html)这个模组，此模组可以针对档案做管理、监控、读取等行为，里面有许多预设的方法，底下是档案输出的基本范例，底下会有两个档案，第一个是静态html档案，
 
 ```html
 <!DOCTYPE html>
@@ -145,15 +143,11 @@ fs.readFile(filename, encode, function(err, file) {
     console.log(file);
 });
 ```
-一开始直接载入file system 模组，载入名称为fs。读取档案主要使用的方法为readFile ，里面以叁个参数 **路径(file path)**, **编码方式(encoding)** ， **回应函数(callback)**，路径必须要设定为静态html
-所在位置，才能指定到正确的档案。静态档案的编码方式也必须正确，这边使用静态档案的编码为**utf8** ，如果编码设定错误，node.js 读取出来档案结果会使用 byte raw格式输出，如果 **错误编码格式，会导致输出资料为 byte raw**
+一开始直接载入file system 模组，载入名称为fs。读取档案主要使用的方法为readFile ，里面以叁个参数 **路径(file path)**, **编码方式(encoding)** ， **回应函数(callback)**，路径必须要设定为静态html所在位置，才能指定到正确的档案。静态档案的编码方式也必须正确，这边使用静态档案的编码为**utf8** ，如果编码设定错误，node.js 读取出来档案结果会使用 byte raw格式输出，如果 **错误编码格式，会导致输出资料为 byte raw**
 
 ![image](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/zh-tw/node_basic_file_byte.png)
 
-**回应函数** 中里面会使用两个变数，error
-为错误资讯，如果读取的档案不存在，或者发生错误，error 数值会是 true
-，如果成功读取资料 error 将会是 false 。 content
-则是档案内容，资料读取后将会把资料全数丢到content 这个变数当中。
+**回应函数** 中里面会使用两个变数，error为错误资讯，如果读取的档案不存在，或者发生错误，error 数值会是 true，如果成功读取资料 error 将会是 false 。 content则是档案内容，资料读取后将会把资料全数丢到content 这个变数当中。
 
 最后程序的输出结果画面如下，
 
@@ -245,8 +239,7 @@ http 服务器中，除了路由之外另一个最常使用的方法就是采集
 
     http://127.0.0.1/test?send=1&test=2
 
-上面这段网址，里面的GET 参数就是 send 而这个变数的数值就为1，如果想要在http 服务器取得GET
-资料，需要在浏览器给予的要求(request)做处理，首先需要载入 **query string**这个模组，这个模组主要是用来将字符串资料过滤后，转换成 **javascript对象**。
+上面这段网址，里面的GET 参数就是 send 而这个变数的数值就为1，如果想要在http 服务器取得GET资料，需要在浏览器给予的要求(request)做处理，首先需要载入 **query string**这个模组，这个模组主要是用来将字符串资料过滤后，转换成 **javascript对象**。
 
 ```javascript
 qs = require('querystring');

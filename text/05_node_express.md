@@ -33,15 +33,11 @@ app.get('/', function(req, res){
 console.log('start express server\n');
 ```
 
-可以从上面的程序码发现，基本操作与node.js http
-的建立方式没有太大差异，主要差在当我们设定路由时，可以直接透过 app.get
-方式设定回应与接受方式。
+可以从上面的程序码发现，基本操作与node.js http的建立方式没有太大差异，主要差在当我们设定路由时，可以直接透过 app.get方式设定回应与接受方式。
 
 ### 5.3 Express 路由处理
 
-Express 对于 http
-服务上有许多包装，让开发者使用及设定上更为方便，例如有几个路由设定，那我们就统一藉由
-app.get 来处理，
+Express 对于 http服务上有许多包装，让开发者使用及设定上更为方便，例如有几个路由设定，那我们就统一藉由app.get 来处理，
 
 ```javascript
 // ... Create http server
@@ -59,8 +55,7 @@ app.get('/user/', function(req, res){
 });
 ```
 
-如上面的程序码所表示，app.get可以带入两个参数，第一个是路径名称设定，第二个为回应函数(call back
-function)，回应函数里面就如同之前的 createServer 方法，里面包含request， response两个对象可供使用。用户就可以透过浏览器，输入不同的url切换到不同的页面，显示不同的结果。
+如上面的程序码所表示，app.get可以带入两个参数，第一个是路径名称设定，第二个为回应函数(call back function)，回应函数里面就如同之前的 createServer 方法，里面包含request， response两个对象可供使用。用户就可以透过浏览器，输入不同的url切换到不同的页面，显示不同的结果。
 
 路由设定上也有基本的配对方式，让用户从浏览器输入的网址可以是一个变数，只要符合型态就可以有对应的页面产出，例如，
 
