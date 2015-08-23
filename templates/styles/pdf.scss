@@ -6,6 +6,11 @@ $page-height: 19.05cm;
 
 $frontcover-padding: 50px;
 
+@font-face {
+  font-family: 'DFSong';
+  src: url('../fonts/gb5sl1bg.ttf');
+}
+
 @page {
   size: 19.05cm 22.86cm portrait;
 }
@@ -63,7 +68,7 @@ $frontcover-padding: 50px;
 }
 
 body {
-  font-family: Caslon, serif;
+  font-family:  serif, 'Microsoft Yahei', '微软雅黑';
   font-size: 14px;
   line-height: 1.5;
 }
@@ -158,7 +163,7 @@ a {
 }
 
 .chapter > h2 {
-  font-family: sans-serif;
+  font-family: 'Microsoft Yahei', '微软雅黑';
   margin: -100px -100px 75px -100px;
   background: $frontcover-color;
   padding: 100px;

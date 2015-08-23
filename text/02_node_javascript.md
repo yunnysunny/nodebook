@@ -13,35 +13,39 @@ JavaScript 有以下几种基本型态。
 
 变数宣告的方式，就是使用var，结尾使用‘;’，如果需要连续宣告变数，可以使用 ‘,’ 做为连结符号。
 
-    // 宣告 x 为 123, 数字体态
-    var x=123;
+```javascript
+// 宣告 x 为 123, 数字体态
+var x=123;
 
-    // 宣告 a 为456, b 为 'abc' 字符串型态
-    var a=456,
-        b='abc';
-
+// 宣告 a 为456, b 为 'abc' 字符串型态
+var a=456,
+    b='abc';
+```
 ##### 2.1.1 布尔值
 
 
 布林，就只有两种数值, true, false
 
-    var a=true,
-        b=false;
-
+```javascript
+var a=true,
+    b=false;
+```
 ###### 2.1.2 数字体别
 
 Number 数字体别，可以分为整数，浮点数两种，
 
-    var a=123,
-        b=123.456;
-
+```javascript
+var a=123,
+    b=123.456;
+```
 ###### 2.1.3 字符串型别
 
 字符串，可以是一个字，或者是一连串的字，可以使用 '' 或 "" 做为字符串的值。(尽量使用双引号来表达字符串，因为在node里不会把单引号框住的文字当作字符串解读)
 
-    var a="a",
-        a='abc';
-
+```javascript
+var a="a",
+    a='abc';
+```
 ##### 2.1.4 运算子
 
 
@@ -52,30 +56,32 @@ Number 数字体别，可以分为整数，浮点数两种，
 
 这边突然离题，加入判断式来插花，判断就是 if，整个架构就是，
 
-    if (判断a) {
-        // 判断a 成立的话，执行此区域指令
-    } else if (判断b) {
-        // 判断a 不成立，但是 判断b 成立，执行此区域指令
-    } else {
-        // 其余的事情在这边处理
-    }
-
+```javascript
+if (判断a) {
+    // 判断a 成立的话，执行此区域指令
+} else if (判断b) {
+    // 判断a 不成立，但是判断b 成立，执行此区域指令
+} else {
+    // 其余的事情在这边处理
+}
+```
 整体架构就如上面描述，非 a 即b的状态，会掉进去任何一个区域里面。整体的判断能够成立，只要判断转型成Boolean 之后为 true，就会成立。大家可以这样子测试，
 
-> Boolean(判断);
+    Boolean(判断);
 
 ##### 2.1.6 应用
 
 
 会突然讲 if 判断式，因为，前面有提到 Number, String两种型态，但是如果我们测试一下，新增一个 test.js
 
-    var a=123,
-        b='123';
+```javascript
+var a=123,
+    b='123';
 
-    if (a == b) {
-        console.log('ok');
-    }
-
+if (a == b) {
+    console.log('ok');
+}
+```
 编辑 test.js 完成之后，执行底下指令
 
     node test.js
@@ -85,24 +91,25 @@ Number 数字体别，可以分为整数，浮点数两种，
 
 这个结果是有点迥异， a 为 Number, b 为 String 型态，两者相比较，应该是为false 才对，到底发生什么事情？ 这其中原因是，在判断式中使用了 == ，JavaScript 编译器，会自动去转换变数型态，再进行比对，因此 a == b就会成立，如果不希望转型产生，就必须要使用 === 做为判断。
  
+```javascript
+if (a === b) {
 
-    if (a === b) {
+   console.log('ok);
 
-       console.log('ok);
+} else {
 
-    } else {
+   console.log('not ok');
 
-       console.log('not ok');
-
-    } // print: not ok
-
+} // print: not ok
+```
 ##### 2.1.7 转型
 
 如果今天需要将字符串，转换成 Number 的时候，可以使用 parseInt, parseFloat的方法来进行转换，
 
-    var a='123';
-    console.log(typeof parseInt(a, 10));
-
+```javascript
+var a='123';
+console.log(typeof parseInt(a, 10));
+```
 使用 typeof 方法取得资料经过转换后的结果，会取得，
 
     number
@@ -118,70 +125,77 @@ Number 数字体别，可以分为整数，浮点数两种，
 
 变数要经过宣告，赋予 null ，才会形成 null 型态。
 
-    var a=null;
-
+```javascript
+var a=null;
+```
 null 在 JavaScript 中表示一个空值。
 
 ##### 2.2.2 undefined
 
 从字面上就表示目前未定义，只要一个变数在初始的时候未给予任何值的时候，就会产生undefined
 
-    var a;
+```javascript
+var a;
 
-    console.log(a);
+console.log(a);
 
-    // print : undefined
-
+// print : undefined
+```
 这个时候 a 就是属于 undefined 的状态。另外一种状况就是当 Object被删除的时候。
 
-    var a = {};    
-    delete a;
-    console.log(a);
+```javascript
+var a = {};    
+delete a;
+console.log(a);
 
-    //print: undefined.
-
+//print: undefined.
+```
 Object 在之后会介绍，先记住有这个东西。而使用 delete的时候，就可以让这个 Object 被删除，就会得到结果为 undefined.
 
 ##### 2.2.3 两者比较
  null,undefined在本质上差异并不大，不过实质上两者并不同，如果硬是要比较，建议使用 === 来做为判断标准，避免 null, undefined 这两者被强制转型。
 
-     var a=null,
-         b;
+```javascript
+var a=null,
+ b;
 
-     if (a === b) {
-         console.log('same');
-     } else {
-         console.log('different');
-     }
+if (a === b) {
+    console.log('same');
+} else {
+    console.log('different');
+}
 
-     //print: different
-
+ //print: different
+```
 从 typeof 也可以看到两者本质上的差异，
 
-    typeof null;
-    //print: 'object'
+```javascript
+typeof null;
+//print: 'object'
 
-    typeof undefined;
-    //print: 'undefined'
-
+typeof undefined;
+//print: 'undefined'
+```
 null 本质上是属于 object, 而 undefined 本质上属于 undefined ，意味着在undefined 的状态下，都是属于未定义。如果用判断式来决定，会发现另外一种状态
 
-    Boolean(null);
-    // false
+```javascript
+Boolean(null);
+// false
 
-    Boolean(undefined);
-    // false
-
+Boolean(undefined);
+// false
+```
 可以观察到，如果一个变数值为 null, undefined 的状态下，都是属于 false。这样说明应该帮助到大家了解，其实要判断一个对象、属性是否存在，只需要使用if
 
-    var a;
+```javascript
+var a;
 
-    if (!a) {
-        console.log('a is not existed');
-    }
+if (!a) {
+    console.log('a is not existed');
+}
 
-    //print: a is not existed
-
+//print: a is not existed
+```
 a 为 undefined 由判断式来决定，是属于 False 的状态。
 
 ### 2.3 JavaScript Array
@@ -189,7 +203,7 @@ a 为 undefined 由判断式来决定，是属于 False 的状态。
 
 阵列也是属于 JavaScript 的原生对象之一，在实际开发会有许多时候需要使用Array 的方法，先来介绍一下阵列要怎么宣告。
 
-##### 2.3.1 阵列宣告
+#### 2.3.1 阵列宣告
 
 宣告方式，
 
@@ -379,11 +393,12 @@ function outter(arg1) {
 }
 
 var a = outter(1);//变数a 就是outter函数执行后返回的inner函数
-var b = a(4);//执行inner函数，执行时上下文已经在outter函数之外，但是仍然能正常执行，而且可以使用定义在outter函数里面的arg1及free_variable1变数
+var b = a(4);//执行inner函数，执行时上下文已经在outter函数之外，但是仍然能正常执行，
+             //而且可以使用定义在outter函数里面的arg1及free_variable1变数
 
 console.log(b);//结果10
 ```
-在Javascript中，scope最主要的单位是函数（另外有global及eval），所以有可能制造出closure的状况，通常在形式上都是有巢状的函数定义，而且内侧的函数使用到定义在外侧函数里面的变数。
+在Javascript中，scope最主要的单位是函数（另外有global及eval），所以有可能制造出closure的状况，通常在形式上都是有嵌套的函数定义，而且内侧的函数使用到定义在外侧函数里面的变数。
 
 Closure有可能会造成记忆体泄漏，主要是因为被参考的变数无法被垃圾收集机制处理，造成占用的资源无法释放，所以使用上必须考虑清楚，不要造成意外的记忆体泄漏。（在上面的例子中，如果a一直未执行，使用到的记忆体就不会被释放）
 
@@ -400,12 +415,14 @@ callback在形式上，其实就是把函数传给函数，然后在适当的时
 可以使用 对象.on(事件名称, callback函数) 或是 对象.addListener(事件名称,callback函数) 把你想要处理事件的函数传入 在 对象 中，可以使用对象.emit(事件名称, 参数...) 呼叫传入的callback函数 这是Observer Pattern的简单实作，而且跟在网页中使用DOM的addEventListener使用上很类似，也很容易上手。不过NodeJS是大量使用异步方式执行的应用，所以程序逻辑几乎都是写在callback函数中，当逻辑比较复杂时，大量的callback会让程序看起来很复杂，也比较难单元测试。举例来说：
 
 ```javascript
-var p_client = new Db('integration_tests_20', new Server("127.0.0.1", 27017, {}), {'pk':CustomPKFactory});
+var p_client = new Db('integration_tests_20', 
+    new Server("127.0.0.1", 27017, {}), {'pk':CustomPKFactory});
 p_client.open(function(err, p_client) {
   p_client.dropDatabase(function(err, done) {
     p_client.createCollection('test_custom_key', function(err, collection) {
       collection.insert({'a':1}, function(err, docs) {
-        collection.find({'_id':new ObjectID("aaaaaaaaaaaa")}, function(err, cursor) {
+        collection.find({'_id':new ObjectID("aaaaaaaaaaaa")},
+        function(err, cursor) {
           cursor.toArray(function(err, items) {
             test.assertEquals(1, items.length);
             p_client.close();
@@ -417,7 +434,7 @@ p_client.open(function(err, p_client) {
 });
 ```
 
-这是在网络上看到的一段操作mongodb的程序码，为了循序操作，所以必须在一个callback里面呼叫下一个动作要使用的函数，这个函数里面还是会使用callback，最后就形成一个非常深的巢状。
+这是在网络上看到的一段操作mongodb的程序码，为了循序操作，所以必须在一个callback里面呼叫下一个动作要使用的函数，这个函数里面还是会使用callback，最后就形成一个非常深的嵌套。
 
 这样的程序码，会比较难进行单元测试。有一个简单的解决方式，是尽量不要使用匿名函数来当作callback或是event handler。透过这样的方式，就可以对各个handler做单元测试了。例如：
 
@@ -509,7 +526,8 @@ cps是callback使用上的特例，形式上就是在函数最后呼叫callback�
 	request.addEventListener('readystatechange', (function(next){
 		return function() {
 			if(this.readyState===4&&this.status===200) {
-				next(this.responseText);//<==传入的cps callback在动作完成时执行并取得结果进一步处理
+				next(this.responseText);//<==传入的cps callback在动作完成时
+				                                   //执行并取得结果进一步处理
 			}
 		};
 	})(function(str){//<==这个匿名函数就是cps callback
@@ -592,14 +610,13 @@ var b = wait_another_arg(a);//然后再继续执行
 console.log(b);
 ```
 
-像这样利用函数返回函数，使得原本接受多个参数的函数，可以一次接受一个参数，直到参数接收完成才执行得到结果的方式，有一个学名就叫做...Currying
+像这样利用函数返回函数，使得原本接受多个参数的函数，可以一次接受一个参数，直到参数接收完成才执行得到结果的方式，有一个学名就叫做...Currying（柯里化）。
 
 综合以上许多奇技淫巧，就可以透过用函数来处理函数的方式，调整程序流程。接下来看看...
 
 ### 2.9 流程控制
 
-（以sync方式使用async函数、避开巢状callback循序呼叫async
-callback等奇技淫巧）
+（以sync方式使用async函数、避开嵌套callback循序呼叫async callback等奇技淫巧）
 
 建议参考：
 
@@ -608,14 +625,14 @@ callback等奇技淫巧）
 -   <http://howtonode.org/control-flow-part-iii>
 -   <http://blog.mixu.net/2011/02/02/essential-node-js-patterns-and-snippets>
 
-这几篇都是非常经典的NodeJS/Javascript流程控制好文章（阿，mixu是在介绍一些pattern时提到这方面的主题）。不过我还是用几个简单的程序介绍一下做法跟概念：
+这几篇都是非常经典的NodeJS/Javascript流程控制好文章（mixu是在介绍一些pattern时提到这方面的主题）。不过我还是用几个简单的程序介绍一下做法跟概念：
 
-##### 2.9.1 并发与等待
+#### 2.9.1 并发与等待
 
 
 下面的程序参考了mixu文章中的做法：
 
-```javascript
+``` javascript
 var wait = function(callbacks, done) {
 	console.log('wait start');
 	var counter = callbacks.length;
@@ -717,32 +734,38 @@ function Wait(fns, done) {
     }
 }
 var a = new Wait(
-[
-	function(waitback) {
-		console.log('done a');
-		var result = 500;
-		waitback(result)
-	},
-	function(waitback) {
-		console.log('done b');
-		var result = 1000;
-		waitback(result)
-	},
-	function(waitback) {
-		console.log('done c');
-		var result = 1500;
-		waitback(result)
-	}
-],
-function(results) {
-    var ret = 0,
-    i = 0;
-    for (; i < results.length; i++) {
-        ret += results[i];
+    [
+    	function(waitback) {
+    		console.log('done a');
+    		var result = 500;
+    		waitback(result)
+    	},
+    	function(waitback) {
+    		console.log('done b');
+    		var result = 1000;
+    		waitback(result)
+    	},
+    	function(waitback) {
+    		console.log('done c');
+    		var result = 1500;
+    		waitback(result)
+    	}
+    ],
+    function(results) {
+        var ret = 0,
+        i = 0;
+        for (; i < results.length; i++) {
+            ret += results[i];
+        }
+        console.log('done all. result: ' + ret);
     }
-    console.log('done all. result: ' + ret);
-});
-var callbacks = [a.getCallback(0),a.getCallback(1),a.getCallback(0),a.getCallback(2)];
+);
+var callbacks = [
+    a.getCallback(0),
+    a.getCallback(1),
+    a.getCallback(0),
+    a.getCallback(2)
+];
 
 //一次取出要使用的callbacks，避免结果提早送出
 setTimeout(callbacks[0], 500);
@@ -763,9 +786,9 @@ done a done b done a done c done all. result: 3500
 
 如果想不透过其他Library做转换，又能直接用同步方式执行异步函数，大概就要使用一些需要额外compile原始程序码的方法了。例如Bruno Jouhier的streamline.js：https://github.com/Sage/streamlinejs
 
-##### 2.9.2 循序执行
+#### 2.9.2 循序执行
 
-循序执行可以协助把非常深的巢状callback结构摊平，例如用这样的简单模组来做（serial.js）：
+循序执行可以协助把非常深的嵌套callback结构摊平，例如用这样的简单模组来做（serial.js）：
 
 ```javascript
 module.exports = function(funs) {
@@ -805,7 +828,7 @@ var serial = require('./serial'),
     function(err, data) {
         if(!err) {
             if(data.isFile) {
-                fs.readFile(path, cb);
+                fs.readFile(path, cb);//<=这个地方可以理解为递归
             }
         } else {
             console.log(err);
@@ -842,9 +865,9 @@ fs.stat(path, function(err, data) {
 });
 ```
 
-关键在于，这些callback的执行是有顺序性的，所以利用serial返回的一个函数cb来取代这些callback，然后在cb中控制每次会循序呼叫的函数，就可以把巢状的callback摊平成循序的function阵列（就是传给serial函数的参数）。
+关键在于，这些callback的执行是有顺序性的，所以利用serial返回的一个函数cb来取代这些callback，然后在cb中控制每次会循序呼叫的函数，就可以把嵌套的callback摊平成循序的function阵列（就是传给serial函数的参数）。
 
-测试中的./dclient.js是一个简单的dnode测试程序，放在跟testSerial.js同一个目录：
+测试中的`./dclient.js`是一个简单的dnode测试程序，放在跟testSerial.js同一个目录：
 
 ```javascript
 var dnode = require('dnode');
@@ -859,31 +882,26 @@ dnode.connect(8000, 'localhost',  function(remote) {
 
 执行测试程序后，出现结果：
 
-\[flattened by searial:\]
-
-```javascript
-var dnode = require('dnode');
-
-dnode.connect(8000, 'localhost',  function(remote) {
-    remote.restart(function(str) {
-        console.log(str);
-        process.exit();
+    [flattened by searial:]
+    var dnode = require('dnode');
+    
+    dnode.connect(8000, 'localhost',  function(remote) {
+        remote.restart(function(str) {
+            console.log(str);
+            process.exit();
+        });
     });
-});
-```
 
-\[nested callbacks:\]
-
-```javascript
-var dnode = require('dnode');
-
-dnode.connect(8000, 'localhost',  function(remote) {
-    remote.restart(function(str) {
-        console.log(str);
-        process.exit();
+    [nested callbacks:]
+    var dnode = require('dnode');
+    
+    dnode.connect(8000, 'localhost',  function(remote) {
+        remote.restart(function(str) {
+            console.log(str);
+            process.exit();
+        });
     });
-});
-```
 
-对照起来看，两种写法的结果其实是一样的，但是利用serial.js，巢状的callback结构就会消失。不过这样也只限于顺序单纯的状况，如果函数执行的顺序比较复杂（不只是一直线），还是需要用功能更完整的流程控制模组比较好，例如
+
+对照起来看，两种写法的结果其实是一样的，但是利用serial.js，嵌套的callback结构就会消失。不过这样也只限于顺序单纯的状况，如果函数执行的顺序比较复杂（不只是一直线），还是需要用功能更完整的流程控制模组比较好，例如
 <https://github.com/caolan/async> 。

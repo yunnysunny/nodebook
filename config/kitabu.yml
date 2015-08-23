@@ -33,7 +33,7 @@ uid: "5c6990af18d0c8349b874eb6830091a8"
 
 # Your book identification like ISBN or ISSN.
 identifier:
-  id: "http://yourbook.example.com"
+  id: "http://nodebook.whyun.com"
   type: "URL" # can be ISBN, ISSN or URL
 
 # This book authors.

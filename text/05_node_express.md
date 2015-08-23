@@ -81,7 +81,8 @@ var app = require('express').createServer(),
 
 app.listen(port);
 
-app.get(/^\/ip?(?:\/(\d{2,3})(?:\.(\d{2,3}))(?:\.(\d{2,3}))(?:\.(\d{2,3})))?/, function(req, res){                                                                                            
+app.get(/^\/ip?(?:\/(\d{2,3})(?:\.(\d{2,3}))(?:\.(\d{2,3}))(?:\.(\d{2,3})))?/, 
+function(req, res){                                                                                            
     res.send(req.params);
 });
 ```
@@ -135,7 +136,8 @@ app.get(/^\/ip?(?:\/(\d{2,3})(?:\.(\d{2,3}))(?:\.(\d{2,3}))(?:\.(\d{2,3})))?/, f
     });
     
     // REGX style
-    app.get(/^\/ip?(?:\/(\d{2,3})(?:\.(\d{2,3}))(?:\.(\d{2,3})))?/, function(req, res){
+    app.get(/^\/ip?(?:\/(\d{2,3})(?:\.(\d{2,3}))(?:\.(\d{2,3})))?/, 
+    function(req, res){
         res.send(req.params);
     });
     

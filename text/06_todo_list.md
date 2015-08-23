@@ -27,6 +27,7 @@ How to setup a node.js development environment on Windows &lt;http://dreamerslab
 
 参考文档 :
 npm basic commands<http://dreamerslab.com/blog/en/npm-basic-commands/>
+
 - 安装 Express
 
     $ npm install express@2.5.11 -g
@@ -35,8 +36,7 @@ npm basic commands<http://dreamerslab.com/blog/en/npm-basic-commands/>
 
 - 步骤
 
-用 Express 的 command line 工具帮我们生成一个 project 雏形 预设的
-template engine 是 jade, 在这里我们改用比较平易近人的 ejs.
+用 Express 的 command line 工具帮我们生成一个 project 雏形 预设的template engine 是 jade, 在这里我们改用比较平易近人的 ejs.
 
     $ express todo -t ejs
 
@@ -179,7 +179,8 @@ var routes = require( './routes' );
 app.get( '/', routes.index );
 
 app.listen( 3000, function (){
-  console.log( 'Express server listening on port %d in %s mode', app.address().port, app.settings.env );
+  console.log( 'Express server listening on port %d in %s mode', 
+      app.address().port, app.settings.env );
 });
 ```
 
@@ -198,11 +199,12 @@ exports.index = function ( req, res ){
 
 views/index.ejs
 
-    <h1><%= title %></h1>
-    <form action="/create" method="post" accept-charset="utf-8">
-      <input type="text" name="content" />
-    </form>
-
+```html
+<h1><%= title %></h1>
+<form action="/create" method="post" accept-charset="utf-8">
+  <input type="text" name="content" />
+</form>
+```
 新增待办事项以及存档，routes/index.js，首先先 require mongoose 和 Todo model.
 
 ```javascript
@@ -270,18 +272,21 @@ exports.destroy = function ( req, res ){
 
 views/index.ejs
 
-    // 在循环里加一个删除连结
-    <% todos.forEach( function ( todo ){ %>
-      <p>
-        <span>
-          <%= todo.content %>
-        </code>
-        <span>
-          <a href="/destroy/<%= todo._id %>" title="Delete this todo item">Delete</a>
-        </code>
-      </p>
-    <% }); %>
-
+```html
+// 在循环里加一个删除连结
+<% todos.forEach( function ( todo ){ %>
+  <p>
+    <span>
+      <%= todo.content %>
+    </code>
+    <span>
+      <a href="/destroy/<%= todo._id %>" title="Delete this todo item">
+          Delete
+      </a>
+    </code>
+  </p>
+<% }); %>
+```
 将这个删除的动作加到 routes 里. app.js
 
 ```javascript
@@ -309,46 +314,56 @@ Edit view 基本上和 index view 差不多,唯一的不同是在选取的那个
 
 views/edit.ejs
 
-    <h1><%= title %></h1>
-    <form action="/create" method="post" accept-charset="utf-8">
-      <input type="text" name="content" />
-    </form>
+```html
+<h1><%= title %></h1>
+<form action="/create" method="post" accept-charset="utf-8">
+  <input type="text" name="content" />
+</form>
 
-    <% todos.forEach( function ( todo ){ %>
-      <p>
-        <span>
-          <% if( todo._id == current ){ %>
-          <form action="/update/<%= todo._id %>" method="post" accept-charset="utf-8">
-            <input type="text" name="content" value="<%= todo.content %>" />
-          </form>
-          <% }else{ %>
-            <a href="/edit/<%= todo._id %>" title="Update this todo item"><%= todo.content %></a>
-          <% } %>
-        </code>
-        <span>
-          <a href="/destroy/<%= todo._id %>" title="Delete this todo item">Delete</a>
-        </code>
-      </p>
-    <% }); %>
-
+<% todos.forEach( function ( todo ){ %>
+  <p>
+    <span>
+      <% if( todo._id == current ){ %>
+      <form action="/update/<%= todo._id %>" method="post" accept-charset="utf-8">
+        <input type="text" name="content" value="<%= todo.content %>" />
+      </form>
+      <% }else{ %>
+        <a href="/edit/<%= todo._id %>" title="Update this todo item">
+            <%= todo.content %>
+        </a>
+      <% } %>
+    </code>
+    <span>
+      <a href="/destroy/<%= todo._id %>" title="Delete this todo item">
+          Delete
+      </a>
+    </code>
+  </p>
+<% }); %>
+```
 将待办事项包在一个 link 里, link 可以连到 edit 动作. views/index.ejs
 
-    <h1><%= title %></h1>
-    <form action="/create" method="post" accept-charset="utf-8">
-      <input type="text" name="content" />
-    </form>
+```html
+<h1><%= title %></h1>
+<form action="/create" method="post" accept-charset="utf-8">
+  <input type="text" name="content" />
+</form>
 
-    <% todos.forEach( function ( todo ){ %>
-      <p>
-        <span>
-          <a href="/edit/<%= todo._id %>" title="Update this todo item"><%= todo.content %></a>
-        </code>
-        <span>
-          <a href="/destroy/<%= todo._id %>" title="Delete this todo item">Delete</a>
-        </code>
-      </p>
-    <% }); %>
-
+<% todos.forEach( function ( todo ){ %>
+  <p>
+    <span>
+      <a href="/edit/<%= todo._id %>" title="Update this todo item">
+          <%= todo.content %>
+      </a>
+    </code>
+    <span>
+      <a href="/destroy/<%= todo._id %>" title="Delete this todo item">
+          Delete
+      </a>
+    </code>
+  </p>
+<% }); %>
+```
 将这个编辑的动作加到 routes 里. app.js
 
     // 新增下列语法到 routes
@@ -450,7 +465,8 @@ app.get( '/edit/:id', routes.edit );
 app.post( '/update/:id', routes.update );
 
 app.listen( 3000, function (){
-  console.log( 'Express server listening on port %d in %s mode', app.address().port, app.settings.env );
+  console.log( 'Express server listening on port %d in %s mode',
+     app.address().port, app.settings.env );
 });
 ```
 
