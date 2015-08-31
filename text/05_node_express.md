@@ -2,9 +2,9 @@
 
 在前面的node.js 基础当中介绍许多许多开设http的使用方法及介绍，以及许多基本的node.js 基本应用。
 
-接下来要介绍一个套件称为[Express](<http://expressjs.com/>)，这个套件主要帮忙解决许多node.js http server所需要的基本服务，让开发http service变得更为容易，不需要像之前需要透过层层模组（module）才有办法开始编写自己的程序。
+接下来要介绍一个包称为[Express](<http://expressjs.com/>)，这个包主要帮忙解决许多node.js http server所需要的基本服务，让开发http service变得更为容易，不需要像之前需要透过层层模块（module）才有办法开始编写自己的程序。
 
-这个套件是由TJ Holowaychuk制作而成的套件，里面包含基本的路由处理(route)，http资料处理（GET/POST/PUT），另外还与样板套件（js html template engine）搭配，同时也可以处理许多复杂化的问题。
+这个包是由TJ Holowaychuk制作而成的包，里面包含基本的路由处理(route)，http资料处理（GET/POST/PUT），另外还与样板包（js html template engine）搭配，同时也可以处理许多复杂化的问题。
 
 ### 5.1 Express 安装
 
@@ -14,7 +14,7 @@
 npm install -g express
 ```
 
-这边建议需要将此套件安装成为全域模组，方便日后使用。
+这边建议需要将此包安装成为全域模块，方便日后使用。
 
 ### 5.2 Express 基本操作
 

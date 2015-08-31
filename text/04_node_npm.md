@@ -1,11 +1,11 @@
-## 4 NPM 套件管理工具
+## 4 NPM 包管理工具
 
 
-npm 全名为 **N**ode **P**ackage **M**anager，是 Node.js 的套件（package）管理工具， 类似 Perl 的 ppm 或 PHP 的 PEAR等。安装 npm 后，使用 `npm install module_name` 指令即可安装新套件，维护管理套件的工作会更加轻松。
+npm 全名为 **N**ode **P**ackage **M**anager，是 Node.js 的包（package）管理工具， 类似 Perl 的 ppm 或 PHP 的 PEAR等。安装 npm 后，使用 `npm install module_name` 指令即可安装新包，维护管理包的工作会更加轻松。
 
-npm 可以让 Node.js 的开发者，直接利用、扩充线上的套件库（packages registry），加速软体专案的开发。npm 提供很友善的搜寻功能，可以快速找到、安装需要的套件，当这些套件发行新版本时，npm 也可以协助开发者自动更新这些套件。
+npm 可以让 Node.js 的开发者，直接利用、扩充线上的包库（packages registry），加速软体专案的开发。npm 提供很友善的搜寻功能，可以快速找到、安装需要的包，当这些包发行新版本时，npm 也可以协助开发者自动更新这些包。
 
-npm 不仅可用于安装新的套件，它也支持搜寻、列出已安装模组及更新的功能。
+npm 不仅可用于安装新的包，它也支持搜寻、列出已安装模块及更新的功能。
 
 ### 4.1 安装 NPM
 
@@ -78,7 +78,7 @@ npm 官方提供的安装程序 `install.sh`，可以适用于大多数的 Linux
 
 安装过程会询问系统管理者密码，使用预设的选项完成安装即可。安装 MacPorts 之后，在终端机执行 `port -v` 将会看到 MacPorts的版本讯息。
 
-安装 npm 之前，先更新 MacPorts 的套件清单，以确保安装的 npm 是最新版本。
+安装 npm 之前，先更新 MacPorts 的包清单，以确保安装的 npm 是最新版本。
 
     sudo port -d selfupdate
 
@@ -86,7 +86,7 @@ npm 官方提供的安装程序 `install.sh`，可以适用于大多数的 Linux
 
     sudo port install npm
 
-若读者的 Node.js 并非使用 MacPorts 安装，则不建议使用 MacPorts 安装 npm，因为 MacPorts 会自动检查并安装相依套件，而 npm 相依 nodejs，所以 MacPorts 也会一并将 nodejs 套件安装，造成先前读者使用其它方式安装的 nodejs 被覆盖。
+若读者的 Node.js 并非使用 MacPorts 安装，则不建议使用 MacPorts 安装 npm，因为 MacPorts 会自动检查并安装相依包，而 npm 相依 nodejs，所以 MacPorts 也会一并将 nodejs 包安装，造成先前读者使用其它方式安装的 nodejs 被覆盖。
 
 读者可以先使用 MacPorts 安装 curl（`sudo port install curl`），再参考 Linux 的 install.sh 安装方式，即可使用 npm 官方提供的安装程序。
 
@@ -108,15 +108,15 @@ npm 是指令列工具（command-line tool），使用时请先打开系统的�
 
     1.1.0-2
 
-### 4.2 使用 NPM 安装套件
+### 4.2 使用 NPM 安装包
 
-npm 目前拥有超过 6000 种套件（packages），可以在 [npm registry](http://search.npmjs.org/) 使用关键字搜寻套件。举例来说，在关键字栏位输入“coffee-script”，下方的清单就会自动列出包含 coffee-script 关键字的套件。
+npm 目前拥有超过 6000 种包（packages），可以在 [npm registry](http://search.npmjs.org/) 使用关键字搜寻包。举例来说，在关键字栏位输入“coffee-script”，下方的清单就会自动列出包含 coffee-script 关键字的包。
 
 ![image](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/zh-tw/node_npm_registry.png)
 
-接着我们回到终端机模式的操作，`npm` 的指令工具本身就可以完成套件搜寻的任务。
+接着我们回到终端机模式的操作，`npm` 的指令工具本身就可以完成包搜寻的任务。
 
-例如，以下的指令同样可以找出 coffee-script 相关套件。
+例如，以下的指令同样可以找出 coffee-script 相关包。
 
     npm search coffee-script
 
@@ -124,11 +124,11 @@ npm 目前拥有超过 6000 种套件（packages），可以在 [npm registry](h
 
 ![image](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/zh-tw/node_npm_search.png)
 
-找到需要的套件后（例如 express），即可使用以下指令安装：
+找到需要的包后（例如 express），即可使用以下指令安装：
 
     npm install coffee-script
 
-值得注意的一点是，使用 `npm install` 会将指定的套件，安装在工作目录（Working Directory）的 `node_modules` 资料夹下。
+值得注意的一点是，使用 `npm install` 会将指定的包，安装在工作目录（Working Directory）的 `node_modules` 资料夹下。
 
 以 Windows 为例，如果执行 `npm install` 的目录位于：
 
@@ -138,20 +138,20 @@ npm 目前拥有超过 6000 种套件（packages），可以在 [npm registry](h
 
 `C:\project1\node_modules`
 
-并且将下载的套件，放置于这个子目录，例如：
+并且将下载的包，放置于这个子目录，例如：
 
 `C:\project1\node_modules\coffee-script`
 
-这个设计让专案可以个别管理相依的套件，并且可以在专案布署或发行时，将这些套件（位于 node\_modules）一并打包，方便其它专案的用户不必再重新下载套件。
+这个设计让专案可以个别管理相依的包，并且可以在专案布署或发行时，将这些包（位于 node\_modules）一并打包，方便其它专案的用户不必再重新下载包。
 
 这个 `npm install` 的预设安装模式为 **local**(本地)，只会变更当前专案的资料夹，不会影响系统。
 
-另一种安装模式称为 **global**（全域），这种模式会将套件安装到系统资料夹，也就是 npm 安装路径的 `node_modules` 资料夹，
+另一种安装模式称为 **global**（全域），这种模式会将包安装到系统资料夹，也就是 npm 安装路径的 `node_modules` 资料夹，
 例如：
 
 `C:\Program Files\nodejs\node_modules`
 
-是否要使用全域安装，可以按照套件是否提供**新指令**来判断，举例来说，express 套件提供 `express` 这个指令，而 coffee-script 则提供 `coffee` 指令。
+是否要使用全域安装，可以按照包是否提供**新指令**来判断，举例来说，express 包提供 `express` 这个指令，而 coffee-script 则提供 `coffee` 指令。
 
 在 local 安装模式中，这些指令的程序档案，会被安装到 `node_modules` 的 `.bin` 这个隐藏资料夹下。除非将 .bin 的路径加入 PATH 环境变数，否则要执行这些指令将会相当不便。
 
@@ -185,7 +185,7 @@ npm 目前拥有超过 6000 种套件（packages），可以在 [npm registry](h
 
     CoffeeScript version 1.2.0
 
-若未将 Node.js 套件安装路径加入环境变数 NODE_PATH，在引入时会回报错误。
+若未将 Node.js 包安装路径加入环境变数 NODE_PATH，在引入时会回报错误。
 
 **报错范例**
 
@@ -209,7 +209,7 @@ npm 目前拥有超过 6000 种套件（packages），可以在 [npm registry](h
     echo 'NODE_PATH="/usr/lib/node_modules"' | sudo tee -a
     /etc/environment
 
-### 4.3 套件的更新及维护
+### 4.3 包的更新及维护
 
 除了前一节说明的 search 及 install 用法，npm 还提供其他许多指令（commands）。
 
@@ -233,7 +233,7 @@ npm 目前拥有超过 6000 种套件（packages），可以在 [npm registry](h
 
     npm help list
 
-接下来，本节要介绍开发过程常用的 npm 指令。使用 `list` 可以列出已安装套件：
+接下来，本节要介绍开发过程常用的 npm 指令。使用 `list` 可以列出已安装包：
 
     npm list
 
@@ -247,19 +247,19 @@ npm 目前拥有超过 6000 种套件（packages），可以在 [npm registry](h
       ├── mkdirp@0.0.7 
       └── qs@0.4.1 
 
-检视某个套件的详细资讯，例如：
+检视某个包的详细资讯，例如：
 
     npm show express
 
-升级所有套件（如果该套件已发布更新版本）：
+升级所有包（如果该包已发布更新版本）：
 
     npm update
 
-升级指定的套件：
+升级指定的包：
 
     npm update express
 
-删除指定的套件：
+删除指定的包：
 
     npm uninstall express
 
@@ -282,16 +282,16 @@ npm 目前拥有超过 6000 种套件（packages），可以在 [npm registry](h
 
 其中 `name` 与 `version` 按照专案的需求设置。
 
-需要注意的是 `dependencies` 的设定，它用于指定专案相依的套件名称及版本：
+需要注意的是 `dependencies` 的设定，它用于指定专案相依的包名称及版本：
 
 -   `"express": "2.5.5"`
 
-    //代表此专案相依版本 2.5.5 的 express 套件
+    //代表此专案相依版本 2.5.5 的 express 包
 -   `"coffee-script": "latest"`
 
-    //使用最新版的 coffee-script 套件（每次更新都会检查新版）
+    //使用最新版的 coffee-script 包（每次更新都会检查新版）
 -   `"mongoose": ">= 2.5.3"`
 
-    //使用版本大于 2.5.3 的 mongoose 套件
+    //使用版本大于 2.5.3 的 mongoose 包
 
-假设某个套件的新版可能造成专案无法正常运作，就必须指定套件的版本，避免专案的程序码来不及更新以兼容新版套件。通常在开发初期的专案，需要尽可能维持新套件的兼容性（以取得套件的更新或修正），可以用“`>=`”设定最低兼容的版本，或是使用“`latest`”设定永远保持最新套件。
+假设某个包的新版可能造成专案无法正常运作，就必须指定包的版本，避免专案的程序码来不及更新以兼容新版包。通常在开发初期的专案，需要尽可能维持新包的兼容性（以取得包的更新或修正），可以用“`>=`”设定最低兼容的版本，或是使用“`latest`”设定永远保持最新包。

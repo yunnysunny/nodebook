@@ -28,7 +28,7 @@ console.log("Server running at http://" + ip + ":" + port);
 - ip: 机器本身的ip 位置，因为使用本地端，因此设定为127.0.0.1
 - port: 需要开通的阜号，通常设定为http port 80，因范例不希望与基本port 相冲，随意设定为1337
 
-在node.js 的程序中，有许多预设的模组可以使用，因此需要使用require 方法将模组引入，在这边我们需要使用http这个模组，因此将http载入。Http 模组里面内建有许多方法可以使用，这边采用createServer 创建一个基本的http 服务器，再将http 服务器给予一个server 变数。里面的回调函数(call back function)可以载入http 服务器的资料与回应方法(request, response)。在程序里面就可以看到我们直接回应给浏览器端所需的 Header，回应内容。
+在node.js 的程序中，有许多预设的模块可以使用，因此需要使用require 方法将模块引入，在这边我们需要使用http这个模块，因此将http载入。Http 模块里面内建有许多方法可以使用，这边采用createServer 创建一个基本的http 服务器，再将http 服务器给予一个server 变数。里面的回调函数(call back function)可以载入http 服务器的资料与回应方法(request, response)。在程序里面就可以看到我们直接回应给浏览器端所需的 Header，回应内容。
 
 ```javascript
     res.writeHead(200, {'Content-Type': 'text/plain'});
@@ -97,7 +97,7 @@ server.listen(port, ip);
 console.log("Server running at http://" + ip + ":" + port);
 ```
 
-程序做了片段的修改，首先载入url 模组，另外增加一个path 变数。url 模组就跟如同他的命名一般，专门处理url 字符串处理，里面提供了许多方法来解决路径上的问题。因为从浏览器发出的要求路径可能会带有多种需求，或者GET 参数组合等。因此我们需要将路径单纯化，取用路径部分的资料即可，例如用户可能会送出 http://127.0.0.1:1337/test?send=1 ，如果直接信任**req.url** 就会收到结果为 /test?send=1 ，所以需要透过url 模组的方法将路径资料过滤。
+程序做了片段的修改，首先载入url 模块，另外增加一个path 变数。url 模块就跟如同他的命名一般，专门处理url 字符串处理，里面提供了许多方法来解决路径上的问题。因为从浏览器发出的要求路径可能会带有多种需求，或者GET 参数组合等。因此我们需要将路径单纯化，取用路径部分的资料即可，例如用户可能会送出 http://127.0.0.1:1337/test?send=1 ，如果直接信任**req.url** 就会收到结果为 /test?send=1 ，所以需要透过url 模块的方法将路径资料过滤。
 
 在这边使用url.parse 的方法，里面带入网址格式资料，会回传路径资料。为了后需方便使用，将回传的资料设定到path 变数当中。在回传的路径资料，里面包含资讯，如下图，
 
@@ -119,7 +119,7 @@ console.log("Server running at http://" + ip + ":" + port);
 
 前面已经介绍如何使用路由（rount）做出不同的回应，实际应用只有在浏览器只有输出几个文字资料总是不够的，在本章节中将介绍如何使用档案读取，输出档案资料，让用户在前端浏览器也可以读取到完整的html, css, javascript 档案输出。
 
-档案管理最重要的部分就是[File system](http://nodejs.org/docs/latest/api/fs.html)这个模组，此模组可以针对档案做管理、监控、读取等行为，里面有许多预设的方法，底下是档案输出的基本范例，底下会有两个档案，第一个是静态html档案，
+档案管理最重要的部分就是[File system](http://nodejs.org/docs/latest/api/fs.html)这个模块，此模块可以针对档案做管理、监控、读取等行为，里面有许多预设的方法，底下是档案输出的基本范例，底下会有两个档案，第一个是静态html档案，
 
 ```html
 <!DOCTYPE html>
@@ -143,7 +143,7 @@ fs.readFile(filename, encode, function(err, file) {
     console.log(file);
 });
 ```
-一开始直接载入file system 模组，载入名称为fs。读取档案主要使用的方法为readFile ，里面以叁个参数 **路径(file path)**, **编码方式(encoding)** ， **回应函数(callback)**，路径必须要设定为静态html所在位置，才能指定到正确的档案。静态档案的编码方式也必须正确，这边使用静态档案的编码为**utf8** ，如果编码设定错误，node.js 读取出来档案结果会使用 byte raw格式输出，如果 **错误编码格式，会导致输出资料为 byte raw**
+一开始直接载入file system 模块，载入名称为fs。读取档案主要使用的方法为readFile ，里面以叁个参数 **路径(file path)**, **编码方式(encoding)** ， **回应函数(callback)**，路径必须要设定为静态html所在位置，才能指定到正确的档案。静态档案的编码方式也必须正确，这边使用静态档案的编码为**utf8** ，如果编码设定错误，node.js 读取出来档案结果会使用 byte raw格式输出，如果 **错误编码格式，会导致输出资料为 byte raw**
 
 ![image](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/zh-tw/node_basic_file_byte.png)
 
@@ -173,7 +173,7 @@ server.listen(port, ip);
 console.log("Server running at http://" + ip + ":" + port);
 ```
 
-加入 **file system** 模组， 使用 **readFile**的功能，将这一段程序放置于createServer 的回应函数中。
+加入 **file system** 模块， 使用 **readFile**的功能，将这一段程序放置于createServer 的回应函数中。
 
 ```javascript
 fs.readFile(filePath, encode, function(err, file) {
@@ -239,13 +239,13 @@ http 服务器中，除了路由之外另一个最常使用的方法就是采集
 
     http://127.0.0.1/test?send=1&test=2
 
-上面这段网址，里面的GET 参数就是 send 而这个变数的数值就为1，如果想要在http 服务器取得GET资料，需要在浏览器给予的要求(request)做处理，首先需要载入 **query string**这个模组，这个模组主要是用来将字符串资料过滤后，转换成 **javascript对象**。
+上面这段网址，里面的GET 参数就是 send 而这个变数的数值就为1，如果想要在http 服务器取得GET资料，需要在浏览器给予的要求(request)做处理，首先需要载入 **query string**这个模块，这个模块主要是用来将字符串资料过滤后，转换成 **javascript对象**。
 
 ```javascript
 qs = require('querystring');
 ```
 
-接着在第一阶段，利用url 模组过滤浏览器发出的URL资料后，将回应的对象里面的 query这个变数，是一个字符串值，资料过滤后如下，
+接着在第一阶段，利用url 模块过滤浏览器发出的URL资料后，将回应的对象里面的 query这个变数，是一个字符串值，资料过滤后如下，
 
     send=1&test=2
 
@@ -290,4 +290,4 @@ console.log("Server running at http://" + ip + ":" + port);
 ### 3.6本章结语
 
 
-前面所解说的部份，一大部分主要是处理 http服务器基本问题，虽然在某些部分有牵扯到http服务器基本运作原理，主要还是希望可以藉由这些基本范例练习node.js，练习回应函数与语法串接的特点，习惯编写javascript风格程序。当然直接这样开发node.js是非常辛苦的，接下来在模组实战开发的部份将会介绍特定的模组，一步一步带领各位从无到有进行node.js应用程序开发。
+前面所解说的部份，一大部分主要是处理 http服务器基本问题，虽然在某些部分有牵扯到http服务器基本运作原理，主要还是希望可以藉由这些基本范例练习node.js，练习回应函数与语法串接的特点，习惯编写javascript风格程序。当然直接这样开发node.js是非常辛苦的，接下来在模块实战开发的部份将会介绍特定的模块，一步一步带领各位从无到有进行node.js应用程序开发。

@@ -23,7 +23,7 @@ How to setup a node.js development environment on Ubuntu 11.04 &lt;http://dreame
 
 How to setup a node.js development environment on Windows &lt;http://dreamerslab.com/blog/tw/how-to-setup-a-node-js-development-environment-on-windows/&gt;
 
-### 6.1 node.js 套件
+### 6.1 node.js 包
 
 参考文档 :
 npm basic commands<http://dreamerslab.com/blog/en/npm-basic-commands/>
@@ -109,12 +109,12 @@ Project 档案结构
     |
     `-- package.json
 
--   node_modules - 包含所有 project 相关套件.
+-   node_modules - 包含所有 project 相关包.
 -   public - 包含所有静态档案.
 -   routes - 所有动作包含商业逻辑.
 -   views - 包含 action views, partials 还有 layouts.
 -   app.js - 包含设定, middlewares, 和 routes 的分配.
--   package.json - 相关套件的设定档.
+-   package.json - 相关包的设定档.
 
 ### 6.3 MongoDB 以及 Mongoose 设定
 

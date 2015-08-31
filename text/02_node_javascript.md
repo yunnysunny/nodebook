@@ -365,9 +365,9 @@ c, 2
 
 （除了John Resig的那篇文章，Nicholas C. Zakas的 "Professional Javascript for Web Developer 2nd edition" 有一个试阅本：http://yuiblog.com/assets/pdf/zakas-projs-2ed-ch18.pdf，598页刚好也有简短的说明）
 
-所以在Javascript中，虽然有异步，但是他并不是使用执行绪。所有的事件或是异步执行的函数，都是在同一个执行绪中，利用event loop的方式在执行。至于一些比较慢的动作例如I/O、网页render, reflow等，实际动作会在其他执行绪跑，等到有结果时才利用事件来触发处理函数来处理。这样的模型有几个好处：
+所以在Javascript中，虽然有异步，但是他并不是使用线程。所有的事件或是异步执行的函数，都是在同一个线程中，利用event loop的方式在执行。至于一些比较慢的动作例如I/O、网页render, reflow等，实际动作会在其他线程跑，等到有结果时才利用事件来触发处理函数来处理。这样的模型有几个好处：
 
-- 没有执行绪的额外成本，所以反应速度很快。
+- 没有线程的额外成本，所以反应速度很快。
 - 不会有任何程序同时用到同一个变数，不必考虑lock，也不会产生dead lock,所以程序撰写很简单。 
 
 但是也有一些潜在问题：
@@ -507,7 +507,7 @@ module.exports = testCase({
 });
 ```
 
-善于利用模组，可以让程序更好维护与测试。
+善于利用模块，可以让程序更好维护与测试。
 
 ### 2.7 CPS（Continuation-Passing Style）
 
@@ -788,7 +788,7 @@ done a done b done a done c done all. result: 3500
 
 #### 2.9.2 循序执行
 
-循序执行可以协助把非常深的嵌套callback结构摊平，例如用这样的简单模组来做（serial.js）：
+循序执行可以协助把非常深的嵌套callback结构摊平，例如用这样的简单模块来做（serial.js）：
 
 ```javascript
 module.exports = function(funs) {
@@ -818,7 +818,7 @@ function isArrayOfFunctions(f) {
 }
 ```
 
-简单的测试范例（testSerial.js），使用fs模组，确定某个path是档案，然后读取印出档案内容。这样会用到两层的callback，所以测试中有使用serial的版本与nested callbacks的版本做对照：
+简单的测试范例（testSerial.js），使用fs模块，确定某个path是档案，然后读取印出档案内容。这样会用到两层的callback，所以测试中有使用serial的版本与nested callbacks的版本做对照：
 
 ```javascript
 var serial = require('./serial'),
@@ -903,5 +903,5 @@ dnode.connect(8000, 'localhost',  function(remote) {
     });
 
 
-对照起来看，两种写法的结果其实是一样的，但是利用serial.js，嵌套的callback结构就会消失。不过这样也只限于顺序单纯的状况，如果函数执行的顺序比较复杂（不只是一直线），还是需要用功能更完整的流程控制模组比较好，例如
+对照起来看，两种写法的结果其实是一样的，但是利用serial.js，嵌套的callback结构就会消失。不过这样也只限于顺序单纯的状况，如果函数执行的顺序比较复杂（不只是一直线），还是需要用功能更完整的流程控制模块比较好，例如
 <https://github.com/caolan/async> 。
