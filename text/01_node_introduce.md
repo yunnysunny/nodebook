@@ -10,7 +10,7 @@ JavaScript 是功能强大的对象导向程序语言，但是在 JavaScript的�
 
 开发人员所编写出来的 Javascript脚本程序，怎么可能会比其他语言写出来的网络程序还要快上许多呢？以前的网络程序原理是将用户每次的连接(connection) 都开启一个线程(thread)，当连接爆增的时候将会快速耗尽系统性能，并且容易产生阻塞(block)。
 
-Node.js 对于资源的调配有所不同，当程序接收到一笔连接(connection)，会通知作业系统透过epoll, kqueue,/dev/poll或select将连接保留，并且放入heap中配置，先让连接进入休眠(sleep) 状态，当系统通知时才会触发连接的callback。这种处理连接方式只会占用掉记忆体，并不会使用到CPU资源。另外因为采用JavaScript 语言的特性，每个 request 都会有一个callback，如此可以避免发生 block。
+Node.js 对于资源的调配有所不同，当程序接收到一笔连接(connection)，会通知作业系统透过epoll, kqueue,/dev/poll或select将连接保留，并且放入heap中配置，先让连接进入休眠(sleep) 状态，当系统通知时才会触发连接的callback。这种处理连接方式只会占用掉内存，并不会使用到CPU资源。另外因为采用JavaScript 语言的特性，每个 request 都会有一个callback，如此可以避免发生 block。
 
 基于 callback 特性，目前 Node.js 大多应用于 Comet(long pulling) Request Server，或者是高连接数量的网络服务上，目前也有许多公司将 Node.js设为内部核心网络服务之一。在 Node.js 也提供了包管理 工具(Node package management)，让爱好 Node.js 轻易开发更多有趣的服务、第三方模块，并且提供到 npm让全世界用户快速安装使用。
 
