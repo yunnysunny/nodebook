@@ -31,7 +31,37 @@ app.use(session({
 session 函数的 `key` 参数代表生成cookie的名称。`resave`参数设置默认为`true`，代表每次请求结束都会重写`store`中的数据，不管当前的session有没有被修改。`saveUninitialized`参数值默认为`true`，代表将未赋值过的session写入到store，也就是说假设我们的网站需要登录，那么在未登陆之前，也会往`store`写入数据。所以我们将`resave`和`saveUninitialized`都设置为了false。
 > 如果你对 session 和 cookie 原理不是很清楚的话，可以参见我的两篇博文。  
 
-为了减少篇幅，接着紧紧给出服务器端给session赋值的代码：
+为了减少篇幅，给出的代码都是片段形式：
+```html
+<form method="post" action="/user/login" id="loginForm">
+    <p><input name="username" /><label for="username">用户名</label><p/>
+    <p><input name="password" type="password" /><label for="password">密码</label><p/>
+    <p><input type="submit" value="登陆" /><p/>
+</form>
+<script src="//upcdn.b0.upaiyun.com/libs/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#loginForm').submit(function() {
+            var $this = $(this);
+            $.ajax({
+                method:$this.attr('method'),
+                url:$this.attr('action'),
+                data:$this.serialize(),
+                dataType:'json'
+            }).done(function(result) {
+                if (result.code == 0) {
+                    return location.href = '/user/admin';
+                }
+                alert(result.msg || '服务器异常');
+            }).fail(function() {
+                alert('网络异常');
+            });
+            return false;
+        });
+    });
+</script>
+```
+**代码6.1.2 登陆前端代码**  
 ```js
 exports.login = function(req, res) {
     var _body = req.body;
@@ -44,3 +74,13 @@ exports.login = function(req, res) {
     res.send({code:1,msg:'用户名或者密码错误'});
 }
 ```
+**代码6.1.3 登陆后端代码**  
+在`代码6.1.3`中通过`req.session.user`来给session增加一个user的属性，在`代码6.1.2`中登陆成功后要跳转到`/user/admin`地址上去，我们接下来看这个地址映射的后端代码：
+```js
+exports.admin = function(req, res) {
+    var user = req.session.user;
+    res.render('user/admin',{user:user});
+}
+```
+**代码 6.1.4 读取session**  
+通过`req.session.user`，就可以方便的将之前存储的`user`属性给读取出来。
