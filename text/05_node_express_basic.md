@@ -258,7 +258,7 @@ ReferenceError: noneExistVar is not defined
 ```
 **代码5.7.2 user_controller.js文件中处理函数**
 
-> web编程中广泛使用MVC的设计模式，在项目创建`controllers`正是为了符合这一模式，关于MVC的介绍，可以参见[维基百科](https://zh.wikipedia.org/wiki/MVC)。
+> web编程中广泛使用MVC（模型Model、视图View、控制器Controller，这三个单词的缩写）的设计模式，在项目创建`controllers`正是为了符合这一模式，同时你还需要创建一个models文件夹，专门负责处理数据。具体的使用流程是这样的：`controllers`里面放置请求处理的代码，即接收请求参数，对其进行有效性校验，然后调用`models`里面的代码进行数据操作（比如说数据库的增删改查等操作），拿到处理结果后加载视图进行渲染。关于MVC的介绍，可以参见[维基百科](https://zh.wikipedia.org/wiki/MVC)。
 
 然后添加相应的路由如下：
 

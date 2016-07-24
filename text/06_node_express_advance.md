@@ -27,7 +27,7 @@ app.use(session({
 
 ```
 **代码 6.1.1 引入session**  
-其实express默认的session是存储在内存里的，但是这种做法不适合在生产环境使用，首先node如果使用cluster模式的话，内存无法共享，也就是说只能使用单进程；其次，如果在线人数一直增多的话，会造成内存猛增。所以这里的`store`参数使用了redis。
+其实express默认的session是存储在内存里的，但是这种做法不适合在生产环境使用，首先node如果使用cluster模式的话，内存无法共享，也就是说只能使用单进程；其次，如果在线人数一直增多的话，会造成内存猛增。所以这里的`store`参数使用了redis，这同样也意味着你需要在你本地（或者远程机器上）启动redis服务，否则程序会报错。
 session 函数的 `key` 参数代表生成cookie的名称。`resave`参数设置默认为`true`，代表每次请求结束都会重写`store`中的数据，不管当前的session有没有被修改。`saveUninitialized`参数值默认为`true`，代表将未赋值过的session写入到store，也就是说假设我们的网站需要登录，那么在未登陆之前，也会往`store`写入数据。所以我们将`resave`和`saveUninitialized`都设置为了false。
 > 如果你对 session 和 cookie 原理不是很清楚的话，可以参见我的两篇博文。  
 
@@ -124,10 +124,11 @@ db.article.update({name:'chapter2'},{
     console.log('更新单条数据',err,ret);
 });
 ```
+**代码 6.2.4 mogonskin修改单条数据**  
 **注意**第二个参数中需要有一个`$set`属性，否则整条数据将会被替换掉，如果直接将第二个参数
 写成了`{content:'Node.js 入门'}`，则操作完成之后，数据库里当前记录就变成了`{_id:主键值,content:'Node.js 入门'}`,
 之前的属性`name`和`createTime`就都丢失了。
-**代码 6.2.4 mongoskin修改单条数据**  
+**代码 6.2.5 mongoskin修改单条数据**  
 如果想修改多条数据，只需要增加一个参数：
 db.article.update({name:'chapter2'},{
     $set:{content:'Node.js 入门'}
@@ -136,28 +137,28 @@ db.article.update({name:'chapter2'},{
 });
 ```
 相比较代码 6.2.4 这里多了一个参数，`{multi:true}`告诉数据库服务器，要更新多条数据。
-**代码 6.2.5 mongoskin修改多条数据**  
+**代码 6.2.6 mongoskin修改多条数据**  
 删除和更新相反，默认情况下是删除多条记录：
 ```js
 db.article.remove({name:'chapter1'},function(err,ret) {
     console.log('删除数据',err,ret);
 });
 ```
-**代码 6.2.6 mongoskin删除多条记录** 
+**代码 6.2.7 mongoskin删除多条记录** 
 如果想删除一条记录，则增加一个参数 `{justone:true}`,即改成：  
 ```js
 db.article.remove({name:'chapter1'},{justone:true},function(err,ret) {
     console.log('删除数据',err,ret);
 });
 ```
-**代码 6.2.6 mongoskin删除单条记录** 
+**代码 6.2.8 mongoskin删除单条记录** 
 查询一条记录：  
 ```js
 db.article.findOne({name:'chapter2'},function(err,item) {
     console.log('查询单条数据',err,item);
 });
 ```
-**代码 6.2.7 mongoskin查询单体记录**  
+**代码 6.2.9 mongoskin查询单体记录**  
 代码 6.2.7 中回调函数得到`item`变量即为查询后得到的记录。  
 查询多条记录：  
 ```js
@@ -165,7 +166,7 @@ db.article.findItems({},function(err, items) {
     console.log('查询多条数据',err,items);
 });
 ```
-**代码 6.2.8 mongoskin查询多条记录**
+**代码 6.2.10 mongoskin查询多条记录**
 上面演练了一遍mongoskin的增删改查，不过，我们将其和传统的关系型数据库做对比，发现还少了点东西。比如说：一条记录有多个字段，
 我只想返回若干字段怎么弄；表中的数据过多，想分页显示怎么弄；对于需要使用事务的情形，怎么弄。  
 对于前两个问题，只需要在查询的时候加参数即可。比如我们想查询7月1日都有哪些文章发布，我们只关心文章名称，同时由于数据量很大，
@@ -179,7 +180,7 @@ db.article.findItems({
     console.log('查询多条数据',err,items);
 });
 ```
-**代码 6.2.9 mongoskin自定义查询选项**  
+**代码 6.2.11 mongoskin自定义查询选项**  
 在这里我们通过`fields`来控制返回字段名，`skip:1`代表跳过第一条记录，`limit:1`代表从跳过的记录后面取1条记录，同时我们还增加了
 `sort`属性，按照`createTime`字段的倒序排列。  
 对于最后一个问题，很遗憾，mongodb中确实没有事务，不过它还是提供了一个带有锁功能的操作函数，就是 `findAndModify`。这个函数的参数比较多，
@@ -235,7 +236,7 @@ db.comment.findAndModify({
     console.log('修改后数据',err,result);
 });
 ```
-**代码 6.2.10 函数findAndModify演示**  
+**代码 6.2.12 函数findAndModify演示**  
 但是要注意，`findAndModify` 会同时持有读写锁，也就是在这个函数操作过程中，其他命令是会被堵塞住，一直等待这个函数操作完成或者出错，其他命令才会有机会接着执行。所以一般情况下，不要使用这个函数，除非是非常关键的数据，要求精度很高才使用这个函数，比如说订单状态修改之类的操作，但是就像`代码 6.2.10`之中的操作，纯属拿大炮打蚊子了。即使非要用到这个函数的情况，也尽量保证查询的时候可以使用索引，尽量减少锁持有的时间。  
 对于一些非关键性数据，但是又必须保证某个字段在写入的时候保持唯一性，那么在这个字段上增加一个唯一索引，就可以了。在mongodb的命令行中执行如下命令：
 ```js
@@ -273,7 +274,8 @@ exports.loginCheck = function(username,password,callback) {
 };
 ```
 **代码 6.3.1 登陆验证逻辑**  
-> 其实单纯用md5/sha1/sha256这些算法来说，都存在被破解的可能性，国内有网站http://cmd5.com 几乎可以破解一切弱密码，解决方案就是使用更长的密码（可以通过用户名和密码进行拼接来计算哈希值），或者使用hmac算法。这里为了演示，使用了最简单的方式。
+> 其实单纯用md5/sha1/sha256这些算法来说，都存在被破解的可能性，国内有网站http://cmd5.com 几乎可以破解一切弱密码，解决方案就是使用更长的密码（可以通过用户名和密码进行拼接来计算哈希值），或者使用hmac算法。这里为了演示，使用了最简单的方式。  
+
 那么现在控制器中的代码就可以这么写：  
 ```js
 exports.loginWithDb = function(req, res) {
@@ -295,3 +297,61 @@ exports.loginWithDb = function(req, res) {
 **代码 6.3.2 登陆验证控制器代码**  
 我们在路由器中增加一个链接 `/user/login-with-db` 指向代码 6.3.2 中的控制器函数，修改代码6.1.2中的表单提交地址即可。
 ### 6.4 使用拦截器
+之前的章节中介绍过express的middleware，翻译一下就是中间件，下面的内容其实是做一个中间件，但是为啥我给它起名叫拦截器呢，因为我认为对于业务逻辑处理叫拦截器更贴切，因为我理解的middleware仅仅负责解析http数据，不处理业务逻辑。仅仅是个人见解。  
+之前我们已经做了登陆操作，但是对于一个网站的若干地址（比如说后台地址），不登录是没法用的，我们需要用户在加载这些地址的时候，如果检测到当前处于未登录状态，就统一跳转到登陆页。在每一个控制器中都做一遍登陆状态判断来决定是否跳转，显然是一个笨拙的方法。但是如果使用了拦截器，一切问题就显得简单了。  
+我们新建文件夹`filters`，然后在其内新建文件`auth_filter.js`:
+```js
+const ERROR_NO_LOGIN = 0xffff0000;
+module.exports = function(req, res, next) {
+    var path = req.path;
+    if (path === '/' || path === '/user/login') {//这些路径不需要做登陆验证
+        return next();
+    }
+    if (req.session && req.session.user) {//已经登陆了
+        return next();
+    }
+    //以下为没有登陆的处理逻辑
+    if (req.xhr) {//当前请求为ajax请求
+        return res.send({code:ERROR_NO_LOGIN,msg:'尚未登陆'});
+    }
+    res.redirect('/');//普通请求
+};
+```
+**代码 6.4.1 授权拦截器逻辑**  
+同时我们在`app.js`中引入这段代码： 
+```js
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+var session = require('express-session');
+var RedisStore = require('connect-redis')(session);
+var redis = require('redis');
+
+var routes = require('./routes/index');
+var authFilter = require('./filters/auth_filter');
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(session({
+    secret: 'GG##@$',
+    cookie:{domain:'localhost'},
+    key:'express_chapter6',
+    resave:false,
+    saveUninitialized:false,
+    store: new RedisStore({
+        client:redis.createClient(6379, '127.0.0.1'),
+        ttl:3600*72,
+        db:2,
+        prefix:'session:chapter6:'
+    })
+
+}));
+app.use(authFilter);
+app.use('/', routes);
+```
+**代码 6.4.2 引入授权拦截器**  
+将其放到session中间件的后面是由于，我们在这个拦截器中需要读取`req.session`变量，如果放到session中间件前面，则这个变量不存在。  
+现在我们在未登录的情况下访问http://localhost:3000/user/admin ，则会直接跳转到登陆页。  
+本章节代码可以从这里获取：https://github.com/yunnysunny/expressdemo/tree/master/chapter6 。
