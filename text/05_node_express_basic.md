@@ -270,11 +270,11 @@ ReferenceError: noneExistVar is not defined
 
 运行`npm start`，即可查看效果，打开http://localhost:3000/users/sign ，可看到如下界面：
 
-![注册显示界面](https://raw.github.com/yunnysunny/expressdemo/master/show.png)
+![注册显示界面](https://raw.githubusercontent.com/yunnysunny/expressdemo/master/chapter5/show.png)
 
 输入数据后，点击注册，显示提示信息：
 
-![注册成功显示界面](https://raw.github.com/yunnysunny/expressdemo/master/do.png)
+![注册成功显示界面](https://raw.githubusercontent.com/yunnysunny/expressdemo/master/chapter5/do.png)
 
 这就完成了get操作，但是前面提到了类似于这种注册操作一般都是用post的，将上面的代码改成post是很简单的，只需在代码代码5.7.1 中将表单的method改成post，代码5.7.2中获取请求数据是这么写的：
 
