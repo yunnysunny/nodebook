@@ -362,4 +362,4 @@ router.post('/users/do/sign2', user.doSign2);
 **代码5.8.3 ajax相关路由**  
 重启项目后访问地址http://localhost:3000/users/sign2 即可进行测试。
 ### 5.9 代码
-本章用的部分代码：https://github.com/yunnysunny/expressdemo
+本章用的部分代码：https://github.com/yunnysunny/expressdemo/tree/master/chapter5

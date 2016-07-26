@@ -1,150 +1,22 @@
 ## 4 NPM 包管理工具
 
+在Node出现之前，我们在做前端的时候经常用到一些开发工具使用ruby和python开发的（比如说[sass](http://sass-lang.com/)，一种CSS预编译语言，依赖于ruby；(Pygments)[http://pygments.org/] ，一种代码语法高亮插件，依赖于python），这个时候就会看到[gem](https://rubygems.org/)和[pip](https://pypi.python.org/pypi)的身影。熟悉java的同学，应该也对[maven](https://maven.apache.org/)如数家珍。和这些语言类似，Node 也提供了包管理工具，它就是 npm ，全名为 **N**ode **P**ackage **M**anager，集成于 Node 的安装程序中。
 
-npm 全名为 **N**ode **P**ackage **M**anager，是 Node.js 的包（package）管理工具， 类似 Perl 的 ppm 或 PHP 的 PEAR等。安装 npm 后，使用 `npm install module_name` 指令即可安装新包，维护管理包的工作会更加轻松。
-
-npm 可以让 Node.js 的开发者，直接利用、扩充线上的包库（packages registry），加速软体专案的开发。npm 提供很友善的搜寻功能，可以快速找到、安装需要的包，当这些包发行新版本时，npm 也可以协助开发者自动更新这些包。
-
+## 4.1 使用NPM
 npm 不仅可用于安装新的包，它也支持搜寻、列出已安装模块及更新的功能。
 
-### 4.1 安装 NPM
 
-Node.js 在 0.6.3 版本开始内建 npm，读者安装的版本若是此版本或更新的版本，就可以略过以下安装说明。
-
-若要检查 npm 是否正确安装，可以使用以下的指令：
-
-    npm -v
-
-**执行结果说明**
-
-若 npm 正确安装，执行 `npm -v` 将会看到类似 1.1.0-2 的版本讯息。
-
-若读者安装的 Node.js 版本比较旧，或是有兴趣尝试自己动手安装 npm 工具，则可以参考以下的说明。
-
-#### 4.1.1 安装于 Windows 系统
-
-Node.js for Windows 于 0.6.2 版开始内建 npm，使用 nodejs.org 官方提供的安装程序，不需要进一步的设定，就可以立即使用 npm 指令，对于 Windows 的开发者来说，大幅降低环境设定的问题与门槛。
-
-除了使用 Node.js 内建的 npm，读者也可以从 npm 官方提供的以下网址：
-
-<http://npmjs.org/dist/>
-
-这是由 npm 提供的 Fancy Windows Install 版本，请下载压缩档（例如：`npm-1.1.0-3.zip`），并将压缩档内容解压缩至 Node.js的安装路径（例如：`C:\Program Files\nodejs`）。
-
-解压缩后，在 Node.js 的安装路径下，应该有以下的档案及资料夹。
-
--   npm.cmd （档案）
--   node_modules （资料夹）
-
-#### 4.1.2 安装于 Linux 系统
-
-Ubuntu Linux 的用户，可以加入 [NPM Unoffcial PPA](https://launchpad.net/~gias-kay-lee/+archive/npm) 这个 repository，即可使用 apt-get 完成 npm 安装。
-
-**Ubuntu Linux 使用 apt-get 安装 npm**
-
-    sudo apt-get install python-software-properties
-    sudo add-apt-repository ppa:gias-kay-lee/npm
-    sudo apt-get update
-    sudo apt-get install npm
-
-npm 官方提供的安装程序 `install.sh`，可以适用于大多数的 Linux 系统。使用这个安装程序，请先确认：
-
-1.  系统已安装 curl 工具（请使用 `curl --version` 查看版本讯息）
-2.  已安装 Node.js 并且 PATH 正确设置
-3.  Node.js 的版本必须大于 0.4.x
-
-以下为 npm 提供的安装指令：
-
-    curl http://npmjs.org/install.sh | sh
-
-安装成功会看到如下讯息：
-
-**install.sh 安装成功的讯息**
-
-    npm@1.0.105 /home/USERNAME/local/node/lib/node_modules/npm
-    It worked
-
-#### 4.1.3 安装于 Mac OS X
-
-建议采用与 Node.js 相同的方式，进行 npm 的安装。例如使用 MacPorts 安装 Node.js，就同样使用 MacPorts 安装 npm，这样对日后的维护才会更方便容易。
-
-使用 MacPorts 安装 npm 是本书比较建议的方式，它可以让 npm 的安装、删除及更新工作自动化，将会帮助开发者节省宝贵时间。
-
-**安装 MacPorts 的提示**
-
-在 MacPorts 网站，可以取得 OS X 系统版本对应的安装程序（例如 10.6 或10.7）。
-
-<http://www.macports.org/>
-
-安装过程会询问系统管理者密码，使用预设的选项完成安装即可。安装 MacPorts 之后，在终端机执行 `port -v` 将会看到 MacPorts的版本讯息。
-
-安装 npm 之前，先更新 MacPorts 的包清单，以确保安装的 npm 是最新版本。
-
-    sudo port -d selfupdate
-
-接着安装 npm。
-
-    sudo port install npm
-
-若读者的 Node.js 并非使用 MacPorts 安装，则不建议使用 MacPorts 安装 npm，因为 MacPorts 会自动检查并安装相依包，而 npm 相依 nodejs，所以 MacPorts 也会一并将 nodejs 包安装，造成先前读者使用其它方式安装的 nodejs 被覆盖。
-
-读者可以先使用 MacPorts 安装 curl（`sudo port install curl`），再参考 Linux 的 install.sh 安装方式，即可使用 npm 官方提供的安装程序。
-
-#### 4.1.4 NPM 安装后测试
-
-npm 是指令列工具（command-line tool），使用时请先打开系统的文字终端机工具。
-
-测试 npm 安装与设定是否正确，请输入指令如下：
-
-    npm -v
-
-或是：
-
-    npm --version
-
-如果 npm 已经正确安装设定，就会显示版本讯息：
-
-**执行结果（范例）**
-
-    1.1.0-2
-
-### 4.2 使用 NPM 安装包
-
-npm 目前拥有超过 6000 种包（packages），可以在 [npm registry](http://search.npmjs.org/) 使用关键字搜寻包。举例来说，在关键字栏位输入“coffee-script”，下方的清单就会自动列出包含 coffee-script 关键字的包。
+npm 目前拥有数以百万计的包，可以在 https://www.npmjs.com/ 使用关键字搜寻包。举例来说，在关键字栏位输入“coffee-script”，下方的清单就会自动列出包含 coffee-script 关键字的包。
 
 ![image](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/zh-tw/node_npm_registry.png)
 
-接着我们回到终端机模式的操作，`npm` 的指令工具本身就可以完成包搜寻的任务。
+虽然也可以通过`npm search`来在命令行中查询，但是初次查询过程中要在本地建立索引，等待的时间巨漫长，还是不介绍的为好。
 
-例如，以下的指令同样可以找出 coffee-script 相关包。
-
-    npm search coffee-script
-
-以下是搜寻结果的参考画面：
-
-![image](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/zh-tw/node_npm_search.png)
-
-找到需要的包后（例如 express），即可使用以下指令安装：
+找到需要的包后，即可使用以下指令安装：
 
     npm install coffee-script
 
-值得注意的一点是，使用 `npm install` 会将指定的包，安装在工作目录（Working Directory）的 `node_modules` 资料夹下。
 
-以 Windows 为例，如果执行 `npm install` 的目录位于：
-
-`C:\project1`
-
-那么 npm 将会自动建立一个 node\_modules 的子目录（如果不存在）。
-
-`C:\project1\node_modules`
-
-并且将下载的包，放置于这个子目录，例如：
-
-`C:\project1\node_modules\coffee-script`
-
-这个设计让专案可以个别管理相依的包，并且可以在专案布署或发行时，将这些包（位于 node\_modules）一并打包，方便其它专案的用户不必再重新下载包。
-
-这个 `npm install` 的预设安装模式为 **local**(本地)，只会变更当前专案的资料夹，不会影响系统。
 
 另一种安装模式称为 **global**（全域），这种模式会将包安装到系统资料夹，也就是 npm 安装路径的 `node_modules` 资料夹，
 例如：
