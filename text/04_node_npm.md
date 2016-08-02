@@ -17,10 +17,9 @@ npm 目前拥有数以百万计的包，可以在 https://www.npmjs.com/ 使用�
     npm install coffee-script
 运行完之后，就会在当前目录下的 `node_modules`目录下安装coffee-script包。
 ```
-|
-----node_modules
-    |
-    -----coffee-script
+
+  ├─┬ node_modules 
+  │ └── coffee-script 
 ```
 **目录结构 4.1.1 将包安装到本地后的目录结构**  
 一般情况下，我们在node项目目录下创建package.json，里面包含项目名称、作者、依赖包等配置，我们可以通过 `npm init`快速创建一个package.json文件，我们新建一个目录，然后在命令执行`npm init`，则会要求你填入若干信息：
@@ -171,6 +170,19 @@ prefix = ${NODE_PATH}
     npm uninstall express
     
 ### 4.5 发布自己的包到 npmjs  
-刚才演示了这么命令都是安装别人的包，现在我们自己开发一个包。首先你要注册一个npmjs的账号（注册地址：https://www.npmjs.com/signup）。
-
-
+刚才演示了这么命令都是安装别人的包，现在我们自己开发一个包。首先你要注册一个npmjs的账号（注册地址：https://www.npmjs.com/signup ）。注册完成后，通过`npm adduser`命令来将注册的账号绑定到本地机器上，运行完改命令后会让你输入 npmjs 的注册账号和密码。  
+要想在 npmjs 上发布自己的包，首先要做的是明确你发布的包名在这个网站上有没有存在，在4.1小节，我们上来就介绍了怎么通过包名搜索npmjs上的包。不过，这里提供一个简单暴力的方法，就是直接在浏览器里输入：npmjs.com/package/packageName ， 将packName替换成你所想创建的包名，然后回车，如果打开的网页中有404映入你的眼帘，恭喜你，这个包名没有被占用。  
+我这里演示一下，我开发包slogger的过程，首先在浏览器地址栏里输入：npmjs.com/package/slogger ，很不幸，slogger 这个包名已经被占用了。于是乎我输入 npmjs.com/package/node-slogger ，咦没有被占用（我们应该用发展的眼光的看待问题）。接着新建一个目录node-slogger，在命令行中进入这个目录，运行 `npm init`: 
+```
+name: (node-slogger) node-slogger                                           
+version: (1.0.0) 0.0.1                                     
+description: A wrapper of logger package , which can write same code even if you change you logger api.                                         
+entry point: (index.js)                                    
+test command:                                              
+git repository: git@github.com:yunnysunny/slogger.git                                           
+keywords:  logger                                                
+author: yunnysunny                                         
+license: (ISC) MIT
+```
+**输出 4.5.1 运行 npm init 后的部分输出**  
+注意我们在 `git repository` 位置填写了一个 git 地址，这就意味着当前的代码要托管在github上。接着我们编写代码，然后将代码push到github，接着给预发布的代码打一个tag，最后运行`npm publish`，打完收工，现在我们看 https://npmjs.com/package/node-slogger ，包已经可以访问了！
