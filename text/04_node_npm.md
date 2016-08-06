@@ -16,13 +16,14 @@ npm 目前拥有数以百万计的包，可以在 https://www.npmjs.com/ 使用�
 
     npm install coffee-script
 运行完之后，就会在当前目录下的 `node_modules`目录下安装coffee-script包。
-```
 
+```
   ├─┬ node_modules 
   │ └── coffee-script 
-```
+```  
 **目录结构 4.1.1 将包安装到本地后的目录结构**  
 一般情况下，我们在node项目目录下创建package.json，里面包含项目名称、作者、依赖包等配置，我们可以通过 `npm init`快速创建一个package.json文件，我们新建一个目录，然后在命令执行`npm init`，则会要求你填入若干信息：
+
 ```
 name: (app) test                                           
 version: (1.0.0) 0.0.1                                     
@@ -49,14 +50,15 @@ About to write to I:\node\app\package.json:
                                                            
                                                            
 Is this ok? (yes)                                       
-```
+```  
 **命令输入 4.1.1 npm init命令输入示例**  
 我们接着在项目中安装express包（在第5章会讲到这个包的使用），不过我们执行命令的时候加个参数：`npm install express --save`。命令执行完成之后，再看package.json，发现多了一个配置属性：
+
 ```json
 "dependencies": {
     "express": "^4.14.0"
 }
-```
+```  
 这个dependencies属性里面描述的就是当前项目依赖的各种包，你可以通过运行`npm install packageName --save`来将其安装到本地的同时在package.json中同时添加依赖声明。当你代码开发完成时，要把项目往服务器上部署，那么这时候package.json中的依赖声明都已经写好了，这时候，你直接在项目目录运行`npm install`，就可以自动将声明中的文件全部下载安装到项目目录的`node_modules`子目录下。  
 我们在来稍微留意一下，我们配置的这个express的版本号，咦，`^`是个什么鬼？讲这个东东，还要从[Semantic Versioning](http://semver.org/)这个概念讲起，它将版本号分为三段：  
 
@@ -88,6 +90,7 @@ npm install -g cnpm@3.4.1 --registry=https://registry.npm.taobao.org
 接着你可以使用 cnpm 来代替 npm，比如说`cnpm install`来代替`npm install`，又可以愉快的玩耍了。  
 
 接着，我们尝试使用cnpm全局安装lodash，运行假设你的nodejs安装在windows的C盘的话，运行完`cnpm install lodash -g`后，你会惊奇的发现报错了：
+
 ```
 npm ERR! Error: EPERM, mkdir 'C:\Program Files (x86)\nodejs\node_modules\lodash'
 npm ERR!  { [Error: EPERM, mkdir 'C:\Program Files (x86)\nodejs\node_modules\lodash']
@@ -105,13 +108,13 @@ npm ERR!
 npm ERR! Please try running this command again as root/Administrator.
 
 npm ERR! Please include the following file with any support request:
-```
+```  
 **输出 4.2.1 cnpm全局安装错误输出**  
 为啥呢？首先，cnpm 会在将包默认安装在nodejs安装目录下的`node_modules`子文件夹中，其次我们这里将node安装到了系统盘`C:\Program Files (x86)`目录下，最后写入这个目录需要超级管理员权限。  
 本来就讨厌往系统盘写入数据文件，这下子非要改掉它这个默认设置不可了。首先我们新建一个环境变量`NODE_PATH`，将其设置为非系统目录，然后将`%NODE_PATH%`（linux中为`$NODE_PATH`）追加到`PATH`环境变量中，做完如上设置的话，运行 `npm install -g packageName` 可以保证安装到的`NODE_PATH`指定的目录下，同时由于`NODE_PATH`在环境变量`PATH`，所以可以保证安装的命令行程序可以直接被调用到。但是做完这番操作后， cnpm 还是安装到系统目录，不要着急，接下来我们修改一下用户根目录（windows下为`c:\users\[用户名]`，linux下为`$HOME`变量指向的目录）下的`.cnpmrc`文件，在里面追加一行：  
 ```
 prefix = ${NODE_PATH}
-```
+```  
 然后重新执行全局安装 lodash 的命令，最终终于将其安装到 NODE_PATH 指向的目录。
 
 
@@ -183,6 +186,6 @@ git repository: git@github.com:yunnysunny/slogger.git
 keywords:  logger                                                
 author: yunnysunny                                         
 license: (ISC) MIT
-```
+```  
 **输出 4.5.1 运行 npm init 后的部分输出**  
 注意我们在 `git repository` 位置填写了一个 git 地址，这就意味着当前的代码要托管在github上。接着我们编写代码，然后将代码push到github，接着给预发布的代码打一个tag，最后运行`npm publish`，打完收工，现在我们看 https://npmjs.com/package/node-slogger ，包已经可以访问了！
