@@ -98,14 +98,8 @@ app.use(function(err, req, res, next) {
 module.exports = app;
 ```  
 **代码 5.2.1 app.js**  
-express处理网络请求，是以一种被称之为 `middlewave(也翻译为中间件)` 机制进行的，即网络请求先经过第一个middlewave，
-如果处理完成则直接返回，否则调用 `next()` 函数将当前请求丢给下一个middlewave进行处理。我们看到app.js中有很多 `app.use`
-函数的调用，正是这个函数配置了一个个的middleware。
-其中`app.use(bodyParser.json());`处理请求头为`application/json`的数据，其实这个middleware一般用不到；
-`app.use(bodyParser.urlencoded({ extended: false }));`这句话是处理form表单数据的，这个用处就大了。
-`app.use(cookieParser());`是用来处理cookie的，没有这个middleware的话，无法读取http请求中的cookie数据。
-`app.use(express.static(path.join(__dirname, 'public')));`是定义从 `public` 路径读取静态文件。之前讲过当前项目目录中存在
-`public` 文件夹，假设我们在其下 `javascripts` 目录中放置一个 `query.js` 文件，那么我们在html中就可以这么引用这个静态文件：
+express处理网络请求，是以一种被称之为 `middlewave(也翻译为中间件)` 机制进行的，即网络请求先经过第一个middlewave，如果处理完成则直接返回，否则调用 `next()` 函数将当前请求丢给下一个middlewave进行处理。我们看到app.js中有很多 `app.use`函数的调用，正是这个函数配置了一个个的middleware。  
+其中`app.use(bodyParser.json());`处理请求头为`application/json`的数据，其实这个middleware一般用不到；`app.use(bodyParser.urlencoded({ extended: false }));`这句话是处理form表单数据的，这个用处就大了。`app.use(cookieParser());`是用来处理cookie的，没有这个middleware的话，无法读取http请求中的cookie数据。`app.use(express.static(path.join(__dirname, 'public')));`是定义从 `public` 路径读取静态文件。之前讲过当前项目目录中存在`public` 文件夹，假设我们在其下 `javascripts` 目录中放置一个 `query.js` 文件，那么我们在html中就可以这么引用这个静态文件：
 
 `<script type="text/javascript" src="/javascripts/jquery.js"></script>`
 

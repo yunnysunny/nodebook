@@ -13,16 +13,16 @@ language: zh-cn
 #   This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License.
 #   This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
 #
-copyright: "Copyright (C) 2015 yunnysunny."
+copyright: "Copyright (C) 2016 yunnysunny."
 
 # Who's publishing this book.
 publisher: "yunnysunny"
 
 # When this book was published.
-published_at: "2015-08-13"
+published_at: "2016-08-06"
 
 # Some book description.
-subject: "整理自台湾nodejs社区的电子书（https://github.com/nodejs-tw/nodejs-wiki-book）."
+subject: "一本关于nodejs的电子书（https://github.com/yunnysunny/nodebook）."
 
 # Some keywords that identify this book.
 keywords: "nodejs, e-book, kindlegen, epub, mobi, pdf, prince"
