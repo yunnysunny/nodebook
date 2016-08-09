@@ -32,6 +32,7 @@ session 函数的 `key` 参数代表生成cookie的名称。`resave`参数设置
 > 如果你对 session 原理不是很清楚的话，可以参见我的博文 [session的安全性](http://blog.whyun.com/posts/session/)，里面提到了session的基本原理，安全性及攻击防范。  
 
 为了减少篇幅，给出的代码都是片段形式：
+
 ```html
 <form method="post" action="/user/login" id="loginForm">
     <p><input name="username" /><label for="username">用户名</label><p/>
@@ -62,6 +63,7 @@ session 函数的 `key` 参数代表生成cookie的名称。`resave`参数设置
 </script>
 ```
 **代码6.1.2 登陆前端代码**  
+
 ```js
 exports.login = function(req, res) {
     var _body = req.body;
@@ -76,6 +78,7 @@ exports.login = function(req, res) {
 ```
 **代码6.1.3 登陆后端代码**  
 在`代码6.1.3`中通过`req.session.user`来给session增加一个user的属性，在`代码6.1.2`中登陆成功后要跳转到`/user/admin`地址上去，我们接下来看这个地址映射的后端代码：
+
 ```js
 exports.admin = function(req, res) {
     var user = req.session.user;
@@ -89,6 +92,7 @@ exports.admin = function(req, res) {
 web开发离不开数据库，那么和 Node.js 最搭配的数据是啥呢？当然是 [mongodb](https://www.mongodb.com/)。我们这里只要讲 [mongoskin](https://github.com/kissjs/node-mongoskin)，一个在原生node mongodb驱动基础上做封装的模块的使用。  
 在介绍之前先讲清楚一个概念，传统关系型数据库中，有表的概念，mongodb有collection的概念，其实是同一种东西，我在这里仍然称呼collection为`表`。    
 为了演示它的用法，我们先不在 express 中使用它，而是写个简单的的测试函数。
+
 ```js
 var mongo = require('mongoskin');
 var db = mongo.db("mongodb://localhost:27017/live", {native_parser:false});
@@ -98,6 +102,7 @@ db.bind('article');
 在代码 `6.2.1` 中，可以看出我们创建了一个mongo连接，服务器服务器地址为`localhost`,端口为`80`,参数 `native_parser` 代表是否使用原生代码来解析 mongodb 的 [bson](https://www.mongodb.com/json-and-bson) 数据。如果开启这个选项，需要在安装 `mongoskin` 模块的时候可以编译原生代码，如果你的开发环境是 Windows，且没有安装臃肿的Visual Studio的话，是没法编译原生代码的，那么这个参数就设置为 `false`。  
 注意最后一句 `db.bind('article')` 函数[bind](https://github.com/kissjs/node-mongoskin#dbbindname-options)返回一个`Collection`对象，它在db对象上绑定一个`article`属性，指向刚才返回的对象，所以这句话等同于 `db.article = db.collection('article');` （ `collection`其实为原生mongodb驱动里面获取一个`Collection`的封装函数），下面我们就可以通过`db.article`来操作一系列的增删改查了。  
 首先是插入单条数据：  
+
 ```js
 db.article.insert({
     name:'chapter5',content:'Express.js 基础',createTime:new Date('2016/07/03')
@@ -107,6 +112,7 @@ db.article.insert({
 ```
 **代码 6.2.2 mongoskin插入单条数据**  
 接着是插入多条数据，仅仅把第一个参数改成数组就可以了：  
+
 ```js
 db.article.insert([
     {name:'chapter1',content:'Node.js 简介',createTime:new Date('2016/07/01')},
@@ -117,6 +123,7 @@ db.article.insert([
 ```
 **代码 6.2.3 mongoskin插入多条数据**  
 修改单条数据：  
+
 ```js
 db.article.update({name:'chapter2'},{
     $set:{content:'Node.js 入门'}
@@ -125,11 +132,11 @@ db.article.update({name:'chapter2'},{
 });
 ```
 **代码 6.2.4 mogonskin修改单条数据**  
-**注意**第二个参数中需要有一个`$set`属性，否则整条数据将会被替换掉，如果直接将第二个参数
-写成了`{content:'Node.js 入门'}`，则操作完成之后，数据库里当前记录就变成了`{_id:主键值,content:'Node.js 入门'}`,
-之前的属性`name`和`createTime`就都丢失了。
+**注意**第二个参数中需要有一个`$set`属性，否则整条数据将会被替换掉，如果直接将第二个参数写成了`{content:'Node.js 入门'}`，则操作完成之后，数据库里当前记录就变成了`{_id:主键值,content:'Node.js 入门'}`,之前的属性`name`和`createTime`就都丢失了。
 **代码 6.2.5 mongoskin修改单条数据**  
 如果想修改多条数据，只需要增加一个参数：
+
+```js
 db.article.update({name:'chapter2'},{
     $set:{content:'Node.js 入门'}
 },{multi:true},function(err,ret) {
@@ -139,6 +146,7 @@ db.article.update({name:'chapter2'},{
 相比较代码 6.2.4 这里多了一个参数，`{multi:true}`告诉数据库服务器，要更新多条数据。
 **代码 6.2.6 mongoskin修改多条数据**  
 删除和更新相反，默认情况下是删除多条记录：
+
 ```js
 db.article.remove({name:'chapter1'},function(err,ret) {
     console.log('删除数据',err,ret);
@@ -146,6 +154,7 @@ db.article.remove({name:'chapter1'},function(err,ret) {
 ```
 **代码 6.2.7 mongoskin删除多条记录** 
 如果想删除一条记录，则增加一个参数 `{justone:true}`,即改成：  
+
 ```js
 db.article.remove({name:'chapter1'},{justone:true},function(err,ret) {
     console.log('删除数据',err,ret);
@@ -153,6 +162,7 @@ db.article.remove({name:'chapter1'},{justone:true},function(err,ret) {
 ```
 **代码 6.2.8 mongoskin删除单条记录** 
 查询一条记录：  
+
 ```js
 db.article.findOne({name:'chapter2'},function(err,item) {
     console.log('查询单条数据',err,item);
@@ -161,16 +171,16 @@ db.article.findOne({name:'chapter2'},function(err,item) {
 **代码 6.2.9 mongoskin查询单体记录**  
 代码 6.2.7 中回调函数得到`item`变量即为查询后得到的记录。  
 查询多条记录：  
+
 ```js
 db.article.findItems({},function(err, items) {
     console.log('查询多条数据',err,items);
 });
 ```
 **代码 6.2.10 mongoskin查询多条记录**
-上面演练了一遍mongoskin的增删改查，不过，我们将其和传统的关系型数据库做对比，发现还少了点东西。比如说：一条记录有多个字段，
-我只想返回若干字段怎么弄；表中的数据过多，想分页显示怎么弄；对于需要使用事务的情形，怎么弄。  
-对于前两个问题，只需要在查询的时候加参数即可。比如我们想查询7月1日都有哪些文章发布，我们只关心文章名称，同时由于数据量很大，
-无法全部显示出来，需要做分页，那么查询语句可以这么写：
+上面演练了一遍mongoskin的增删改查，不过，我们将其和传统的关系型数据库做对比，发现还少了点东西。比如说：一条记录有多个字段，我只想返回若干字段怎么弄；表中的数据过多，想分页显示怎么弄；对于需要使用事务的情形，怎么弄。  
+对于前两个问题，只需要在查询的时候加参数即可。比如我们想查询7月1日都有哪些文章发布，我们只关心文章名称，同时由于数据量很大，无法全部显示出来，需要做分页，那么查询语句可以这么写：
+
 ```js
 db.article.findItems({
     createTime:{$gte:new Date(2016,6,1),$lt:new Date(2016,6,2)}
@@ -207,6 +217,7 @@ findAndModify(query, sort, update , options , callback)
 
     - error {Error} 错误对象，成功时为null
     - result {Object}
+    
         ```js
         {
             value : {Object} 函数findAndModify返回的数据记录
@@ -217,6 +228,7 @@ findAndModify(query, sort, update , options , callback)
         ```
 
 举个例子，现在有一张表comment，它的数据结构是这样的：
+
 ```json
 {
     "_id" : ObjectId("5792f2db03d07723cff9ab35"),
@@ -227,6 +239,7 @@ findAndModify(query, sort, update , options , callback)
 }
 ```
 现在我们将使用函数`findAndModify`查询文章ID为`ObjectId("5792288c0c0c422b282f2f93")`最近的一条评论，将其`content`字段改成`评论已被删除`:
+
 ```js
 db.comment.findAndModify({
     articleId:mongo.helper.toObjectID("5792288c0c0c422b282f2f93")
@@ -239,6 +252,7 @@ db.comment.findAndModify({
 **代码 6.2.12 函数findAndModify演示**  
 但是要注意，`findAndModify` 会同时持有读写锁，也就是在这个函数操作过程中，其他命令是会被堵塞住，一直等待这个函数操作完成或者出错，其他命令才会有机会接着执行。所以一般情况下，不要使用这个函数，除非是非常关键的数据，要求精度很高才使用这个函数，比如说订单状态修改之类的操作，但是就像`代码 6.2.10`之中的操作，纯属拿大炮打蚊子了。即使非要用到这个函数的情况，也尽量保证查询的时候可以使用索引，尽量减少锁持有的时间。  
 对于一些非关键性数据，但是又必须保证某个字段在写入的时候保持唯一性，那么在这个字段上增加一个唯一索引，就可以了。在mongodb的命令行中执行如下命令：
+
 ```js
 db.collectionName.ensureIndex({fieldName:1},{unique:true});
 ```
@@ -247,6 +261,7 @@ db.collectionName.ensureIndex({fieldName:1},{unique:true});
 
 ### 6.3 改善我们的登陆
 在6.2中，我们已经讲述了怎样使用mongodb了，下面就有机会对于我们6.1中提到的登陆进行改进了。虽然登陆在前端页面登陆仅仅是一个表单，但是在后台处理的流程就不是那么简单。这次我们决定读取数据库中的账号信息进行登陆验证，为此我们创建文件夹`models`，在其内新建文件`user_model.js`：
+
 ```js
 var crypto = require('crypto');
 var collection = require('./index');
@@ -277,6 +292,7 @@ exports.loginCheck = function(username,password,callback) {
 > 其实单纯用md5/sha1/sha256这些算法来说，都存在被破解的可能性，国内有网站http://cmd5.com 几乎可以破解一切弱密码，解决方案就是使用更长的密码（可以通过用户名和密码进行拼接来计算哈希值），或者使用hmac算法。这里为了演示，使用了最简单的方式。  
 
 那么现在控制器中的代码就可以这么写：  
+
 ```js
 exports.loginWithDb = function(req, res) {
     var _body = req.body;
@@ -300,6 +316,7 @@ exports.loginWithDb = function(req, res) {
 之前的章节中介绍过express的middleware，翻译一下就是中间件，下面的内容其实是做一个中间件，但是为啥我给它起名叫拦截器呢，因为我认为对于业务逻辑处理叫拦截器更贴切，因为我理解的middleware仅仅负责解析http数据，不处理业务逻辑。仅仅是个人见解。  
 之前我们已经做了登陆操作，但是对于一个网站的若干地址（比如说后台地址），不登录是没法用的，我们需要用户在加载这些地址的时候，如果检测到当前处于未登录状态，就统一跳转到登陆页。在每一个控制器中都做一遍登陆状态判断来决定是否跳转，显然是一个笨拙的方法。但是如果使用了拦截器，一切问题就显得简单了。  
 我们新建文件夹`filters`，然后在其内新建文件`auth_filter.js`:
+
 ```js
 const ERROR_NO_LOGIN = 0xffff0000;
 module.exports = function(req, res, next) {
@@ -319,6 +336,7 @@ module.exports = function(req, res, next) {
 ```
 **代码 6.4.1 授权拦截器逻辑**  
 同时我们在`app.js`中引入这段代码： 
+
 ```js
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
