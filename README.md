@@ -50,4 +50,4 @@ Node.js Taiwan是一个自由开放的技术学习社群，我们欢迎您加入
 
 ## 编译
 本书使用[kitabu](https://github.com/fnando/kitabu)进行编译，`kitabu`是一个ruby模块，安装ruby需要保证系统的ruby版本在2.0.0及以上，同时需要安装`ruby-dev`(linux环境下)或者`ruby-devkit`(windows环境下)。  
-运行`gem install kitabu`安装kitabu，将本项目clone到任意目录，然后进入clone到的目录运行`kitabu export`，运行完成后就会在output目录中找到`nodebook.html`，即为生成的网页版电子书。
+运行`gem install kitabu`安装kitabu，将本项目clone到任意目录，然后进入 `config` 文件夹，将 `kitabu.example.yml` 重命名为 `kitabu.yml`。接着进入clone到的目录运行`kitabu export`，运行完成后就会在output目录中找到`nodebook.html`，即为生成的网页版电子书。

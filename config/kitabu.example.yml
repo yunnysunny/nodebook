@@ -42,3 +42,5 @@ authors:
 
 # Syntax highlight theme. Can be any of supported by Rouge.
 theme: github
+# baidu tongji id
+baidu_analysis_id: "4e00daa5988e4235c8de77af10727164"
