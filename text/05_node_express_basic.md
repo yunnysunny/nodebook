@@ -355,6 +355,7 @@ ReferenceError: noneExistVar is not defined
 
 express中res的send函数中传一个json对象，则发送给浏览器的时候会自动序列化成json字符串。  
 我们继续添加两个路由：
+
 ```javascript
 router.get('/users/sign2', user.showSign2);
 router.post('/users/do/sign2', user.doSign2);
