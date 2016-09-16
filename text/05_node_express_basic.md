@@ -163,7 +163,6 @@ router.use(function timeLog(req, res, next) {
 最后看错误捕获这一块了，`app.js`中对于代码捕获区分了相中情况，如果当前是开发环境就在出错的时候打印堆栈，否则只显示错误名称。我们现在修改一下 `/user` 的路由代码：  
 
 ```javascript
-/* GET users listing. */
 router.get('/user', function(req, res) {
   console.log(noneExistVar.pp);
   res.send('respond with a resource');
