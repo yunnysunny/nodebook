@@ -68,7 +68,7 @@ $frontcover-padding: 50px;
 }
 
 body {
-  font-family:  'Microsoft Yahei', '微软雅黑';
+  font-family: "Arial Unicode MS" , 'Microsoft Yahei', '微软雅黑';
   font-size: 14px;
   line-height: 1.5;
 }
@@ -105,7 +105,7 @@ a {
   padding: $frontcover-padding;
   padding-left: 0;
   text-align: center;
-  font-family: sans-serif;
+  font-family: sans-serif,"Arial Unicode MS";
 }
 
 .frontcover * {
@@ -163,7 +163,7 @@ a {
 }
 
 .chapter > h2 {
-  font-family: 'Microsoft Yahei', '微软雅黑';
+  /*font-family: 'Microsoft Yahei', '微软雅黑';*/
   margin: -100px -100px 75px -100px;
   background: $frontcover-color;
   padding: 100px;
@@ -187,7 +187,7 @@ a {
 p code,
 li code {
   font-size: 12px;
-  font-family: Menlo, monospace;
+  font-family: Menlo, monospace,"Arial Unicode MS";
 }
 
 .highlight {
@@ -196,7 +196,7 @@ li code {
 }
 
 .highlight * {
-  font-family: Menlo, monospace;
+  font-family: Menlo, monospace,"Arial Unicode MS";
 }
 
 .highlight .gutter {
@@ -228,11 +228,11 @@ li code {
 // Table of contents
 .table-of-contents {
   page: chapter;
-  font-family: sans-serif;
+  font-family: sans-serif,"Arial Unicode MS";
 }
 
 .table-of-contents > h2 {
-  font-family: sans-serif;
+  font-family: sans-serif,"Arial Unicode MS";
   margin: -100px -100px 75px -100px;
   background: $frontcover-color;
   padding: 100px;
