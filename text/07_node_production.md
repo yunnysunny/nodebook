@@ -178,4 +178,150 @@ chapter7-0 [2016-09-16 23:28:15.003] [INFO] console - Listening on port 8100
 ```
 **输出 7.2.1**  
 我们看到进程自己重启了，最终实现了我们的目的。  
-### 单元测试
+### 7.2 单元测试
+对于一个程序员来说不仅要写代码，还要验证一下代码写得到底对不对，写单元测试就是一个通用且有效的解决方案。单元测试很重要，可以将错误扼杀在摇篮中，如果你认为没有写单元测试也过得很好，也许等我介绍完 [mocha](http://mochajs.org/) 之后，你会改变主意的。  
+下面给出一个栗子，领导给了小明一个计算器的项目，不过这个项目周期比较长，后期需要增加更多的人手，所以对于每一个模块都要有相应的测试用例。下面是小明开工后写的第一个函数，一个加法函数：
+
+```javascript
+function add(a,b) {
+    return a+b;
+}
+```
+**代码 7.2.1 add函数**  
+小明之前没有接触过单元测试，于是乎他写出的测试用例是这样的：
+
+```javascript
+var s = add(1,2);
+if (s == 3) {
+    console.log('恭喜你，加法测试成功了');
+} else {
+    console.error('哎呦，加法测试出错了啊');
+}
+```  
+**代码 7.2.2 不使用测试框架的测试用例**  
+接着他又写了减法函数、乘法函数、除法函数，但是随着模块的增加，他逐渐的意识到一个问题，如果按照代码7.2.2的模式的话，一则输出格式比较乱，而且测试结果没有最终统计信息，不能一下子得出成功数和失败数。于是乎他去网上找资料，然后他就发现了大名鼎鼎的 `mocha`。  
+研究了一番，小明发现 `mocha` 提供了测试结果输出格式化和测试结果统计的功能，也就是说对于上面那个加法测试用例，就可以这么写了：
+
+```javascript
+var assert = require('assert');
+describe('Calculator', function() {
+  describe('#add()', function() {
+    it('should get 3 when 1 add 2', function() {
+      assert.equal(3, add(1,2));
+    });
+  });
+});
+```  
+**代码 7.2.3 使用mocha改写测试用例**  
+官网上说， mocha 在使用的时候，可以使用全局安装的模式，也可以安装为当前项目的开发依赖包（即在安装的时候使用`--save-dev`参数），不过小明考虑到以后各个项目都要用得到，于是决定进行全局安装（`npm install mocha -g`）。  
+安装完之后，小明兴奋的新建了文件`calculator_test.js`:  
+
+```javascript
+var assert = require('assert');
+var calculator = require('./calculator');
+
+describe('Calculator', function() {
+  describe('#add()', function() {
+    it('should get 3 when 1 add 2', function() {
+      assert.equal(3, calculator.add(1,2));
+    });
+  });
+});
+```  
+**代码 7.2.4 文件calculator_test.js部分代码**  
+接着他运行`node calculator_test.js`，没想到结果打出他的意料，报错了：
+
+```
+e:\kuaipan\code\node\myapp\chapter7\src\test\mocha>node calculator_test.js                                                     
+                                                                                                                               
+e:\kuaipan\code\node\myapp\chapter7\src\test\mocha\calculator_test.js:4                                                        
+describe('Calculator', function() {                                                                                            
+^                                                                                                                              
+ReferenceError: describe is not defined                                                                                        
+    at Object.<anonymous> (e:\kuaipan\code\node\myapp\chapter7\src\test\mocha\calculator_test.js:4:1)                          
+    at Module._compile (module.js:456:26)                                                                                      
+    at Object.Module._extensions..js (module.js:474:10)                                                                        
+    at Module.load (module.js:356:32)                                                                                          
+    at Function.Module._load (module.js:312:12)                                                                                
+    at Function.Module.runMain (module.js:497:10)                                                                              
+    at startup (node.js:119:16)                                                                                                
+    at node.js:929:3
+```  
+**输出 7.2.1 命令node calculator_test.js的输出**  
+一定是小问题，小明心里嘀咕着，然后顺手打开了google，直接搜索`ReferenceError: describe is not defined                                                                         `在第一页就发现了答案，原来要运行`mocha calculator_test.js`（还是谷歌靠谱）。运行完正确的命令后，果然看到想要的结果了：
+
+```
+e:\kuaipan\code\node\myapp\chapter7\src\test\mocha>mocha calculator_test.js                                                    
+                                                                                                                               
+                                                                                                                               
+  Calculator                                                                                                                   
+    #add()                                                                                                                     
+      √ should get 3 when 1 add 2                                                                                              
+                                                                                                                               
+                                                                                                                               
+  1 passing (7ms)
+```
+**输出 7.2.2 命令mocha calculator_test.js的输出**  
+小明发现，这里之所以使用 node 自带的 assert 包，是由于 mocha 仅仅本身没有提供断言（Assertion）库，所以他又尝试了几种常用的断言库。  
+**1.should.js**  
+他使用的格式是 (something).should 或者 should(something)，更多使用方法还得参阅其[github文档](https://github.com/Automattic/expect.js "") ，例如上面我们使用 assert 进行判断的代码就可以写成:
+
+```javascript
+var should = require('should');
+
+(calculator.add(1,2)).should.be.exactly(3).and.be.a.Number();
+```  
+**代码 7.2.5 should判断1**  
+或者：  
+
+```javascript
+var should = require('should/as-function');
+
+should(calculator.add(1,2)).be.exactly(3).and.be.a.Number();
+```  
+**代码 7.2.6 should判断2**  
+> 画外音，上面仅仅是简单说明使用方法，完整的测试用例大家可以参见第七章源码`test/mocha/calculator_should1.js` 和 `test/mocha/calculator_should2.js`。  
+
+**2.expect.js**  
+首先给出expect.js的[github地址](https://github.com/Automattic/expect.js) ，下面是用expect重写的测试用例：  
+
+```javascript
+var expect = require('expect.js');
+expect(calculator.add(1,2)).to.be(3);
+```  
+**代码 7.2.7 expect判断**  
+**3.chai**  
+[chai](http://chaijs.com/)将前面提到的assert should expect融合到了一起，你仅仅需要使用 chai 这一个包就能享用以上三者的功能，所以前面讲到的三种判断在chai中是这么实现的：  
+
+```javascript
+var chai = require('chai');
+
+var assert = chai.assert;//use assert
+assert.equal(3, calculator.add(1,2));
+
+chai.should();//use should
+(calculator.add(1,2)).should.be.equal(3).and.be.a('number');
+
+var expect = chai.expect;//use expect
+expect(calculator.add(1,2)).to.equal(3);
+```  
+**代码 7.2.8 使用chai判断**  
+这个 chai 还真是个大杀器呢。不过注意，在 chai 中
+
+    to
+    be
+    been
+    is
+    that
+    which
+    and
+    has
+    have
+    with
+    at
+    of
+    same
+只能作为属性使用，不能作为函数使用（除非你自己写代码把这些属性覆盖掉），所以`to.be(3)`要写作`to.equal(3)`，另外 chai 中也没有`exactly` 这个函数，所以这里也是用`equal`来替代，同时在 chai 中`a`只能作为函数使用，其函数声明为`a(type)`,所以这里用了`a('number')`，其他技术细节，请移步官方API [BDD部分](http://chaijs.com/api/bdd/)。  
+
+
+
