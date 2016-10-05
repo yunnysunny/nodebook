@@ -323,5 +323,47 @@ expect(calculator.add(1,2)).to.equal(3);
     same
 只能作为属性使用，不能作为函数使用（除非你自己写代码把这些属性覆盖掉），所以`to.be(3)`要写作`to.equal(3)`，另外 chai 中也没有`exactly` 这个函数，所以这里也是用`equal`来替代，同时在 chai 中`a`只能作为函数使用，其函数声明为`a(type)`,所以这里用了`a('number')`，其他技术细节，请移步官方API [BDD部分](http://chaijs.com/api/bdd/)。  
 
+**4.supertest**  
+小明将计算器的任务完成了，测试用例写的也很完备，经理对其进行了表扬。不过他同时分配了下一期的任务，公司要提供一个计算器云的业务，要将小明之前做的功能以接口的形式提供给用户调用，不过这个项目同样要给出测试用例。  
+HTTP请求和本地调用从流程是有很多不一样的地方的：调用的过程中服务器可能会出现异常，返回数据有可能格式不正确，传递参数有可能出现偏差；而本地代码测试只要关心调用得到的结果是否正常就够了。不过，还好，小明找到了[supertest](https://github.com/visionmedia/supertest "") 这个mocha 断言工具。  
 
+这里先给出小明写的一个HTTP接口：
 
+```javascript
+exports.doAdd = function(req, res) {
+    var _body = req.body;
+    var a = parseInt(_body.a, 10);
+    if (isNaN(a)) {
+        return res.send({code:1,msg:'a值非法'});
+    }
+    var b = parseInt(_body.b, 10);
+    if (isNaN(b)) {
+        return res.send({code:2,msg:'b值非法'});
+    }
+    res.send({code:0,data:a+b});
+};
+```  
+**代码 7.2.9 加法运算的HTTP接口**  
+
+对应的supertest的测试用例代码就是这样的：
+
+```javascript
+var request = require('supertest');
+var app = require('../../app');
+
+describe('POST /calculator/add', function() {
+  it('respond with json', function(done) {
+    request(app)
+      .post('/calculator/add')
+      .send({a: 1,b:2})
+      .expect(200, {
+          code:0,data:3
+      },done);
+  });
+});
+```  
+**代码 7.2.10 加法运算HTTP接口的单元测试代码**  
+> 此代码放置于第七章代码的目录 /src/test/http目录下，变量app其实是引用的项目根目录的app.js。  
+
+完成了这个所谓的计算器云的项目后，小明又接到了新的任务，要做一个开发者平台，这个平台允许开发者创建基于计算云的开发者帐号和应用，然后登录进去管理自己的应用。  
+为了简化我们的教程，我们姑且认为这个平台使用的登录请求是我们之前用过的`/user/login`请求，管理后台首页是`/user/admin`。我们现在来测试登录到后台这个动作。
