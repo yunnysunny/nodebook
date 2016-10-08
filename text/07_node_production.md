@@ -367,3 +367,59 @@ describe('POST /calculator/add', function() {
 
 完成了这个所谓的计算器云的项目后，小明又接到了新的任务，要做一个开发者平台，这个平台允许开发者创建基于计算云的开发者帐号和应用，然后登录进去管理自己的应用。  
 为了简化我们的教程，我们姑且认为这个平台使用的登录请求是我们之前用过的`/user/login`请求，管理后台首页是`/user/admin`。我们现在来测试登录到后台这个动作。
+
+登录过程要牵扯到我们在第6章讲过的session的知识，但是session在前端要有sessionid写入cookie中，我们的测试运行环境是命令行，不是浏览器，这就需要我们自己来维护cookie的读写操作。同时我们还需要用到 mocha 中的钩子（Hook）函数。由于我们的后台在进入之前需要先登录，所以我们要用到 mocha 中的 before 函数，它表示在所有测试用例之前执行，当然还有 beforeEach 函数，它表示在每次测试用例执行前都执行一次。显然两者的区别是前者只在所有测试用例前执行一次，而后者要在每个测试用例执行前都要重新执行。先看这个钩子函数：
+
+```javascript
+var request = require('supertest');
+var app = require('../../app');
+var cookie = '';
+
+before(function(done) {
+    request(app)
+      .post('/user/login')
+      .send({username:'admin', password:'admin'})
+      .expect(200,{code:0})
+      .end(function(err,res) {
+          if (err) {
+              return done(err);
+          }
+          var header = res.header;
+          var setCookieArray = header['set-cookie'];
+
+          for (var i=0,len=setCookieArray.length;i<len;i++) {
+              var value = setCookieArray[i];
+              var result = value.match(/^express_chapter7=([a-zA-Z0-9%\.\-_]+);\s/);
+              if (result && result.length > 1) {
+                  cookie = result[1];
+                  break;
+              }
+          }
+          if (!cookie) {
+              return done(new Error('查找cookie失败'));
+          }
+          done();
+      });
+});
+```  
+**代码 7.2.11 钩子函数**  
+这里我们使用全局变量cookie来存储我们提到的 sessionid ，在 supertest 的 end 函数中，我们读取响应体变量res中的 set-cookie 头信息，通过正则把 sessionid 读取出来。  
+接着就可以使用这个读取到的cookie来进入后台了：  
+
+```javascript
+describe('Backend',function() {
+
+    it('first test',function(done) {
+        request(app)
+        .get('/user/admin')
+        .set('Cookie','express_chapter7='+cookie)
+        .expect(200,/<title>admin<\/title>/,done);
+    });
+});
+```  
+**代码 7.2.12 请求中使用cookie**  
+我们在模板 `user/admin.ejs` 有这么一句：`<title><%=user.account%></title>`，所以我们这里在测试时使用正则 `/<title>admin<\/title>/` 来验证是否真的进入后台了。  
+> 注意，由于我们使用了 redis 来存储 session 数据，所以如果你忘记启动 redis 服务器的话，我们的登录操作会失败，而且在 mocha 中给出的报错提示是请求超时，这个问题比较隐蔽，大家一定要注意。
+
+经过一番实践，小明的熟练掌握了各种测试技能，不过某天经理找打了他，“小明啊，要不你转到测试组吧”，……
+> 本章配套代码：https://github.com/yunnysunny/expressdemo/tree/master/chapter7
