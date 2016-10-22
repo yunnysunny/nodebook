@@ -1,3 +1,3 @@
-## 2 JavaScript哪些事
+## 2 JavaScript那些事
 
 
