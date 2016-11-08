@@ -46,5 +46,9 @@ paid for this book.**
 <http://github.com/yunnysunny/nodebook>
 
 ## 编译
-本书使用[kitabu](https://github.com/fnando/kitabu)进行编译，`kitabu`是一个ruby模块，安装ruby需要保证系统的ruby版本在2.2.0及以上，不推荐在windows上安装使用，因为经过我的测试在windows上生成的pdf会出现乱码的情况。  
-运行`gem install kitabu`安装kitabu，将本项目clone到任意目录，然后进入 `config` 文件夹，将 `kitabu.example.yml` 重命名为 `kitabu.yml`。接着进入clone到的目录运行`kitabu export`，运行完成后就会在output目录中找到`nodebook.html`，即为生成的网页版电子书。
+本书采用 [gitbook](https://www.gitbook.com/) 进行编译，如果你想在本地编译，需要安装 gitbook-cli：
+
+```
+npm install gitbook-cli -g
+```
+然后在项目目录中运行`gitbook serve`即可编译生成html，并且创建一个本地预览网站，其他详细的编译参数可以参照[官方文档](https://toolchain.gitbook.com/setup.html)。
