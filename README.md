@@ -12,7 +12,6 @@
 
 -   readme.md -&gt; 本书说明
 -   text -&gt; 内含各章节详细资料
--   src -&gt; 示例程序码摆放位置
 
 ## 授权
 
@@ -41,9 +40,9 @@ paid for this book.**
 
 ## 源码
 
-本书最新的源码网址如下：
+本书配套的源码网址如下：
 
-<http://github.com/yunnysunny/nodebook>
+<https://github.com/yunnysunny/nodebook-sample>
 
 ## 编译
 本书采用 [gitbook](https://www.gitbook.com/) 进行编译，如果你想在本地编译，需要安装 gitbook-cli：
