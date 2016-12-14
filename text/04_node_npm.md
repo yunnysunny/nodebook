@@ -8,7 +8,7 @@ npm 不仅可用于安装新的包，它也支持搜寻、列出已安装模块�
 
 npm 目前拥有数以百万计的包，可以在 https://www.npmjs.com/ 使用关键字搜寻包。举例来说，在关键字栏位输入“coffee-script”，下方的清单就会自动列出包含 coffee-script 关键字的包。
 
-![image](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/zh-tw/node_npm_registry.png)
+![image](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/node_npm_registry.png)
 
 虽然也可以通过`npm search`来在命令行中查询，但是初次查询过程中要在本地建立索引，等待的时间巨漫长，还是不介绍的为好。
 
@@ -120,25 +120,20 @@ npm ERR! Please include the following file with any support request:
 本来就讨厌往系统盘写入数据文件，这下子非要改掉它这个默认设置不可了。我们命令
 
 ```
-npm config set prefix "D:\Program Files\nodejs"
+npm config set prefix "D:\npm"
 ```  
 **命令 4.2.3**
 
 这样你使用 `npm install -g package` 命令安装的包就会被放置到 ${prefix}/node_modules   下。同时使用命令
 
 ```
-npm config set cache "D:\Program Files\nodejs\node_modules\npm-cache"
+npm config set cache "D:\npm\node_modules\npm-cache"
 ```  
 **命令 4.2.4**
 
-可以设置npm的缓存路径，否则的话它默认会缓存一部分下载的包到下
+可以设置npm的缓存路径，否则的话它默认会缓存一部分下载的包到系统目录中。
 
-首先我们新建一个环境变量`NODE_PATH`，将其设置为非系统目录，然后将`%NODE_PATH%`（linux中为`$NODE_PATH`）追加到`PATH`环境变量中，做完如上设置的话，运行 `npm install -g packageName` 可以保证安装到的`NODE_PATH`指定的目录下，同时由于`NODE_PATH`在环境变量`PATH`，所以可以保证安装的命令行程序可以直接被调用到。但是做完这番操作后， cnpm 还是安装到系统目录，不要着急，接下来我们修改一下用户根目录（windows下为`c:\users\[用户名]`，linux下为`$HOME`变量指向的目录）下的`.cnpmrc`文件，在里面追加一行：  
-```
-prefix = ${NODE_PATH}
-```  
-然后重新执行全局安装 lodash 的命令，最终终于将其安装到 NODE_PATH 指向的目录。
-
+我们推荐仅仅在全局安装命令行工具类型的包，因为同一个包在不同项目中很有可能使用不同的版本，所以如果将其安装在全局的话，就没办法使用不同版本了。如果你非要将某一个类库安装到全局的话，那就增加一个 `NODE_PATH` 环境变量，指向我们刚才设置的目录 `D:\npm`。
 
 ### 4.3 其他一些命令
 
@@ -187,7 +182,15 @@ content-disposition@0.5.1:
 你会发现里面罗列了express各个依赖的版本号（ version 字段），下载地址（ resolved 字段），我们仅仅截取了前面几行，因为 express 包中依赖关系比较复杂，生成的这个 lock 文件也比较长。项目初始化的老兄，通过 yarn add 的方式安装好包之后，需要将这个 yarn.lock 提交到版本库，这样你的小伙伴通过 `yarn install` 安装的各个依赖就和初始化的老兄用的一样了，这样就避免了团队中各个开发者通过 npm install 安装到本地的包的版本号不一致而导致的各种难以排查的问题了。
 
 更多关于 npm 和 yarn 的对比可以参见[官方文档](https://yarnpkg.com/en/docs/migrating-from-npm)。
-    
+
+不过我们在使用 yarn 的时候，因为 yarn 在底层依然得使用 npm 进行安装，所以依然无法避免因网络原因导致的包无法下载的问题，不过我们可以直接将 npm 的安装源设置为 cnpm 提供的安装源：
+
+```
+yarn config set registry http://registry.cnpmjs.org
+```
+**命令4.4.1**  
+
+   
 ### 4.5 发布自己的包到 npmjs  
 刚才演示了这么命令都是安装别人的包，现在我们自己开发一个包。首先你要注册一个npmjs的账号（注册地址：https://www.npmjs.com/signup ）。注册完成后，通过`npm adduser`命令来将注册的账号绑定到本地机器上，运行完改命令后会让你输入 npmjs 的注册账号和密码。  
 要想在 npmjs 上发布自己的包，首先要做的是明确你发布的包名在这个网站上有没有存在，在4.1小节，我们上来就介绍了怎么通过包名搜索npmjs上的包。不过，这里提供一个简单暴力的方法，就是直接在浏览器里输入：npmjs.com/package/packageName ， 将packName替换成你所想创建的包名，然后回车，如果打开的网页中有404映入你的眼帘，恭喜你，这个包名没有被占用。  
