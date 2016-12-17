@@ -141,5 +141,11 @@ int uv_run(uv_loop_t* loop, uv_run_mode mode) {
 可能很多人对C代码不是很熟，没有关系，我们直接给出他的流程图，参数 `uv_run_mode` 代表当前事件轮询使用的方式，如果是其值为`UV_RUN_DEFAULT`的话，事件轮询一直运行，除非是调用了 `uv_stop()` 函数，如果值为 `UV_RUN_ONCE` 或者 `UV_RUN_NOWAIT` 的话，则只循环一次。
 
 这里仅仅给出 uv_run_mode 为 `UV_RUN_DEFAULT` 的流程图：
+![uv_run默认流程图](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/uv_run.png)  
+**图1.2.1 uv_run默认流程图**
 
-在讲事件轮询之前，我们得先来讲述一下libuv的线程模型。事件轮询运行在一个单独的线程中；此外libuv还有一个线程池，可以用来处理文件IO、DNS解析，还有用户自己编写的代码也可以调用它。libuv 在处理完一个文件 IO 操作后，会把处理后的结果发送到 pending 队列中，
+在讲事件轮询之前，我们得先来讲述一下libuv的线程模型，在libuv大体上可以把线程分为两类，一类是事件轮询线程，一类是文件IO处理线程。第一类事件轮询线程是单线程；另外一类称其为文件IO处理线程多少有些不准确，因为他不仅能处理文件IO，还能处理DNS解析，也能处理用户自己编写的node扩展中的逻辑，他是一个线程池，如果你想自己编写一个 c++ 扩展来处理耗时业务的话，就会用上它（我们将在第9章讲c++扩展内容）。
+
+我们这里拿文件IO处理举个栗子，来描述这两类线程之前是怎么通信的。libuv 在处理完一个文件 IO 操作后，会把处理后的结果发送到 pending 队列中；事件轮询线程读取 pending 队列，执行回调函数，也就是图1.2.1中第3步操作。
+
+好这里定时器回调、pending回调，我们都能明白，但是这里的idle、prepare、check回调都是什么鬼，这个其实是一些自定义回调事件，在事件
