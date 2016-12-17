@@ -148,4 +148,4 @@ int uv_run(uv_loop_t* loop, uv_run_mode mode) {
 
 我们这里拿文件IO处理举个栗子，来描述这两类线程之前是怎么通信的。libuv 在处理完一个文件 IO 操作后，会把处理后的结果发送到 pending 队列中；事件轮询线程读取 pending 队列，执行回调函数，也就是图1.2.1中第3步操作。
 
-好这里定时器回调、pending回调，我们都能明白，但是这里的idle、prepare、check回调都是什么鬼，这个其实是一些自定义回调事件，在事件
+>好，在这里定时器回调、pending回调，我们都能明白，但是这里的idle、prepare、check回调都是什么鬼，这个其实是一些自定义回调事件，只是在node调用libuv的时候这些回调函数对应的句柄都没有被初始化。有兴趣大家可以参见libuv的测试文件 [test_idle.c](https://github.com/libuv/libuv/blob/v1.x/test/test-idle.c)。
