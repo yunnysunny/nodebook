@@ -171,6 +171,12 @@ server.listen(port, hostname, () => {
 ![最终我们的apache显示效果](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/success.png)  
 **图 3.3.2 最终我们的apache显示效果**
 
+## 3.4 HTTP请求参数
+
+既然我们称 Node.js 是一门后端语言，那他就应该能处理 HTTP 请求中的请求参数，比如说我在 URL 上添加查询参数（类似于这种 `/xxx?a=1&b=2`），再比如说通过表单提交数据。 Node 确实提供了处理这两种数据的能力，只不过让人感觉到稍显“低级”。
+
+
+
 
 
 
