@@ -252,10 +252,13 @@ server.listen(port, hostname, () => {
 
 由于不能直接通过浏览器输入地址来测试 POST 请求，所以推荐大家使用一个 chrome app来测试 POST 请求，它就是 [Postman](https://chrome.google.com/webstore/detail/postman/fhbjgbiflinjbdggehcddcbncdddomop?utm_source=chrome-ntp-icon)。安装完成之后，打开主界面，下拉菜单区域选择 `POST`，然后输入地址 `http://localhost:3000`，打开 Body 标签，选择`x-www-form-urlencoded`，最后点击 Send 按钮，完成后就会输出`Hello sunny World from unknown`。
 
+![Postman 发送 POST 请求](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/postman_post.png)  
+**图3.4.2.1 Postman 发送 POST 请求**
+
 这里之所以需要选择`x-www-form-urlencoded`，是由于 POST 数据包有很多组织方式，我们最常用的就是这种方式，其数据格式依然是`key1=value1&key2=value2`，而 Node 自带的 [querystring.parse函数](https://nodejs.org/dist/latest-v6.x/docs/api/querystring.html#querystring_querystring_parse_str_sep_eq_options) 正是用来处理这种字符串的。同时我们可以点击 Code 按钮，来查看 POST请求发送的请求数据包：
 
-![POST请求数据包](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/post_date.png)  
-**图3.4.2.1 POST请求数据包**
+![POST请求数据包](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/post_package.png)  
+**图3.4.2.2 POST请求数据包**
 
 你可以留意到请求包中当中有一个空行（HTTP协议中用空行来分割请求头和请求正文），空格下面的`name=sunny&password=1234`就是我们 POST 到后台的数据。
 
