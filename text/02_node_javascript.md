@@ -61,12 +61,130 @@ var array = ['a','bb','cc'];
 
 js 提供了一系列函数来对数组进行增删改查。
 
+首先是查，你可以通过下标来访问数组元素，下标从0开始， `array[0]` 返回 `'a'` 。同时数组还有一个 `length` 属性，通过这个属性我们可以写一个遍历这个数组的 for 循环：
+
+```javascript
+for (var i=0,len=array.length;i<len;i++) {
+    console.log(array[i]);
+}
+```  
+**代码 2.1.4.1 for循环遍历数组**
+
+我们还可以通过 [indexOf](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf) 函数来查找某一个元素是否在当前数组中。
+
+然后是改， 直接举个栗子，设置 0 号元素为 `'11'`，则使用 `array[0] = '11'`，即可。
+
+接着是增加，通过 [shift](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/shift) 函数删除数组最开头的元素， `var first = array.shift()` 调用完之后，变量 `array` 的值为 `['bb','cc']`，同时 `first` 被赋值 `'a'`。
+
+通过 [unshift](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/unshift) 函数可以往数组头部添加元素，例如 `array.unshift('123')`，那么 array 变量的值就变成了 `['123','a','bb','cc']`。
+
+通过 [pop](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/pop) 可以删除数组最末尾的一个元素，例如 `var last = array.pop()` 调用完之后， array 就变成了 `['a','bb']` 同时变量 `last` 被赋值 `'cc'`。
+
+通过 [push](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/push) 函数可以在数组末尾添加元素，例如 `array.push('333')`，则 array 变成 `['a','bb','cc','333']`。
+
 #### 2.1.5 函数
+作为一门编程语言，我们免不了在使用的时候要把某些功能封装成一个模块，函数作为模块的载体在任何程序语言中都是必不可少的， JavaScript 也不例外。在 js 中定义一个函数很简单：
+
+```javascript
+function doAdd(a,b) {
+    return a + b;
+}
+```  
+**代码 2.1.5.1 函数定义**  
+虽然函数体只有一行，但是这个函数却将函数三要素都澄清了：函数名 `doAdd`，参数 `a` 和 `b`，返回值 `a + b`。当然三要素并不是必不可缺的：
+
+```javascript
+var doEcho = function() {
+    console.log('你好');
+}
+```  
+**代码 2.1.5.2 匿名函数**
+
+这里其实是定义了一个匿名函数，只不过我们在定义完之后将它赋值给了变量 `doEcho`，同时这个函数在运行的时候可以不用传任何参数，同时函数内部没有任何 `return` 语句，其实这种情况跟 `return undefined` 是等价的。匿名函数一般作用是作为函数参数使用，例如下面这个栗子：
+
+```javascript
+function addLater(a,b,callback) {
+    setTimeout(function() {
+        var sum = a+b;
+        callback(sum);
+    },1000);
+}
+
+addLater(1,2,function(result) {
+    console.log('the result:',result);
+});
+```  
+**代码 2.1.5.3 匿名函数使用示例** 
+
+上面这个栗子中，addLater函数在调用的时候，第三个参数在使用的时候是一个函数，而且它是匿名的。
 
 ### 2.2 对象
 
-其实对象也是一种数据类型，只不过由于它太特殊，所以这里单独拿出来讲。
+其实对象也是一种数据类型，只不过由于它太特殊，所以这里单独拿出来讲。在 ES6 之前 javascript 还是一门**基于对象**的编程语言，为啥叫基于呢，因为 ES5 和之前版本的 javascript 中原生语法中没有类（class）这个关键词，你只能拿原型（prototype）来模拟一个类的行为。
+
+> ES ( [ECMAScript](https://zh.wikipedia.org/wiki/ECMAScript) )，可以理解为 javascript 的语法标准， 2015年6月发布的 ES6 （又称 ES2015） 版本增加了N多语言特性，其中就包括类和继承的实现。由于 ES6 规避了之前版本中 javascript 中的一些糟粕设计，并且提升了开发效率，所以产生了学习 ES6 的大量前端开发人员，但是现行浏览器对于 ES6 语法的支持能力参差不齐，所以 [babeljs](https://babeljs.io) 应运而生，它提供了 ES6 转 ES5的功能，一时间产生了大量的拥趸。同时国内大神阮一峰也写了一本 [ECMAScript 6 入门](http://es6.ruanyifeng.com/) 开源图书，我想使用 ES6 语法的程序员，没有一位没有浏览过这本书的。另外 node 从4.x开始逐渐引入 ES6 语法，具体各个版本的实现情况可以参见[Node.js ES2015 Support](http://node.green/)。
+
+我们这里先讲一下 ES5 中怎样模拟一个类，答案是使用原型：
+
+```javascript
+function PersonES5(p) {
+    this.age = p.age;
+    this.name = p.name;
+    this.sex = p.sex;
+}
+
+PersonES5.prototype.showInfo = function() {
+    console.log(this);
+};
+
+var person = new PersonES5({
+    age:18,
+    name:'tom',
+    sex:'boy'
+});
+
+person.showInfo();
+```  
+**代码 2.2.1 person_es5.js**  
+
+而在 ES6 中由于直接有类的概念，所以代码语法上还是有差别的：
+
+```javascript
+class PersonES6 {
+    constructor(p) {
+        this.age = p.age;
+        this.name = p.name;
+        this.sex = p.sex;
+    }
+    showInfo() {
+        console.log(this);
+    }
+}
 
 
+var person = new PersonES6({
+    age:18,
+    name:'tom',
+    sex:'boy'
+});
 
+person.showInfo();
+```  
+**代码 2.2.2 person_es6.js**
+
+由于 javascript 长期函数式编程思想盛行，因为我们一般不会在一个网页中呈现过多的 UI 组件，所以它的代码处理流程一般都是线性的。比如说我们在前端使用 javascript 的流程是这样的：加载网页->请求数据->渲染 UI 组件->触发事件监听，后端的流程是这样的：接收请求->数据库操作->返回处理结果。当然你会说，不对，我们处理的流程可比这复杂多了，当然随着单页应用（SPA,Single Page Application）的兴起，前端 js 的处理逻辑会越来越复杂。比如说有一天，你的经理可能会给你分配一个在线 photoshop 的需求，这时候面向对象就派上用场了，你可能需要一个抽象类来描述组件的基本属性和功能，同时派生出若干继承自这个抽象类的具体组件类，比如说矩形类、三角形类、圆形类。我想面对这么复杂需求的时候，开发者肯定会选择 ES6 来实现，更不用说如今流行 mvvm 框架都是采用 ES6 来开发。
+
+上面啰嗦了这么多，其实是为了我自己开脱，我实在不想讲 ES5 中的原型链的知识点，为了搞清楚如何依赖原型链来实现继承，好多人都已经吐血了，这里就略过了，如果出现想用面向对象的场景，还是用 ES6 吧。
+
+### 2.3 回调嵌套
+
+由于在 javascript 中存在大量的异步操作，函数调用完成之后，不能立马拿到执行结果，必须在回调函数中得到执行结果，如果你在一个函数中要接连做好几次这样的异步处理，是不是画面应该是这样的：
+
+![代码深层次嵌套](../images/callback_nested.png)  
+**图 2.3.1 代码深层次嵌套的即视感**
+
+正是由于考虑到这种问题，所以 ES6 在设计的时候增加 Promise 类，不过这东西在批量处理异步回调时候依然让人不爽，大家可以参考 [A quick guide to JavaScript Promises](https://www.twilio.com/blog/2016/10/guide-to-javascript-promises.html)。我这里给大家介绍的是一个第三方回调流程控制库 [async](https://caolan.github.io/async/docs.html) (我这算不算开倒车)。
+
+### 2.4 参考文献
+- https://www.twilio.com/blog/2016/10/guide-to-javascript-promises.html
 
