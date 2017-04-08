@@ -49,7 +49,7 @@ if (dbConfig.url instanceof Array) {
 
 var redisConfig = settings.loadNecessaryObject('redis');//保证配置文件中的redis属性存在
 exports.redis = redis.createClient(redisConfig.port, redisConfig.host);
-```  
+```
 **代码 8.1 使用配置文件**  
 ### 8.2 自动重启
 作为一个健壮的线上环境，肯定不希望自己的应用程序垮掉。然而，现实开发中在代码中总是会时不时出现未捕获的异常导致程序崩溃，真实编程实践中，我们肯定会对代码慎之又慎，但是想要代码100%无bug是不可能的，想想那个整天升级打补丁的微软。  
@@ -109,7 +109,7 @@ router.get('/user', function(req, res) {
 └──────────┴────┴──────┴──────┴────────┴─────────┴────────┴─────────────┴──────────┘                                                                  
                                                                                                               
  Use `pm2 show <id|name>` to get more details about an app
-```  
+```
 **输出 8.2.1**  
 pm2 命令还有好多命令行参数，如果单纯手敲的话就太麻烦了，幸好它还提供了通过配置文件的形式来指定各个参数值，它支持使用 json 或者 yaml 格式来书写配置文件，下面给出一个 json 格式的配置文件：
 
@@ -130,7 +130,7 @@ pm2 命令还有好多命令行参数，如果单纯手敲的话就太麻烦了�
     }
   }]
 }
-```  
+```
 **配置文件 8.2.1 process.json**  
 > 我为啥要在日志文件的路径配置项上写linux路径呢，因为在 windows 下使用 pm2 ，一旦出现未捕获异常，进程重启的时候，都会弹出命令行窗口来抢占当前的桌面。所以我只能在 linux 下进行测试。并且经过测试，如果使用node 0.10.x版本的话，遇到未捕获异常时，进程无法重启，会僵死，所以推荐使用 4.x+版本。
 
@@ -139,7 +139,7 @@ pm2 命令还有好多命令行参数，如果单纯手敲的话就太麻烦了�
 
 ```
 pm2 start process.json
-```  
+```
 **命令 8.2.1**  
 如果你想重启当前项目，运行：  
 
@@ -168,9 +168,9 @@ chapter7-0     at null._onTimeout (/home/gaoyang/code/expressdemo/chapter7/src/r
 chapter7-0     at Timer.listOnTimeout (timers.js:92:15)
 chapter7-0 [2016-09-16 23:28:14.025] [INFO] console - kill current proccess:6053
 chapter7-0 load var [port],value: 8100
-chapter7-0 load var [debuglogfilename],value: /tmp/weibo.debug.log
-chapter7-0 load var [tracelogfilename],value: /tmp/weibo.trace.log
-chapter7-0 load var [errorlogfilename],value: /tmp/weibo.error.log
+chapter7-0 load var [debuglogfilename],value: /tmp/debug.log
+chapter7-0 load var [tracelogfilename],value: /tmp/trace.log
+chapter7-0 load var [errorlogfilename],value: /tmp/error.log
 chapter7-0 [2016-09-16 23:28:14.908] [INFO] console - load var [db],value: { url: 'mongodb://localhost:27017/live',
 chapter7-0   dbOption: { safe: true } }
 chapter7-0 [2016-09-16 23:28:14.934] [INFO] console - load var [redis],value: { port: 6379, host: '127.0.0.1' }
@@ -181,4 +181,71 @@ chapter7-0 [2016-09-16 23:28:15.003] [INFO] console - Listening on port 8100
 
 ### 8.3 开机自启动
 
+虽然我们在服务上线的时候，可以请高僧来给服务器开光，其实只要不是傻子就看得出来那只不过博眼球的无耻炒作而已。机器不是你想不宕就不宕，所以说给你的服务加一个开机自启动，是绝对有必要的，庆幸的是 pm2 也提供了这种功能。
+
+以下演示命令是在 Ubuntu 16.04 做的，其他服务器差别不大，首先运行 `pm2 startup`，正常情况会有如下输出：
+
+```
+[PM2] Init System found: systemd
+[PM2] You have to run this command as root. Execute the following command:
+sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u user --hp /home/user
+```
+
+按照上面的提示，我们接着运行：
+
+```shell
+sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u user --hp /home/user
+```
+
+注意将 -u 参数替换你应用启动的用户，--hp 参数替换成这个用户的 $HOME 目录。这样 pm2 的开机启动服务就安装完成了，最后我们用 `pm2 save` 产生当前所有已经启动的 pm2 应用列表，这样下次服务器在重启的时候就会加载这个列表，把应用再重新启动起来。
+
+最后，如果不想再使用开机启动功能，运行 `pm2 unstartup` 即可取消。
+
 ### 8.4 使用docker
+
+随着智能设备的蓬勃发展，整个互联网的网民总数出现了井喷，对于软件开发者来说，面对的用户群体越来庞大，需求变化原来越快，导致软件开发的规模越来越大，复杂度越来越高。为了应对这些趋势，最近几年一些新的技术渐渐被大家接受，比如说 [devops](https://zh.wikipedia.org/wiki/DevOps)，比如说我们接下来要讲的 [docker](https://zh.wikipedia.org/wiki/Docker_(%E8%BB%9F%E9%AB%94)) 容器。
+
+有了docker，大家就可以本地开发代码，然后开发完成之后直接打一个包扔到服务器上运行，这个包就是我们所说的容器，它跟宿主机无关，不管运行在何种宿主机上，它的内部环境都是一致。所以说有了docker，我们在也用担心在本地跑的好好的，结果一到服务器就出错的问题了。
+
+>  当然如果你们服务器使用了Docker 技术的话，8.3小节的内容就没有必要使用了。因为在 Docker 上是没法设置开机服务的。
+
+pm2 提供了生成 Dockerfile 的功能，不过生成的文件实用性不是很强，我稍加改造了一下：
+
+```dockerfile
+FROM mhart/alpine-node:latest
+
+RUN apk update && apk add git && apk add openssh-client && rm -rf /var/cache/apk/*
+
+#创建应用目录
+RUN mkdir -p /var/app
+RUN mkdir -p /var/log/app
+#将git clone用的sshkey的私钥拷贝到.ssh目录下
+COPY sshkey_for_deploy /root/.ssh/id_rsa
+RUN chmod 600 ~/.ssh/id_rsa
+#将当前git服务器域名添加到可信列表
+RUN  ssh-keyscan -p 22 -t rsa domain_of_your_git_server >> /root/.ssh/known_hosts
+
+WORKDIR /var/app
+
+#clone代码
+RUN git clone ssh://your_git_link .
+#拷贝配置文件
+COPY config.production.json config.json
+COPY process.production.json process.json
+
+#安装cnpm
+RUN npm install -g cnpm --registry=https://registry.npm.taobao.org
+#安装pm2
+RUN cnpm install pm2 -g
+RUN cnpm install
+
+#向外暴漏当前应用的端口
+EXPOSE 8100:8100
+
+## 设置环境变量
+ENV NODE_ENV=development
+# 启动命令
+CMD ["pm2-docker", "process.json"]
+```
+
+**代码 8.4.1 Dockerfile示例**

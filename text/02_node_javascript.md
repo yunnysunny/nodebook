@@ -33,7 +33,7 @@ if ('0') {
 if (NaN) {
     console.log('NaN is true');
 }
-```  
+```
 **代码 2.1.2.1 逻辑判断语句**
 
 你会发现 只有 `'0' is true` 被打印出来，其他的在做逻辑判断的时候都为假。本来这一节是讲布尔型数据类型的，但是我发现实在没啥可讲的，所以我就讲些逻辑判断相关的知识。其中 `undefined` 在 js 里面表示变量未定义；`null` 代表当前变量是一个对象，但是没有初始化；`''` 代表当前是一个字符串，但是字符串中没有任何字符；`0` 表示当前是一个字符串，且字符串就只有一个0字符；NaN 代表当前变量不是数字，这个数据类型在调用 parseInt 的时候会返回，比如说 `parseInt('a')` 就返回 `NaN`。
@@ -67,7 +67,7 @@ js 提供了一系列函数来对数组进行增删改查。
 for (var i=0,len=array.length;i<len;i++) {
     console.log(array[i]);
 }
-```  
+```
 **代码 2.1.4.1 for循环遍历数组**
 
 我们还可以通过 [indexOf](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf) 函数来查找某一个元素是否在当前数组中。
@@ -89,7 +89,7 @@ for (var i=0,len=array.length;i<len;i++) {
 function doAdd(a,b) {
     return a + b;
 }
-```  
+```
 **代码 2.1.5.1 函数定义**  
 虽然函数体只有一行，但是这个函数却将函数三要素都澄清了：函数名 `doAdd`，参数 `a` 和 `b`，返回值 `a + b`。当然三要素并不是必不可缺的：
 
@@ -97,7 +97,7 @@ function doAdd(a,b) {
 var doEcho = function() {
     console.log('你好');
 }
-```  
+```
 **代码 2.1.5.2 匿名函数**
 
 这里其实是定义了一个匿名函数，只不过我们在定义完之后将它赋值给了变量 `doEcho`，同时这个函数在运行的时候可以不用传任何参数，同时函数内部没有任何 `return` 语句，其实这种情况跟 `return undefined` 是等价的。匿名函数一般作用是作为函数参数使用，例如下面这个栗子：
@@ -113,7 +113,7 @@ function addLater(a,b,callback) {
 addLater(1,2,function(result) {
     console.log('the result:',result);
 });
-```  
+```
 **代码 2.1.5.3 匿名函数使用示例** 
 
 上面这个栗子中，addLater函数在调用的时候，第三个参数在使用的时候是一个函数，而且它是匿名的。
@@ -144,7 +144,7 @@ var person = new PersonES5({
 });
 
 person.showInfo();
-```  
+```
 **代码 2.2.1 person_es5.js**  
 
 而在 ES6 中由于直接有类的概念，所以代码语法上还是有差别的：
@@ -169,7 +169,7 @@ var person = new PersonES6({
 });
 
 person.showInfo();
-```  
+```
 **代码 2.2.2 person_es6.js**
 
 由于 javascript 长期函数式编程思想盛行，因为我们一般不会在一个网页中呈现过多的 UI 组件，所以它的代码处理流程一般都是线性的。比如说我们在前端使用 javascript 的流程是这样的：加载网页->请求数据->渲染 UI 组件->触发事件监听，后端的流程是这样的：接收请求->数据库操作->返回处理结果。当然你会说，不对，我们处理的流程可比这复杂多了，当然随着单页应用（SPA,Single Page Application）的兴起，前端 js 的处理逻辑会越来越复杂。比如说有一天，你的经理可能会给你分配一个在线 photoshop 的需求，这时候面向对象就派上用场了，你可能需要一个抽象类来描述组件的基本属性和功能，同时派生出若干继承自这个抽象类的具体组件类，比如说矩形类、三角形类、圆形类。我想面对这么复杂需求的时候，开发者肯定会选择 ES6 来实现，更不用说如今流行 mvvm 框架都是采用 ES6 来开发。
@@ -183,7 +183,98 @@ person.showInfo();
 ![代码深层次嵌套](../images/callback_nested.png)  
 **图 2.3.1 代码深层次嵌套的即视感**
 
-正是由于考虑到这种问题，所以 ES6 在设计的时候增加 Promise 类，不过这东西在批量处理异步回调时候依然让人不爽，大家可以参考 [A quick guide to JavaScript Promises](https://www.twilio.com/blog/2016/10/guide-to-javascript-promises.html)。我这里给大家介绍的是一个第三方回调流程控制库 [async](https://caolan.github.io/async/docs.html) (我这算不算开倒车)。
+正是由于考虑到这种问题，所以 ES6 在设计的时候增加 Promise 类，不过这东西在批量处理异步回调时候依然让人不爽，大家可以参考 [A quick guide to JavaScript Promises](https://www.twilio.com/blog/2016/10/guide-to-javascript-promises.html)。我这里给大家介绍的是一个第三方回调流程控制库 [async](https://caolan.github.io/async/docs.html) (我这算不算开倒车？另外注意不要和 ES7 中的 [async](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function) 关键字相混淆)。
+
+我们在处理异步任务的时候，大体上分为两种情况，一种是串行操作，即处理完一个任务之后才能接着处理下一个任务；一种是并行操作，即各个任务都是独立运行的，大家一起运行，没有前后依赖关系。
+
+对于串行运行在 async 中，可以是这样的：
+
+```javascript
+var async = require('async');
+
+async.waterfall([
+    function(callback) {
+        setTimeout(function() {
+            callback(false,2+3);
+        },100);
+    },
+    function(sum,callback) {
+        setTimeout(function() {
+            callback(false,sum-1);
+        },100);
+    },
+    function(left,callback) {
+        setTimeout(function() {
+            callback(false,left * 2);
+        },100);
+    }
+],function(err,result) {
+    console.log(err,result);
+});
+```
+
+**代码 2.3.1 async waterfall方法示例**
+
+[waterfall](https://caolan.github.io/async/docs.html#waterfall) 函数接受两个参数，第一个参数是 Array 类型，用来指明各个需要异步执行的任务，数组的第一个元素为：
+
+```javascript
+function(callback) {
+  setTimeout(function() {
+    callback(false,2+3);
+  },100);
+}
+```
+
+注意`callback(false,2+3);`这一句，调用完这一句，它就参数 2+3 这个值传递到下一个任务中去了，然后数组的第二个元素：
+
+```javascript
+function(sum,callback) {
+  setTimeout(function() {
+    callback(false,sum-1);
+  },100);
+}
+```
+
+其中里面的`sum`正是刚才我们在第一个函数中传递过来的 `3+2`，同理可得我们最终将 `4`作为参数 `left` 传递到了第三方函数中。 `waterfall` 的第二个参数是一个回调函数：
+
+```javascript
+function(err,result) {
+    console.log(err,result);
+}
+```
+
+其第一个参数 `err` 代表错误信息，假设我们在处理任何一个异步任务的回调时写了一个 `callback(errorInfo);`，整个 `waterfall` 函数会提前结束，并且将这个 `errorInfo` 传递到第一个参数 `err` 上；第二个参数 `result` 代表最终处理得到的结果，具体到上面那个栗子，最终的结构就应该是 `4*2` 得 `8`。
+
+接着将并行处理，也就是 [parallel](https://caolan.github.io/async/docs.html#parallel) ，我们再举个栗子:
+
+```javascript
+var async = require('async');
+
+async.parallel([
+    function(callback) {
+        setTimeout(function() {
+            callback(null, 1);
+        }, 200);
+    },
+    function(callback) {
+        setTimeout(function() {
+            callback(null, 2);
+        }, 100);
+    }
+],
+function(err, results) {
+  	console.log(err,results);
+    //最终打印结果：null [1,2] 
+});
+```
+
+**代码 2.3.2 async parallel 函数示例**
+
+和 `waterfall` 类似，只要其中有一个任务在 callback 的时候传递了一个 error 对象，就会导致整个 parallel 函数立马结束。
+
+> 最后大家可能留意到我们的第一行使用了 `require('async')` ，这个require 函数用来加载第三方包，我们需要在代码文件所在目录运行 `npm install async --save` 来安装这个第三方包。更多关于 npm 的知识可以参见本书第4章。
+>
+> 本章部分代码：https://github.com/yunnysunny/nodebook-sample/tree/master/chapter2
 
 ### 2.4 参考文献
 - https://www.twilio.com/blog/2016/10/guide-to-javascript-promises.html
