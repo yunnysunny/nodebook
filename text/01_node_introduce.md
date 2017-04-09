@@ -68,7 +68,7 @@ Node 的开发者 Ryan dahl，起初想构建一个可以处理大量HTTP连接�
 
 我们前面的内容是基于 linux 描述的，但是类似于 epool 的操作，在不同的操作系统实现库函数是不同的，在 windows 上有IOCP，MAC上有kqueue,SunOS上有event ports，这个时候有一个抽象层对外提供统一的 api 是一个好的选择，libuv就解决了这个问题，但是这不是他所有的功能。
 
-libuv的[官方文档](http://docs.libuv.org/en/v1.x/design.html)在阐述他的架构的时候给出来这么[一张图](http://docs.libuv.org/en/v1.x/_images/architecture.png)，但是仅仅凭着这么一张图并不能让你对其内部机制理解得更透彻。
+libuv的[官方文档](http://docs.libuv.org/en/v1.x/design.html)在阐述他的架构的时候给出来这么一张图![一张图](http://docs.libuv.org/en/v1.x/_images/architecture.png)，但是仅仅凭着这么一张图并不能让你对其内部机制理解得更透彻。
 
 我们知道 node 使用了 V8 引擎，但是在 node 里面 V8 充当的角色更多的是语法解析层面，另外它还充当了 JavaScript 和 c/c++ 的桥梁。但是我们都知道 Node 中一切皆可异步，但这并不是通过 V8 来实现的，充当这个角色的是 libuv。libuv 作为实现此功能的幕后工作者，一直不显山不露水，今天就要将其请到前台来给大家展示一下。
 
@@ -77,7 +77,7 @@ js 怎样做一个异步代码，`setTimeout`函数即可搞定：
 ```javascript
 setTimeout(function(){console.log('timeout 0');},0);
 console.log('outter');
-```  
+```
 **代码 1.2.1 一个简单的js定时器演示**
 
 > 最终输出结果先是打印 `outter` 然后打印 `timeout 0`。
@@ -135,7 +135,7 @@ int uv_run(uv_loop_t* loop, uv_run_mode mode) {
 
   return r;
 }
-```  
+```
 **代码 1.2.2 事件轮询源码**  
 
 可能很多人对C代码不是很熟，没有关系，我们直接给出他的流程图，参数 `uv_run_mode` 代表当前事件轮询使用的方式，如果是其值为`UV_RUN_DEFAULT`的话，事件轮询一直运行，除非是调用了 `uv_stop()` 函数，如果值为 `UV_RUN_ONCE` 或者 `UV_RUN_NOWAIT` 的话，则只循环一次。
@@ -146,6 +146,25 @@ int uv_run(uv_loop_t* loop, uv_run_mode mode) {
 
 在讲事件轮询之前，我们得先来讲述一下libuv的线程模型，在libuv大体上可以把线程分为两类，一类是事件轮询线程，一类是文件IO处理线程。第一类事件轮询线程是单线程；另外一类称其为文件IO处理线程多少有些不准确，因为他不仅能处理文件IO，还能处理DNS解析，也能处理用户自己编写的node扩展中的逻辑，他是一个线程池，如果你想自己编写一个 c++ 扩展来处理耗时业务的话，就会用上它（我们将在第9章讲c++扩展内容）。
 
-我们这里拿文件IO处理举个栗子，来描述这两类线程之前是怎么通信的。libuv 在处理完一个文件 IO 操作后，会把处理后的结果发送到 pending 队列中；事件轮询线程读取 pending 队列，执行回调函数，也就是图1.2.1中第3步操作。
-
 >好，在这里定时器回调、pending回调，我们都能明白，但是这里的idle、prepare、check回调都是什么鬼，这个其实是一些自定义回调事件，只是在node调用libuv的时候这些回调函数对应的句柄都没有被初始化。有兴趣大家可以参见libuv的测试文件 [test_idle.c](https://github.com/libuv/libuv/blob/v1.x/test/test-idle.c)。
+
+我们这里拿文件IO处理举个栗子，来描述这两类线程之前是怎么通信的。libuv 在处理完一个文件 IO 操作后，会把处理后的结果发送到 pending 队列中；事件轮询线程读取 pending 队列，执行回调函数，也就是图1.2.1中第3步操作。下面是我们演示用的函数：
+
+```javascript
+var fs = require('fs');
+
+fs.exists(__filename, function (exists) {
+  console.log(exists);
+});
+```
+
+**代码 1.2.3 fs.exists 函数示例**
+
+[fs.exists](https://nodejs.org/dist/latest-v6.x/docs/api/fs.html#fs_fs_exists_path_callback) 是 Node 自带的函数，我们在调用的时候传了两个参数，第一个 `__filename` 是 Node 中的一个全局变量，它的值其实是当前执行文件的所在路径，第二个参数是一个回调函数，回调函数中 `exists` 用来表示当前是否存在，很明显当前这段代码最终打印的结果肯定是 `true`，当然我们这里更关心的是整个流程处理，下面用一副数据流向图来将上面流程总结一下：
+
+![](../images/pending_queue.png)
+
+**图 1.2.2 Node 中文件IO处理数据流向图**
+
+
+
