@@ -16,7 +16,7 @@ Node.js 是 JavaScript 后端开发语言。从诞生之初就备受关注，到
 **电子书下载**  
 本书同时提供多种格式的电子书供下载：
 
-- [pdf格式下载](http://nodebook.whyun.com/nodebook.pdf "pdf下载")
-- [epub格式下载](http://nodebook.whyun.com/nodebook.epub "epub下载")
-- [mobi格式下载](http://nodebook.whyun.com/nodebook.mobi "mobi下载")
+- [pdf格式下载](https://www.gitbook.com/download/pdf/book/yunnysunny/nodebook "pdf下载")
+- [epub格式下载](https://www.gitbook.com/download/epub/book/yunnysunny/nodebook "epub下载")
+- [mobi格式下载](https://www.gitbook.com/download/mobi/book/yunnysunny/nodebook "mobi下载")
 

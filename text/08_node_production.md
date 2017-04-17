@@ -209,26 +209,27 @@ sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -
 
 >  当然如果你们服务器使用了Docker 技术的话，8.3小节的内容就没有必要使用了。因为在 Docker 上是没法设置开机服务的。
 
-pm2 提供了生成 Dockerfile 的功能，不过生成的文件实用性不是很强，我稍加改造了一下：
+pm2 提供了生成 Dockerfile 的功能，不过生成的文件实用性不是很强，我需要稍加改造了一下。另外为了方便的演示docker使用，专门在 oschina 新建一个[代码仓库](http://git.oschina.net/nodebook/chapter8)用于第8章代码。下面演示一下dockerfile的编写，具体流程是在docker构建的时候，使用 git clone 从仓库中拿去代码，然后安装所需的依赖。构建完成之后，每次启动这个docker容器的使用使用 pm2 命令启动当前应用。dockerfile的示例代码如下：
 
 ```dockerfile
 FROM mhart/alpine-node:latest
 
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
 RUN apk update && apk add git && apk add openssh-client && rm -rf /var/cache/apk/*
 
 #创建应用目录
 RUN mkdir -p /var/app
 RUN mkdir -p /var/log/app
 #将git clone用的sshkey的私钥拷贝到.ssh目录下
-COPY sshkey_for_deploy /root/.ssh/id_rsa
+COPY deploy_key /root/.ssh/id_rsa
 RUN chmod 600 ~/.ssh/id_rsa
 #将当前git服务器域名添加到可信列表
-RUN  ssh-keyscan -p 22 -t rsa domain_of_your_git_server >> /root/.ssh/known_hosts
+RUN  ssh-keyscan -p 22 -t rsa git.oschina.net >> /root/.ssh/known_hosts
 
 WORKDIR /var/app
 
 #clone代码
-RUN git clone ssh://your_git_link .
+RUN git clone git@git.oschina.net:nodebook/chapter8.git .
 #拷贝配置文件
 COPY config.production.json config.json
 COPY process.production.json process.json
@@ -243,9 +244,59 @@ RUN cnpm install
 EXPOSE 8100:8100
 
 ## 设置环境变量
-ENV NODE_ENV=development
+ENV NODE_ENV=production
 # 启动命令
 CMD ["pm2-docker", "process.json"]
 ```
 
 **代码 8.4.1 Dockerfile示例**
+其中 `From` 代表使用的基础镜像，[alpine](https://alpinelinux.org/) 是一个非常轻量级的 linux 发行版本，所以基于其制作的 docker 镜像非常小，特别利于安装。这里的 [alpine-node](https://hub.docker.com/r/mhart/alpine-node/) 在 alipine 操作系统上集成了 node ，单纯 pull 安装的话也非常小。然后 RUN 和 COPY 两个命令是在构建的时候执行命令和拷贝文件，注意 COPY 命令仅仅只能拷贝当前执行docker 命令的目录下的文件，也就是说拷贝的时候不能使用相对路径，比如说你要执行 `COPY xxx/yyy /tmp/yyy` 或者 `COPY ../zzz /tmp/zzz` 都是不允许的。为了正确的 clone git 服务器上的代码，我们还需要配置一下 部署密钥。
+谈到部署密钥的概念，这里还要多说几句。我们一般从git服务器上clone下来代码后，会对代码进行编写，然后 push 你编写后的新代码。但是服务器上显然是不适合在其上面进行直接改动代码的从左，所以就有了部署密钥的概念，使用部署密钥你可以做 clone 和 pull 操作，但是你不能做 push 操作。
+
+```shell
+$ ssh-keygen -f deploy_key -C "somebody@somesite.com"
+Generating public/private rsa key pair.
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in deploy_key.
+Your public key has been saved in deploy_key.pub.
+The key fingerprint is:
+SHA256:S3JbyWc68K43kifBwYcJJxlIFlDlXz9MJDGI6gEhFKw somebody@somesite.com
+The key's randomart image is:
++---[RSA 2048]----+
+|+o+==+o+ .+..    |
+| o....= o  +     |
+|.  . ..= o. .    |
+|E   o  .=o.=     |
+|   . ...So+ *    |
+|    .  +o* + .   |
+|        oo+      |
+|        +.+.     |
+|        .*..     |
++----[SHA256]-----+
+```
+**命令8.4.1 生成密钥对**
+我们在第8章项目代码根目录下新建一个 deploy 文件夹，进入这个文件夹然后运行 **命令 8.4.1**，一路回车即可。然后我们就得到了 **代码 8.4.1** 中的 `deploy_key`了。生成完了之后去 git.oschina.com 上配置一下公钥（也就是我们生成的 `deploy_key.pub` 文件）,在项目页（在这里是 http://git.oschina.net/nodebook/chapter8 ）上点击 `管理` 导航链接（），在打开的页面中点击 `部署公钥管理`，然后选择 `添加公钥`，用记事本打开刚才生成的 deploy_key.pub 文件，全选复制，然后贴到输入框中：
+
+![添加部署公钥](../images/add_deploy_public_key.png)
+**图 8.4.1 添加部署公钥**
+
+最后要注意一下 `EXPOSE` 命令，他代表 docker 及向宿主机暴漏的端口号，如果不暴漏端口的话，在宿主机上没法访问我们应用监听的端口。
+我们运行 `docker build -t someone/chapter8 .`  其中 `-t` 参数指定当前镜像的 tag 名称， `someone` 是指你在 [docker hub](https://hub.docker.com/) 网站上注册的用户，build 成功后你可以通过 `docker push someone/chapter8` 将构建后的结构 push 到 docker hub 网站上去，然后在服务器上运行 `docker pull someone/chapter8` 来拿取你当初 push 的仓库。当然你可以直接将 Dockerfile 拿到你的服务器上执行 build 命令，这时候 -t 参数可以随便指定，甚至不写。
+> 鉴于国内的网络环境问题，在做 build 的时候，pull 基础镜像很有可能会失败，这时候你就只能求助于国内的 docker 镜像站了，比如说 [daoclound](https://www.daocloud.io/mirror#accelerator-doc)。不过鉴于我们在 build 的时候还要安装 alpine 下的 git 等软件包，所以说如果没有梯子的话，一时半会儿很难办。
+
+build 命令运行完成之后，运行 `docker images` 会输出：
+
+```shell
+REPOSITORY          TAG       IMAGE ID       CREATED         VIRTUAL SIZE
+someone/chapter8    latest    2a1a00cc1b41   4 minutes ago   147.7 MB
+```
+最后我们通过 `docker run -d --name chapter8 someone/chapter8` 即可生成一个 docker 容器。其中 `-d` 参数代表在后台运行， `--name` 指定当前 docker 容器的名称， `someone/chapter8` 说明我们使用刚才 build 的镜像来生成容器。 通过 `docker ps` 命令的输出，我们可以查看生成的 docker 容器：
+```shell
+CONTAINER ID        IMAGE               COMMAND                CREATED             STATUS              PORTS               NAMES
+fb0d726a86dc        someone/chapter8    "pm2-docker process.   4 seconds ago       Up 4 seconds        8100/tcp            chapter8
+```
+
+### 8.5 代码
+
+本章代码8.1、8.2小节代码和第7章存储在相同位置：https://github.com/yunnysunny/nodebook-sample/tree/master/chapter7 ， 8.4章节代码为演示方便专门做了一个仓库，位于：http://git.oschina.net/nodebook/chapter8 。

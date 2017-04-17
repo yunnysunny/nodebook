@@ -1,7 +1,7 @@
 * [前言](00_preface.md)
 * [1 Node.js 体系结构](01_node_introduce.md)
 * [2 JavaScript 那些事](02_node_javascript.md)
-* [3 直接上手 Node.js ，一个静态文件服务器的编写](03_node_basic.md)
+* [3 Node 基础](03_node_basic.md)
 * [4 NPM 包管理工具](04_node_npm.md)
 * [5 Express 介绍](05_node_express_basic.md)
 * [6 Express 进阶](06_node_express_advance.md)
