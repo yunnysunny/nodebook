@@ -250,6 +250,7 @@ CMD ["pm2-docker", "process.json"]
 ```
 
 **代码 8.4.1 Dockerfile示例**
+
 其中 `From` 代表使用的基础镜像，[alpine](https://alpinelinux.org/) 是一个非常轻量级的 linux 发行版本，所以基于其制作的 docker 镜像非常小，特别利于安装。这里的 [alpine-node](https://hub.docker.com/r/mhart/alpine-node/) 在 alipine 操作系统上集成了 node ，单纯 pull 安装的话也非常小。然后 RUN 和 COPY 两个命令是在构建的时候执行命令和拷贝文件，注意 COPY 命令仅仅只能拷贝当前执行docker 命令的目录下的文件，也就是说拷贝的时候不能使用相对路径，比如说你要执行 `COPY xxx/yyy /tmp/yyy` 或者 `COPY ../zzz /tmp/zzz` 都是不允许的。为了正确的 clone git 服务器上的代码，我们还需要配置一下 部署密钥。
 谈到部署密钥的概念，这里还要多说几句。我们一般从git服务器上clone下来代码后，会对代码进行编写，然后 push 你编写后的新代码。但是服务器上显然是不适合在其上面进行直接改动代码的从左，所以就有了部署密钥的概念，使用部署密钥你可以做 clone 和 pull 操作，但是你不能做 push 操作。
 
@@ -276,6 +277,7 @@ The key's randomart image is:
 +----[SHA256]-----+
 ```
 **命令8.4.1 生成密钥对**
+
 我们在第8章项目代码根目录下新建一个 deploy 文件夹，进入这个文件夹然后运行 **命令 8.4.1**，一路回车即可。然后我们就得到了 **代码 8.4.1** 中的 `deploy_key`了。生成完了之后去 git.oschina.com 上配置一下公钥（也就是我们生成的 `deploy_key.pub` 文件）,在项目页（在这里是 http://git.oschina.net/nodebook/chapter8 ）上点击 `管理` 导航链接（），在打开的页面中点击 `部署公钥管理`，然后选择 `添加公钥`，用记事本打开刚才生成的 deploy_key.pub 文件，全选复制，然后贴到输入框中：
 
 ![添加部署公钥](../images/add_deploy_public_key.png)
@@ -283,7 +285,9 @@ The key's randomart image is:
 
 最后要注意一下 `EXPOSE` 命令，他代表 docker 及向宿主机暴漏的端口号，如果不暴漏端口的话，在宿主机上没法访问我们应用监听的端口。
 我们运行 `docker build -t someone/chapter8 .`  其中 `-t` 参数指定当前镜像的 tag 名称， `someone` 是指你在 [docker hub](https://hub.docker.com/) 网站上注册的用户，build 成功后你可以通过 `docker push someone/chapter8` 将构建后的结构 push 到 docker hub 网站上去，然后在服务器上运行 `docker pull someone/chapter8` 来拿取你当初 push 的仓库。当然你可以直接将 Dockerfile 拿到你的服务器上执行 build 命令，这时候 -t 参数可以随便指定，甚至不写。
-> 鉴于国内的网络环境问题，在做 build 的时候，pull 基础镜像很有可能会失败，这时候你就只能求助于国内的 docker 镜像站了，比如说 [daoclound](https://www.daocloud.io/mirror#accelerator-doc)。不过鉴于我们在 build 的时候还要安装 alpine 下的 git 等软件包，所以说如果没有梯子的话，一时半会儿很难办。
+> 鉴于国内的网络环境问题，在做 build 的时候，pull 基础镜像很有可能会失败，这时候你就只能求助于国内的 docker 镜像站了，比如说 [daocloud](https://www.daocloud.io/mirror#accelerator-doc)。
+>
+> 不过鉴于我们在 build 的时候还要安装 alpine 下的 git 等软件包，所以说如果没有梯子的话，一时半会儿很难办。
 
 build 命令运行完成之后，运行 `docker images` 会输出：
 
