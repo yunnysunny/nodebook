@@ -287,7 +287,6 @@ The key's randomart image is:
 我们运行 `docker build -t someone/chapter8 .`  其中 `-t` 参数指定当前镜像的 tag 名称， `someone` 是指你在 [docker hub](https://hub.docker.com/) 网站上注册的用户，build 成功后你可以通过 `docker push someone/chapter8` 将构建后的结构 push 到 docker hub 网站上去，然后在服务器上运行 `docker pull someone/chapter8` 来拿取你当初 push 的仓库。当然你可以直接将 Dockerfile 拿到你的服务器上执行 build 命令，这时候 -t 参数可以随便指定，甚至不写。
 > 鉴于国内的网络环境问题，在做 build 的时候，pull 基础镜像很有可能会失败，这时候你就只能求助于国内的 docker 镜像站了，比如说 [daocloud](https://www.daocloud.io/mirror#accelerator-doc)。
 >
-> 不过鉴于我们在 build 的时候还要安装 alpine 下的 git 等软件包，所以说如果没有梯子的话，一时半会儿很难办。
 
 build 命令运行完成之后，运行 `docker images` 会输出：
 
