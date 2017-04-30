@@ -20,7 +20,7 @@ if (s == 3) {
 } else {
     console.error('哎呦，加法测试出错了啊');
 }
-```  
+```
 **代码 7.1.2 不使用测试框架的测试用例**  
 接着他又写了减法函数、乘法函数、除法函数，但是随着模块的增加，他逐渐的意识到一个问题，如果按照代码7.1.2的模式的话，一则输出格式比较乱，而且测试结果没有最终统计信息，不能一下子得出成功数和失败数。于是乎他去网上找资料，然后他就发现了大名鼎鼎的 `mocha`。  
 研究了一番，小明发现 `mocha` 提供了测试结果输出格式化和测试结果统计的功能，也就是说对于上面那个加法测试用例，就可以这么写了：
@@ -34,7 +34,7 @@ describe('Calculator', function() {
     });
   });
 });
-```  
+```
 **代码 7.1.3 使用mocha改写测试用例**  
 官网上说， mocha 在使用的时候，可以使用全局安装的模式，也可以安装为当前项目的开发依赖包（即在安装的时候使用`--save-dev`参数），不过小明考虑到以后各个项目都要用得到，于是决定进行全局安装（`npm install mocha -g`）。  
 安装完之后，小明兴奋的新建了文件`calculator_test.js`:  
@@ -50,7 +50,7 @@ describe('Calculator', function() {
     });
   });
 });
-```  
+```
 **代码 7.1.4 文件calculator_test.js部分代码**  
 接着他运行`node calculator_test.js`，没想到结果打出他的意料，报错了：
 
@@ -69,7 +69,7 @@ ReferenceError: describe is not defined
     at Function.Module.runMain (module.js:497:10)                                                                              
     at startup (node.js:119:16)                                                                                                
     at node.js:929:3
-```  
+```
 **输出 7.1.1 命令node calculator_test.js的输出**  
 一定是小问题，小明心里嘀咕着，然后顺手打开了google，直接搜索`ReferenceError: describe is not defined                                                                         `在第一页就发现了答案，原来要运行`mocha calculator_test.js`（还是谷歌靠谱）。运行完正确的命令后，果然看到想要的结果了：
 
@@ -93,7 +93,7 @@ e:\kuaipan\code\node\myapp\chapter7\src\test\mocha>mocha calculator_test.js
 var should = require('should');
 
 (calculator.add(1,2)).should.be.exactly(3).and.be.a.Number();
-```  
+```
 **代码 7.1.5 should判断1**  
 或者：  
 
@@ -101,7 +101,7 @@ var should = require('should');
 var should = require('should/as-function');
 
 should(calculator.add(1,2)).be.exactly(3).and.be.a.Number();
-```  
+```
 **代码 7.1.6 should判断2**  
 > 画外音，上面仅仅是简单说明使用方法，完整的测试用例大家可以参见第七章源码`test/mocha/calculator_should1.js` 和 `test/mocha/calculator_should2.js`。  
 
@@ -111,7 +111,7 @@ should(calculator.add(1,2)).be.exactly(3).and.be.a.Number();
 ```javascript
 var expect = require('expect.js');
 expect(calculator.add(1,2)).to.be(3);
-```  
+```
 **代码 7.1.7 expect判断**  
 **3.chai**  
 [chai](http://chaijs.com/)将前面提到的assert should expect融合到了一起，你仅仅需要使用 chai 这一个包就能享用以上三者的功能，所以前面讲到的三种判断在chai中是这么实现的：  
@@ -127,7 +127,7 @@ chai.should();//use should
 
 var expect = chai.expect;//use expect
 expect(calculator.add(1,2)).to.equal(3);
-```  
+```
 **代码 7.1.8 使用chai判断**  
 这个 chai 还真是个大杀器呢。不过注意，在 chai 中
 
@@ -165,7 +165,7 @@ exports.doAdd = function(req, res) {
     }
     res.send({code:0,data:a+b});
 };
-```  
+```
 **代码 7.1.9 加法运算的HTTP接口**  
 
 对应的supertest的测试用例代码就是这样的：
@@ -184,7 +184,7 @@ describe('POST /calculator/add', function() {
       },done);
   });
 });
-```  
+```
 **代码 7.1.10 加法运算HTTP接口的单元测试代码**  
 > 此代码放置于第七章代码的目录 /src/test/http目录下，变量app其实是引用的项目根目录的app.js。  
 
@@ -196,7 +196,7 @@ describe('POST /calculator/add', function() {
 ```javascript
 var request = require('supertest');
 var app = require('../../app');
-var cookie = '';
+var cookie = exports.cookie = '';
 
 before(function(done) {
     request(app)
@@ -214,7 +214,7 @@ before(function(done) {
               var value = setCookieArray[i];
               var result = value.match(/^express_chapter7=([a-zA-Z0-9%\.\-_]+);\s/);
               if (result && result.length > 1) {
-                  cookie = result[1];
+                  exports.cookie = cookie = result[1];
                   break;
               }
           }
@@ -224,24 +224,28 @@ before(function(done) {
           done();
       });
 });
-```  
+```
 **代码 7.1.11 钩子函数**  
-这里我们使用全局变量cookie来存储我们提到的 sessionid ，在 supertest 的 end 函数中，我们读取响应体变量res中的 set-cookie 头信息，通过正则把 sessionid 读取出来。  
+这里我们使用全局变量cookie来存储我们提到的 sessionid ，在 supertest 的 end 函数中，我们读取响应体变量res中的 set-cookie 头信息，通过正则把 sessionid 读取出来。注意我们这里将 `cookie` 这个变量还专门做导出了，这样子我们就可以在其他测试文件中引用这个变量了。  
 接着就可以使用这个读取到的cookie来进入后台了：  
 
 ```javascript
+var request = require('supertest');
+var app = require('../../app');
+var before = require('./login_before');
+
 describe('Backend',function() {
 
     it('first test',function(done) {
         request(app)
         .get('/user/admin')
-        .set('Cookie','express_chapter7='+cookie)
+        .set('Cookie','express_chapter7=' + before.cookie)
         .expect(200,/<title>admin<\/title>/,done);
     });
 });
-```  
+```
 **代码 7.1.12 请求中使用cookie**  
-我们在模板 `user/admin.ejs` 有这么一句：`<title><%=user.account%></title>`，所以我们这里在测试时使用正则 `/<title>admin<\/title>/` 来验证是否真的进入后台了。  
+我们在模板 `user/admin.ejs` 有这么一句：`<title><%=user.account%></title>`，所以我们这里在测试时使用正则 `/<title>admin<\/title>/` 来验证是否真的进入后台了。  还有就是在读取 `cookie` 变量的时候没有直接在 require 完成之后立即读取，因为那个时候，这个变量还没有被赋值，而是在测试用例内部通过 `before.cookie` 读取。
 > 注意，由于我们使用了 redis 来存储 session 数据，所以如果你忘记启动 redis 服务器的话，我们的登录操作会失败，而且在 mocha 中给出的报错提示是请求超时，这个问题比较隐蔽，大家一定要注意。
 
 经过一番实践，小明的熟练掌握了各种测试技能，不过某天经理找打了他，“小明啊，要不你转到测试组吧”，……

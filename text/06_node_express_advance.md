@@ -2,7 +2,7 @@
 第5章讲了Express的入门知识，这一节趁热打铁要讲一下高级技术。
 ### 6.1 使用 session
 对于一个网站来说，一个不可避免的问题就是用户登录，这就牵扯到 session 问题了。为此我们需要在app.js中引入两个middleware，[cookie-parser](https://www.npmjs.com/package/cookie-parser)和[express-session](https://www.npmjs.com/package/express-session),上一章的代码5.2.1已经介绍过cookie-parser，接下来重点介绍一下`express-session`,在app.js中添加如下代码：
-  
+
 ```js
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
@@ -88,8 +88,8 @@ exports.admin = function(req, res) {
 **代码 6.1.4 读取session**  
 通过`req.session.user`，就可以方便的将之前存储的`user`属性给读取出来。
 
-### 6.2 使用mongodb
-web开发离不开数据库，那么和 Node.js 最搭配的数据是啥呢？当然是 [mongodb](https://www.mongodb.com/)。我们这里只要讲 [mongoskin](https://github.com/kissjs/node-mongoskin)，一个在原生node mongodb驱动基础上做封装的模块的使用。  
+### 6.2 使用mongoskin
+web开发离不开数据库，那么和 Node.js 最搭配的数据是啥呢？当然是 [mongodb](https://www.mongodb.com/)。我们这里先讲 [mongoskin](https://github.com/kissjs/node-mongoskin)，一个在原生node mongodb驱动基础上做封装的模块的使用。  
 在介绍之前先讲清楚一个概念，传统关系型数据库中，有表的概念，mongodb有collection的概念，其实是同一种东西，我在这里仍然称呼collection为`表`。    
 为了演示它的用法，我们先不在 express 中使用它，而是写个简单的的测试函数。
 
@@ -217,7 +217,7 @@ findAndModify(query, sort, update , options , callback)
 
     - error {Error} 错误对象，成功时为null
     - result {Object}
-    
+
         ```js
         {
             value : {Object} 函数findAndModify返回的数据记录
