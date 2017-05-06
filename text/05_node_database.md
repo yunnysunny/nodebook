@@ -25,16 +25,78 @@ var clusterRedis = [
         "port":6380
     }
 ];
-var redis =  new Redis.Cluster(clusterRedis,{password: 'auth'});//集群连接方式
+var redis =  new Redis.Cluster(clusterRedis,{redisOptions:{password: 'auth'});//集群连接方式
 */
 
-redis.set('foo', 'bar');
+redis.set('foo', 'bar', function(err,reply) {
+  console.log(err, reply);//正常情况打印 null 'OK'
+});
 redis.get('foo', function (err, result) {
-  console.log(result);
+  console.log(err,result);//正常情况打印 null 'bar'
 });
 ```
 
 **代码 5.1.1 redis命令基本演示**
+
+redis 中大多数的命令格式都是这样的 `command key param1 prama2 ...` 对应 ioredis 中的函数就是 `redis.command(key, param1, param2, ...)` 比如说 **代码5.1.1** 中的栗子，我们在 redis-cli 中执行 `set foo bar` 命令就对应我们的 `redis.set('foo', 'bar')` 这行代码。注意到我们这里在接收处理结果的时候都是使用 callback 的方式，ioredis 内部也支持 promise 方式来接收处理结构，你只需要将回调函数去掉，改成 then 函数：
+
+```javascript
+redis.set('foo','bar').then(function(reply) {
+  
+});
+```
+
+**代码 5.1.2 使用 promise 方式接收返回数据**
+
+有时候我们在使用 redis 的时候，在一个处理逻辑中要连续发送多条 redis 命令，这时候你可以考虑用 ioredis 中提供的 pipeline 或者 multi 函数。
+
+使用 pipeline 时 ioredis 内部将一系列指令缓存到内存，最后通过 exec 函数执行后打包发送到 redis 服务器，而且它支持链式的调用方式：
+
+```javascript
+redis.pipeline().set('foo', 'bar').get('foo').exec(function (err, results) {
+});
+```
+
+**代码 5.1.3 pipeline 链式调用**
+
+甚至可以在调用每个命令的时候都加一个回调函数，这里在get位置加一个回调函数：
+
+```javascript
+redis.pipeline().set('foo', 'bar').get('foo',function(err,result) {
+    console.log('get foo',err,result);
+}).exec(function (err, results) {
+    console.log('with single callback',err, results);
+});
+```
+
+**代码 5.1.4 pipeline 链式函数中加回调**
+
+当然这里还有一种更加简洁的调用方式，就是都把参数放到数组里：
+
+```javascript
+redis.pipeline([
+    ['set','foo','bar'],
+    ['get','foo']
+]).exec(function(err,results) {
+    console.log('array params',err,results);
+});
+```
+
+**代码 5.1.5 pipeline 数组参数调用方式**
+
+multi 函数跟 pipeline 函数的区别是，multi 提供了事务的功能，提交到 redis 服务器的命令的会被依次执行，pipeline 则是批量执行一批提交一批指令，但是在 redis 内部都是独立执行的，没有先后顺序，只是最终服务器将所有处理结果一起返回给了调用者。不过要想完全保证事务的原子性，我们还需要使用 watch 函数，防止我们在事务中操作一个事务的过程中，当前操作的某一个键值又被其他连接的客户端给修改了：
+
+```javascript
+redis.watch('foo');
+redis.multi().set('foo', 'bar').get('foo').exec(function (err, results) {
+    redis.unwatch();
+    console.log('chain',err, results);
+});
+```
+
+**代码 5.1.6 multi 事务操作代码**
+
+最后一件需要重点指明的事情是，如果你当前使用了 cluster 方式连接 redis，那么最好不要使用 pipeline 和 multi 因为，ioredis 在调用这两个函数的时候，仅仅会往一个节点发送指令，但是你又不能保证你这里面操作的所有键值都在一个节点上，所以说调用这两个函数的时候很有可能会失败。
 
 ### 5.2 mongodb
 
@@ -290,3 +352,49 @@ var articleSchema = new Schema({/*此处省略字段定义*/},{collection:'artic
 ```
 
 这样将 articleShema 插入model 后得到的 Article 就绑定表 article 上了。
+
+说了插入单条，再说一下批量插入，这时候使用 [insertMany](http://mongoosejs.com/docs/api.html#model_Model.insertMany) 函数即可：
+
+```javascript
+Article.insertMany([
+    {name:'chapter1',content:'Node.js 简介1',create_at:new Date('2016/07/01')},
+    {name:'chapter1',content:'Node.js 简介2',create_at:new Date('2016/07/01')},
+    {name:'chapter1',content:'Node.js 简介3',create_at:new Date('2016/07/01')},
+    {name:'chapter2',content:'Node.js 基础4',create_at:new Date('2016/07/02')},
+    {name:'chapter2',content:'Node.js 基础5',create_at:new Date('2016/07/02')}
+],function(err,ret) {
+    console.log('插入数组',err,ret);
+});
+```
+
+**代码 5.2.2.4 mongoose 批量插入操作**
+
+mongoose 的修改操作和官方 API 差不多：
+
+```javascript
+Article.update({name:'chapter2'},{
+    $set:{content:'Node.js 入门'}
+},function(err,ret) {
+    console.log('更新单条数据',err,ret);
+});
+Article.update({name:'chapter2'},{
+    $set:{content:'Node.js 入门'}
+},{multi:true},function(err,ret) {
+    console.log('更新多条数据',err,ret);
+});
+```
+
+ **代码 5.2.2.5 mongoose 修改操作** 
+
+不过它的删除稍微有些不同，就是删除的时候仅仅只能指定一个查询参数，如果你想仅仅删除一条的话，那就需要先查询出来，然后再删除。
+
+```javascript
+Article.findOne({name:'chapter1'}).remove().exec(function(err,ret) {
+    console.log('删除数据',err,ret);
+});
+Article.remove({name:'chapter1'},function(err,ret) {
+    console.log('删除数据',err,ret);
+});
+```
+
+**代码 5.2.2.6 mongoose 删除操作**
