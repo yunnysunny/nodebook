@@ -302,4 +302,4 @@ fb0d726a86dc        someone/chapter8    "pm2-docker process.   4 seconds ago    
 
 ### 9.5 代码
 
-本章代码9.1、9.2小节代码和第7章存储在相同位置：https://github.com/yunnysunny/nodebook-sample/tree/master/chapter7 ， 9.4章节代码为演示方便专门做了一个仓库，位于：http://git.oschina.net/nodebook/chapter8 。
+本章代码9.1、9.2小节代码和第7章存储在相同位置：https://github.com/yunnysunny/nodebook-sample/tree/master/chapter8 ， 9.4章节代码为演示方便专门做了一个仓库，位于：http://git.oschina.net/nodebook/chapter8 。

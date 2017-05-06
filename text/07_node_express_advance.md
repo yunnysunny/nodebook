@@ -204,4 +204,4 @@ app.use('/', routes);
 **代码 7.4.2 引入授权拦截器**  
 将其放到session中间件的后面是由于，我们在这个拦截器中需要读取`req.session`变量，如果放到session中间件前面，则这个变量不存在。  
 现在我们在未登录的情况下访问http://localhost:3000/user/admin ，则会直接跳转到登陆页。  
-本章节代码可以从这里获取：https://github.com/yunnysunny/expressdemo/tree/master/chapter6 。
+本章节代码可以从这里获取：https://github.com/yunnysunny/expressdemo/tree/master/chapter7 。

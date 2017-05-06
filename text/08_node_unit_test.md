@@ -249,4 +249,4 @@ describe('Backend',function() {
 > 注意，由于我们使用了 redis 来存储 session 数据，所以如果你忘记启动 redis 服务器的话，我们的登录操作会失败，而且在 mocha 中给出的报错提示是请求超时，这个问题比较隐蔽，大家一定要注意。
 
 经过一番实践，小明的熟练掌握了各种测试技能，不过某天经理找打了他，“小明啊，要不你转到测试组吧”，……
-> 本章配套代码：https://github.com/yunnysunny/expressdemo/tree/master/chapter7
+> 本章配套代码：https://github.com/yunnysunny/expressdemo/tree/master/chapter8
