@@ -398,3 +398,68 @@ Article.remove({name:'chapter1'},function(err,ret) {
 ```
 
 **代码 5.2.2.6 mongoose 删除操作**
+
+上面总结了一下 mongoose 的一些基本用法，不过前面的描述还不足以体现 mongoose 的强大，下面讲到的一些高级用法，绝对能让你感到惊艳。
+
+首先 mongoose 提供了中间件（ middleware ）的功能，我们可以在执行数据命令前和执行后添加钩子函数，先上代码：
+
+```javascript
+var mongoose = require('mongoose');
+require('./conn');//代码6.2.2.1对应的代码
+
+var Schema = mongoose.Schema;
+
+var articleSchema = new Schema({
+  name:  String,
+  content:   String,
+  comments: [{ body: String, date: Date }],
+  create_at: { type: Date, default: Date.now }
+});
+
+articleSchema.pre('save',function(next) {
+    this.content = this.name  + '\n' + this.content;
+    next();
+});
+
+articleSchema.post('save', function(doc) {
+    console.log('%s has been saved', doc._id);
+});
+
+var Article = mongoose.model('article', articleSchema);
+
+new Article({
+    name:'chapter5',
+    content:'Node 中使用数据库',
+    comments : [
+        {body:'写的不多',date:new Date('2016-10-11')},
+        {body:'我顶',date:new Date('2017-01-01')}
+    ],
+    create_at:'2017-02-11'
+}).save(function(err,item) {
+    console.log(err,item);
+});
+```
+
+**代码 5.2.2.7 save 的中间件函数演示**
+
+我们创建了一个 article 的 schema 定义，同时定义了两个中间件。通过 `pre('save')` 操作，我们在文章的第一行拼接了文章的标题，然后注意一定要调用 `next` 函数，否则当前数据库操作就不会得到执行。通过 `post('save')` 操作用来在数据库操作完成之后执行一些级联操作，这里我们简单的打印了一下日志。这两个中间件函数会先于 `save` 函数的回调函数前执行。
+
+在调用 save 函数时，mongoose 中还提供了一个 validate 中间件，他会在 pre('save') 之前被触发，用来校验传入 save 函数的各个属性是不是合法：
+
+```javascript
+articleSchema.pre('validate',function(next) {
+    if (/<script>/.test(this.content)) {
+        return next(new Error('文章内容非法'));
+    }
+    next();
+});
+new Article({
+    name:'chapter5',
+    content:'Node 中使用数据库<script>alert(document.cookie)</script>',
+}).save(function(err,item) {
+    console.log(err,item);
+});
+```
+
+**代码 5.2.2.8 save 的 validate 中间件函数演示**
+
