@@ -463,3 +463,164 @@ new Article({
 
 **代码 5.2.2.8 save 的 validate 中间件函数演示**
 
+上面的代码执行后，会抛出异常，因为我们的 article content 字段中包含 script 标签。令人欣喜的是，mongoose 还提供将 validate 中间件直接加到 schema 定义上的功能：
+
+```javascript
+var mongoose = require('mongoose');
+require('./conn');//代码6.2.2.1对应的代码
+
+var Schema = mongoose.Schema;
+
+var articleSchema = new Schema({
+    name:  {
+        type:String,
+        required: [true,'必须提供文章标题'],
+        maxlength : [50,'文章标题不能多于50个字符']
+    },
+    isbn : {
+        type:String,
+        unique:true,
+        sparse: true
+    },
+    content:  {
+        type:String,
+        validate:{
+            validator : function() {
+                return !(/<script>/.test(this.content));
+            },
+            message : '文章内容非法'
+        }
+    },
+    starts : {
+        type:Number,
+        min:0,
+        max:[5,'最多只能给5颗星'],
+        default:0
+    },
+    level : {
+        type:String,
+        enum:['专家推荐','潜力无限','家有作家初长成','我只是个小学生']
+    },
+    category : {
+        type:String,
+        enum:{
+            values:['诗歌','散文','杂文','议论文','小说'],
+            message:'当前标签不支持'
+        }
+    },
+    cover_url : {
+        type:String,
+        match:[/^http(s?):\/\//,'封面图格式非法']
+    },
+    comments: [{ body: String, date: Date }],
+    create_at: { type: Date, default: Date.now }
+});
+
+articleSchema.pre('save',function(next) {
+    this.content = this.name  + '\n' + this.content;
+    next();
+});
+
+articleSchema.post('save', function(doc) {
+    console.log('%s has been saved', doc._id);
+});
+
+var Article = mongoose.model('article', articleSchema);
+
+new Article({
+    name:'chapter5',
+    content:'Node 中使用数据库<script>alert(document.cookie)</script>',
+}).save(function(err,item) {
+    if (err && err.name === 'ValidationError') {
+        for (var field in err.errors) {
+            var error = err.errors[field];
+            console.error(error.message,error.path,error.value);
+        }
+    }
+});
+```
+
+**代码 5.2.2.9 在 schema 中使用校验器**
+
+mongoose 内建了好多校验器（validator），多余所有类型字段来说都可以使用 [required](http://mongoosejs.com/docs/api.html#schematype_SchemaType-required) 校验器，对于 Number 类型字段来说，可以使用 [min](http://mongoosejs.com/docs/api.html#schema_number_SchemaNumber-min) 和 [max](http://mongoosejs.com/docs/api.html#schema_number_SchemaNumber-max) 校验器，对于 String 类型字段来说，可以使用 [enum](http://mongoosejs.com/docs/api.html#schema_string_SchemaString-enum) [match](http://mongoosejs.com/docs/api.html#schema_string_SchemaString-match) [maxlength](http://mongoosejs.com/docs/api.html#schema_string_SchemaString-maxlength) [minlength](http://mongoosejs.com/docs/api.html#schema_string_SchemaString-minlength) 校验器。
+
+所有校验器都可以设置在校验失败后的错误提示信息，如果相对某一个字段设置 required 约束，那么可以写成 `required:true` ，还可以进一步指定校验失败后的提示信息，也就是写成这样 `requried:[true,'这个字段必须指定']` 。但是对于 enum 来说，由于本身定义的时候就是一个数组结构（参见上面代码中 `level` 字段的定义），所以 mongoose 内部在定义其 message 属性时使用这样一个 Object 结构：`{values:[/*枚举字段定义*/],message:'出错提示信息'}` 。
+
+还记得在**代码 5.2.2.8**中我们自定义的那个 content 字段的校验中间件不？这个中间件可以直接写到 schema 定义中，在**代码 5.2.2.9**中的 content 字段中的 validate 属性，就能替换掉之前我们写过的校验中间件。
+
+最终你在调用 save 函数之前，这层层的字段定义约束都会被执行，如果校验出错，那么 save 回调函数返回的第一个参数中的 name 属性的值将是 `ValidationError`，让你后其 errors 属性中保存着字段的详细信息的一个 key-value数据结构，键名是出错的字段名，值是一个包含错误详情的对象，这个对象中 message 属性就是我们在 schema 中设置的出错信息， path 是出错的字段名，value 是引起出错的具体的设置的值。
+
+最终需要注意，unique 这个约束并不是一个  ValidationError （实际上其 name 属性值为 MongoError），所以你  save 失败后得到的error 对象中没有errors 属性。unique 和 sparse 仅仅是 schema 调用 mongodb 的驱动创建了数据库索引而已。**代码 5.2.2.9** 中关于 isbn 的约束，也可以通过 schema 中的 [index](http://mongoosejs.com/docs/api.html#schema_Schema-index) 函数来实现：
+
+```javascript
+articleSchema.index('isbn',{unique:true,sparse:true});
+```
+
+**代码 5.2.2.10**
+
+前面讲了许多 mongoose 的插入、修改之类的操作，一直没有提到查询操作，下面就来讲一下查询。
+
+在讲查询之前，需要先将我们在代码5.2.2.9中定义的 articleSchema 进行一下扩充，增加下面这个字段：
+
+```javascript
+_author : {type:Schema.Types.ObjectId,ref:'user'},
+```
+
+**代码 5.2.2.11**
+
+至于其中的 _ref 属性是怎么回事，我们先买个关子，一会儿再说。
+
+mongoose 在查询方面，有好多细节做了优化，比如说在筛选返回字段的时候可以直接通过字符串来指定：
+
+```javascript
+Article.findOne({name:nameRand},'name -_id',function(err,item) {
+  if (err) {
+    return console.error('findOne',err);
+  }
+  console.log('findOne',item && item.name === nameRand);
+});
+```
+
+**代码 5.2.2.12 mongoose 查询使用字符串筛选字段**
+
+mongoose 的查询中的各个控制参数都可以链式的调用各个函数来解决，比如说上例中用到的字段筛选可以使用 [select](http://mongoosejs.com/docs/api.html#query_Query-select) 函数来替代，即改成 `Article.findOne({name:nameRand}).select('name -_id').exec(function(err,item) {});` 当中可以添加无数个链式函数来控制查询行为，比如说 [limit](http://mongoosejs.com/docs/api.html#query_Query-limit) [skip](http://mongoosejs.com/docs/api.html#query_Query-skip) [lean](http://mongoosejs.com/docs/api.html#query_Query-lean) 等等，最后以 [exec](http://mongoosejs.com/docs/api.html#query_Query-exec) 函数结尾添加回调函数。mongoose 查询默认返回的是 [MongooseDocuments](http://mongoosejs.com/docs/api.html#document-js) 类型对象，使用lean 函数后可以将其转成普通 javascript 对象：
+
+```javascript
+Article.find({name:/^name/}).select('_author').lean().exec(function(err,items) {
+  if (err) {
+    return console.error('find',err);
+  }
+  console.log('find',items);
+});
+```
+
+**代码 5.2.2.13 mongoose 查询返回纯 javascript 对象**
+
+转纯 javascript 对象的使用场景一般比较少见，当我们拿查询的结果作为参数来调用一些第三方库（比如说 [protobufjs](https://github.com/dcodeIO/protobuf.js) ）时，不调用lean的情况下会出错。
+
+最后还要暴一下 mongoose 中的大杀器，就是联合查询，其实 mongdb 本身是没有联合查询功能的，这个功能是在 mongoose 层面延伸的功能：
+
+```javascript
+Article
+  .findById(articleId)
+  .select('name _author')
+  .populate('_author','nickname -_id')
+  .exec(function(err,item) {
+  if (err) {
+    return console.error('findById',err);
+  }
+  console.log('populate',item);
+});
+```
+
+**代码 5.2.2.14 mongoose 联合查询功能**
+
+还记得我们在**代码 5.2.2.10**中卖的关子不，我们看到其中有一个 _ref 属性，它的作用就是告诉 mongoose _author 字段的值对应 users 表中的主键字段，如果在查询的时候使用 populate 函数，则 mongoose 将在底层做两次查询（查询 articles 表 和 users 表），然后把查询结果合并。最终得到的结构演示如下：
+
+```javascript
+{ name: 'name0.6169953700982793',
+  _author: { nickname: 'nick0.09724390163323227' },
+  _id: 5916e9178be9f133b4798002 }
+```
+
+### 5.3 代码
