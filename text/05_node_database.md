@@ -624,3 +624,5 @@ Article
 ```
 
 ### 5.3 代码
+
+本章代码参见这里：https://github.com/yunnysunny/nodebook-sample/tree/master/chapter5
