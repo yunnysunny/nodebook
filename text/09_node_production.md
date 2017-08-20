@@ -280,7 +280,7 @@ The key's randomart image is:
 
 我们在第8章项目代码根目录下新建一个 deploy 文件夹，进入这个文件夹然后运行 **命令 9.4.1**，一路回车即可。然后我们就得到了 **代码 9.4.1** 中的 `deploy_key`了。生成完了之后去 git.oschina.com 上配置一下公钥（也就是我们生成的 `deploy_key.pub` 文件）,在项目页（在这里是 http://git.oschina.net/nodebook/chapter8 ）上点击 `管理` 导航链接（），在打开的页面中点击 `部署公钥管理`，然后选择 `添加公钥`，用记事本打开刚才生成的 deploy_key.pub 文件，全选复制，然后贴到输入框中：
 
-![添加部署公钥](../images/add_deploy_public_key.png)
+![添加部署公钥](images/add_deploy_public_key.png)
 **图 9.4.1 添加部署公钥**
 
 最后要注意一下 `EXPOSE` 命令，他代表 docker 及向宿主机暴漏的端口号，如果不暴漏端口的话，在宿主机上没法访问我们应用监听的端口。
