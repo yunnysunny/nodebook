@@ -100,4 +100,5 @@ NODE_MODULE(hello_nan, Init)
 
 **代码 10.1.4 hello.cc 的 nan 版**
 
-可以看到和**代码10.1.2**相比**代码10.1.4**要简洁不少，这里 NAN_METHOD(Method) 经过宏定义解析为 `void Method(const Nan::FunctionCallbackInfo<v8::Value>& info)`，所以你看到在函数 `Method` 内部会有一个 info 对象，能够在编译的时候被正确识别。同时宏定义 NAN_MODULE_INIT(Init) 会被转化为 `void Init(v8::Local<v8::Object> target)` 所以你会在函数内部看到一个 target 对象。
+可以看到和**代码10.1.2**相比**代码10.1.4**要简洁不少，这里 NAN_METHOD(Method) 经过宏定义解析为 `void Method(const Nan::FunctionCallbackInfo<v8::Value>& info)`，所以你看到在函数 `Method` 内部会有一个 info 对象，能够在编译的时候被正确识别。同时宏定义 NAN_MODULE_INIT(Init) 会被转化为 `void Init(v8::Local<v8::Object> target)` 所以你会在函数内部看到一个 target 对象。同时**代码 10.1.2** 第13行中 `Isolate* isolate = args.GetIsolate();` 这个代码在函数 `NaN::New<String>` 中被封装在其内部，所以在**代码 10.1.4** 中没有看到这段代码。
+
