@@ -128,7 +128,7 @@ server.listen(port, hostname, () => {
 
 直接运行 `node example.js`，然后我们打开 chrome ，输入网址 http://localhost:3000,就会在网页上看到 `Hello world`。OK，我们回头看一下代码，关键部分在于 `createServer` 的回调函数上，这里有两个参数 `req` 和 `res`，这两个变量也是 [stream](https://nodejs.org/dist/latest-v6.x/docs/api/stream.html) 类型，前者是**readable stream(可读流)**，后者是**writeable stream(可写流)**，从字面意思上推测出前者是用来读取数据的，而后者是用来写入数据的。大家还有没有记得我们在**代码 3.2.4**中函数`fs.createReadStream` 也返回一个 readable stream。接下来就是一个见证奇迹的时刻， stream 类上有一个成员函数叫做 `pipe`，就像它的名字 **管道** 一样，他可以将两个流通过管子连接起来：
 
-![pipe原理示意图](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/pipe.png)
+![pipe原理示意图](images/pipe.png)
 
 **图 3.3.1 pipe原理**  
 
@@ -168,7 +168,7 @@ server.listen(port, hostname, () => {
 
 我们仅仅使用了一句`fs.createReadStream(_path).pipe(res);`,就便捷的将文件流输出到HTTP的响应流中了，是不是很强大。OK来看一下效果，运行 `node app.js`，在浏览器中打开 `http://localhost:3000/a.png` 就能看到显示效果。
 
-![最终我们的apache显示效果](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/success.png)  
+![最终我们的apache显示效果](images/success.png)  
 **图 3.3.2 最终我们的apache显示效果**
 
 ## 3.4 HTTP请求参数
@@ -177,10 +177,10 @@ server.listen(port, hostname, () => {
 
 ### 3.4.1 GET 请求
 首先我们来简单描述一下 HTTP 请求，打开浏览器，并且打开开发者工具，  
-![通过菜单打开控制台](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/dev_console.png)  
+![通过菜单打开控制台](images/dev_console.png)  
 **图3.4.1.1 通过菜单打开控制台**  
 然后使用谷歌搜 `node`，我们定向到开发者工具的 Network 标签页，然后开第一条网络请求，鼠标单击点开这条网络请求，会显示格式化好的HTTP 请求和响应的数据包内容：  
-![谷歌搜索](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/google_search.png)  
+![谷歌搜索](images/google_search.png)  
 **图3.4.1.2 使用谷歌搜索 node**  
   
 我们这里仅仅关注一下 `General` 部分，`Request URL` 中 `?` 后面是一大串请求参数，在我们这里是
@@ -252,12 +252,12 @@ server.listen(port, hostname, () => {
 
 由于不能直接通过浏览器输入地址来测试 POST 请求，所以推荐大家使用一个 chrome app来测试 POST 请求，它就是 [Postman](https://chrome.google.com/webstore/detail/postman/fhbjgbiflinjbdggehcddcbncdddomop?utm_source=chrome-ntp-icon)。安装完成之后，打开主界面，下拉菜单区域选择 `POST`，然后输入地址 `http://localhost:3000`，打开 Body 标签，选择`x-www-form-urlencoded`，最后点击 Send 按钮，完成后就会输出`Hello sunny World from unknown`。
 
-![Postman 发送 POST 请求](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/postman_post.png)  
+![Postman 发送 POST 请求](images/postman_post.png)  
 **图3.4.2.1 Postman 发送 POST 请求**
 
 这里之所以需要选择`x-www-form-urlencoded`，是由于 POST 数据包有很多组织方式，我们最常用的就是这种方式，其数据格式依然是`key1=value1&key2=value2`，而 Node 自带的 [querystring.parse函数](https://nodejs.org/dist/latest-v6.x/docs/api/querystring.html#querystring_querystring_parse_str_sep_eq_options) 正是用来处理这种字符串的。同时我们可以点击 Code 按钮，来查看 POST请求发送的请求数据包：
 
-![POST请求数据包](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/post_package.png)  
+![POST请求数据包](images/post_package.png)  
 **图3.4.2.2 POST请求数据包**
 
 你可以留意到请求包中当中有一个空行（HTTP协议中用空行来分割请求头和请求正文），空格下面的`name=sunny&password=1234`就是我们 POST 到后台的数据。

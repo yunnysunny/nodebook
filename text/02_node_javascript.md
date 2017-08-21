@@ -180,7 +180,7 @@ person.showInfo();
 
 由于在 javascript 中存在大量的异步操作，函数调用完成之后，不能立马拿到执行结果，必须在回调函数中得到执行结果，如果你在一个函数中要接连做好几次这样的异步处理，是不是画面应该是这样的：
 
-![代码深层次嵌套](https://raw.githubusercontent.com/yunnysunny/nodebook/master/images/callback_nested.png)  
+![代码深层次嵌套](images/callback_nested.png)  
 **图 2.3.1 代码深层次嵌套的即视感**
 
 正是由于考虑到这种问题，所以 ES6 在设计的时候增加 Promise 类，不过这东西在批量处理异步回调时候依然让人不爽，大家可以参考 [A quick guide to JavaScript Promises](https://www.twilio.com/blog/2016/10/guide-to-javascript-promises.html)。我这里给大家介绍的是一个第三方回调流程控制库 [async](https://caolan.github.io/async/docs.html) (我这算不算开倒车？另外注意不要和 ES7 中的 [async](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function) 关键字相混淆)。
