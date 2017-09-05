@@ -186,20 +186,51 @@ chapter7-0 [2016-09-16 23:28:15.003] [INFO] console - Listening on port 8100
 以下演示命令是在 Ubuntu 16.04 做的，其他服务器差别不大，首先运行 `pm2 startup`，正常情况会有如下输出：
 
 ```
-[PM2] Init System found: systemd
-[PM2] You have to run this command as root. Execute the following command:
-sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u user --hp /home/user
+[PM2] Writing init configuration in /etc/init.d/pm2-root
+[PM2] Making script booting at startup...
+>>> Executing chmod +x /etc/init.d/pm2-root
+[DONE] 
+>>> Executing mkdir -p /var/lock/subsys
+[DONE] 
+>>> Executing touch /var/lock/subsys/pm2-root
+[DONE] 
+>>> Executing chkconfig --add pm2-root
+[DONE] 
+>>> Executing chkconfig pm2-root on
+[DONE] 
+>>> Executing initctl list
+rc stop/waiting
+tty (/dev/tty3) start/running, process 2312
+tty (/dev/tty2) start/running, process 2310
+tty (/dev/tty1) start/running, process 2308
+tty (/dev/tty6) start/running, process 2318
+tty (/dev/tty5) start/running, process 2316
+tty (/dev/tty4) start/running, process 2314
+plymouth-shutdown stop/waiting
+control-alt-delete stop/waiting
+rcS-emergency stop/waiting
+kexec-disable stop/waiting
+quit-plymouth stop/waiting
+rcS stop/waiting
+prefdm stop/waiting
+init-system-dbus stop/waiting
+splash-manager stop/waiting
+start-ttys stop/waiting
+rcS-sulogin stop/waiting
+serial stop/waiting
+[DONE] 
++---------------------------------------+
+[PM2] Freeze a process list on reboot via:
+$ pm2 save
+
+[PM2] Remove init script via:
+$ pm2 unstartup systemv
+
 ```
 
-按照上面的提示，我们接着运行：
+按照上面的提示，用 `pm2 save` 产生当前所有已经启动的 pm2 应用列表，这样下次服务器在重启的时候就会加载这个列表，把应用再重新启动起来。
 
-```shell
-sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u user --hp /home/user
-```
-
-注意将 -u 参数替换你应用启动的用户，--hp 参数替换成这个用户的 $HOME 目录。这样 pm2 的开机启动服务就安装完成了，最后我们用 `pm2 save` 产生当前所有已经启动的 pm2 应用列表，这样下次服务器在重启的时候就会加载这个列表，把应用再重新启动起来。
-
-最后，如果不想再使用开机启动功能，运行 `pm2 unstartup` 即可取消。
+最后，如果不想再使用开机启动功能，运行 `pm2 unstartup systemv` 即可取消。
 
 ### 9.4 使用docker
 
