@@ -381,6 +381,8 @@ asyncSimple.doAsyncWork('prefix:',function(err,result) {
 
 **代码 10.4.3 addon.js**
 
+### 10.5 代码
 
+本章代码位于 https://github.com/yunnysunny/nodebook-sample/tree/master/chapter10
 
  
