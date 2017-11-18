@@ -144,3 +144,97 @@ Debugger attached
 综上两点，做一个实时的验证码生成程序是不合适的，所以这里推荐的解决方案是提前预生成一批验证码图片，然后放到 CDN 上，并且将关联数据存入数据库（比如说 redis），等浏览器请求过来的时候再随机从数据库中抽取一个，至于实现代码留给各位同学自己实现了。
 
 **11.3 内存分析**
+
+Node 的程序中一般不会操作大内存，一般是一个请求过来，处理完数据，变量的生命周期就结束了，会被垃圾回收器回收掉。但是如果有高并发需求时，我们希望从数据库中查询到的数据能够在内存中得到缓存，这样就能减轻对于数据库的压力，提高吞吐率。
+
+我们看下面一段代码：
+
+```javascript
+const db = require('./db');
+const cacheResult = new Map();
+const DEFAULT_CACHE_AGE = 1000;
+
+class CacheItem {
+    constructor(data,expire) {
+        this.expire = expire || (new Date().getTime() + DEFAULT_CACHE_AGE);
+        this.data = data;
+    }
+}
+
+/*const queryWithCache = */exports.queryWithCache = function(itemName) {
+    const item = cacheResult.get(itemName);//console.log(cacheResult.size);
+
+    if (item) {
+        if (item.expire > new Date().getTime()) {
+            return (item.data);
+        }
+        cacheResult.delete(item);//console.log('expired cache..........................');
+    }
+
+    const value = db[itemName];
+    cacheResult.set(itemName,new CacheItem(itemName,value));    
+    return (value);
+};
+```
+
+**代码 11.3.1** 
+
+将从数据库中查询到的数据缓存到内存，不过设置了一个过期时间，下次 查询的时候，先判断内存中有没有，如果内存中存在且数据尚未过期，就直接返回。如果内存中存在数据，但是过期了，就将其删除。看上去这个算法比较简单高效，但是却存在严重的内存泄漏问题，缓存的数据只有再下次被重新请求到的时候才有可能被删除，如果每次请求恰好都是新数据，那么之前缓存的数据永远得不到机会删除，导致内存暴涨。
+
+为了方便的复现这个问题，我们对**代码11.1.1**进行改造：
+
+```javascript
+const http = require('http');
+const ccap = require('ccap')();//Instantiated ccap class 
+const cache = require('./lib/cache');
+const rand = require('./lib/rand');
+
+http.createServer(function (request, response) {
+    const url = request.url;
+    if(url === '/favicon.ico')return response.end('');//Intercept request favicon.ico
+    if (url === '/cache-test') {
+        return response.end(cache.queryWithCache(rand.create(3))||'__');
+    }
+    const ary = ccap.get();
+    const txt = ary[0];
+    const buf = ary[1];
+    response.end(buf);
+    // response.end('ok');
+    //console.log(txt);
+}).listen(8124);
+
+console.log('Server running at http://127.0.0.1:8124/');
+```
+
+**代码 11.3.2**
+
+增加一个地址 `/cache-test`来模拟这个请求，这里使用随机字符串来达到每次请求都使用新数据的目的。回到 Chrome 开发面板，选择 Memory 标签页，然后再选择 `Take heap snapshot`，点击 `Take snapshot` 按钮即可生成堆快照：
+
+![](images/take_snap.png)
+
+**图 11.3.1**
+
+回到我们的 JMeter，再新建一个 HTTP sampler，
+
+![](images/cache_test_sampler.png)
+
+**图 11.3.2**
+
+为了单测试内存泄漏，我们在测试之前先把之前的验证码的测试用例禁用掉，然后点击启动按钮。在测试之前，测试过程中，测试结束之后过一段时间之后，分别点击 `Take snapshot` 按钮：
+
+![](images/three_snaps.png)
+
+**图 11.3.3**
+
+Snapshot 1 对应开始前，Snapshot 2 为进行中和 Snapshot 3 、4 结束后的堆快照，最终发现即使在测试结束后，堆内存依然没有释放，我们选择 `Snapshot 3` ，然后在 `Class filter` 左边的下拉框中选择 `Comparison` ，它会自动和上一个快照做对比，我们发现 `CacheItem` 类型的对象在这当中新增了 82893 个，然后再对比 `Snapshot 4` 和 `Snapshot 3` 发现，`CacheItem` 类型对象完全没有被回收掉。以此我们可以认定，我们写的代码有内存泄漏了。
+
+为了解决这个问题，我单独做了一个闪存处理的包，借鉴了 JVM 或者 V8 中在 GC 中所使用的新生代、老生带的算法，
+
+![](images/flash_cache.png)
+
+**图 11.3.4**
+
+假设缓存声明周期为 N，内部会预置一个定时器，每隔 N/2时间后将新生代拷贝到老生带，并且清空新生代，具体代码参考包 [flash-cache](https://www.npmjs.com/package/flash-cache) 。
+
+
+
