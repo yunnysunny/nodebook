@@ -9,6 +9,8 @@
 * [8 Node.js 单元测试](08_node_unit_test.md)
 * [9 Node.js 最佳实践](09_node_production.md)
 * [10 Node.js 的 c++ 扩展](10_node_addone.md)
+* [11 Node.js 调优](11_node_optimization.md)
+* [12 Node.js Web 安全](11_node_web_security.md)
 * [A1 Node.js 好用工具介绍](a1_node_utils.md)
 * [A2 参考资源](a2_bibliography.md)
 * [A3 书籍写作规范](a3_convention.md)
