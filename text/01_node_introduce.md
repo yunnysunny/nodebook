@@ -127,7 +127,7 @@ fs.exists(__filename, function (exists) {
 
 [fs.exists](https://nodejs.org/dist/latest-v6.x/docs/api/fs.html#fs_fs_exists_path_callback) 是 Node 自带的函数，我们在调用的时候传了两个参数，第一个 `__filename` 是 Node 中的一个全局变量，它的值其实是当前执行文件的所在路径，第二个参数是一个回调函数，回调函数中 `exists` 用来表示当前是否存在，很明显当前这段代码最终打印的结果肯定是 `true`，当然我们这里更关心的是整个流程处理，下面用一副数据流向图来将上面流程总结一下：
 
-![](images/pending_queue.png)
+![](images/fs_io_flow.png)
 
 **图 1.2.2 Node 中文件 IO 处理数据流向图**
 
