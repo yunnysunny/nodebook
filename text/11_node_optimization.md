@@ -81,7 +81,7 @@ Debugger attached
 
 > 这项功能对于chrome来说还处于实验状态，所以在操作过程中如果你的浏览器崩溃，不要怀疑，这属于正常现象。
 
-### 11.2 压力测试
+### 11.2 测试工具 JMeter
 
 要想知道性能如何，需要首先借助压力测试工具，这里我们选择开源的 [JMeter](http://jmeter.apache.org/) 。
 
@@ -143,7 +143,7 @@ Debugger attached
 
 综上两点，做一个实时的验证码生成程序是不合适的，所以这里推荐的解决方案是提前预生成一批验证码图片，然后放到 CDN 上，并且将关联数据存入数据库（比如说 redis），等浏览器请求过来的时候再随机从数据库中抽取一个，至于实现代码留给各位同学自己实现了。
 
-**11.3 内存分析**
+### 11.3 内存分析
 
 Node 的程序中一般不会操作大内存，一般是一个请求过来，处理完数据，变量的生命周期就结束了，会被垃圾回收器回收掉。但是如果有高并发需求时，我们希望从数据库中查询到的数据能够在内存中得到缓存，这样就能减轻对于数据库的压力，提高吞吐率。
 
@@ -228,13 +228,82 @@ console.log('Server running at http://127.0.0.1:8124/');
 
 Snapshot 1 对应开始前，Snapshot 2 为进行中和 Snapshot 3 、4 结束后的堆快照，最终发现即使在测试结束后，堆内存依然没有释放，我们选择 `Snapshot 3` ，然后在 `Class filter` 左边的下拉框中选择 `Comparison` ，它会自动和上一个快照做对比，我们发现 `CacheItem` 类型的对象在这当中新增了 82893 个，然后再对比 `Snapshot 4` 和 `Snapshot 3` 发现，`CacheItem` 类型对象完全没有被回收掉。以此我们可以认定，我们写的代码有内存泄漏了。
 
-为了解决这个问题，我单独做了一个闪存处理的包，借鉴了 JVM 或者 V8 中在 GC 中所使用的新生代、老生带的算法，
+> 为了解决这个问题，我单独做了一个闪存处理的包，借鉴了 JVM 或者 V8 中在 GC 中所使用的新生代、老生带的算法，
+> ![](images/flash_cache.png)
+> **图 11.3.4**
+> 假设缓存声明周期为 N，内部会预置一个定时器，每隔 N/2时间后将新生代拷贝到老生带，并且清空新生代，具体代码参考包 [flash-cache](https://www.npmjs.com/package/flash-cache) 。
 
-![](images/flash_cache.png)
+### 11.4 alinode
 
-**图 11.3.4**
+上面讲的性能分析都是基于 chrome devtools 的，国内的阿里公司也大量的使用 Node 来处理自己的业务，为了发现自己程序的性能问题，他们研发了 alinode 和其对应的性能监控平台，提供一系列的工具来定位性能问题。值得称赞的是，他们将此工具免费提供给大家使用👍。
 
-假设缓存声明周期为 N，内部会预置一个定时器，每隔 N/2时间后将新生代拷贝到老生带，并且清空新生代，具体代码参考包 [flash-cache](https://www.npmjs.com/package/flash-cache) 。
+直接浏览 https://node.console.aliyun.com，使用自己的淘宝或者支付宝账号即可登录。登录完成，进入其性能平台管理界面，选择右上角的 `创建新应用` 按钮，在弹出的对话框中，输入应用名称。创建成功后，会弹出对话框，提示应用的 appid 和 secret。
 
+使用 alinode ，要安装阿里开发的专用 Node 版本，它在官方 Node 代码的基础上集成了性能收集功能，以便将性能数据上传到 alinode 平台做分析。为此你需要安装 tnvm，这是一个类似于 nvm 的 Node 版本安装工具，使用它你才能够顺利地安装 alinode 订制版 Node。
 
+```shell
+# 安装 tnvm
+wget -O- https://raw.githubusercontent.com/aliyun-node/tnvm/master/install.sh | bash
+# 安装后更新一下环境变量，否则找不到 tnvm 命令
+source ~/.bashrc
+```
 
+**代码 11.4.1 安装 tnvm**
+
+接下来需要安装你需要的 tnvm 版本，阿里官方提供了一份 alinode 和原始 Node 的版本对照，详细数据可以参照[官方文档](https://help.aliyun.com/knowledge_detail/60811.html)。大体上的规则是 alinode 的 2.x 对应原始 Node 的 6.x 版本，3.x 对应 8.x，4.x 对应 10.x。举一个例子，从官方文档得知，原始 Node v6.14.4  对应的 alinode 为 v2.5.2 ，那么安装这个版本的命令如下：
+
+```shell
+tnvm install alinode-v2.5.2 # 安装需要的版本
+tnvm use alinode-v2.5.2 # 使用需要的版本
+```
+
+**代码 11.4.2 安装对应的 alinode 版本**
+
+为了能将 alinode 运行时产生的数据收集到性能监控平台，你还需要安装 agenthub 这个工具，通过运行 `npm install @alicloud/agenthub -g ` 即可完成安装。
+
+默认 alinode 不会收集运行时的数据，首先你需要保证你的 Node 程序在启动前，设置如下环境变量：
+
+```shell
+# 设置为 YES，相当于允许产生 Node 运行时的日志
+export ENABLE_NODE_LOG=YES
+# 默认日志保存目录为 /tmp，你可以通过这个环境变量修改她
+export NODE_LOG_DIR=/var/log/alinode
+```
+
+ **代码 11.4.3 设置 alinode 的环境变量**
+
+可以将上述代码写在 `/etc/profile` 中，然后 `source /etc/profile` 让其生效。同时在你的 Node 程序启动之前，你还需要启动 agenthub，否则数据无法上报。还记得之前我们创建应用时生成的 appid 和 secret 参数不，我们创建一个配置文件写入 `~/alinode.json` 中，将 appid 和 secret 填入：
+
+```json
+{
+    "appid":"",
+    "secret":"",
+    "logdir":""
+}
+```
+
+**代码 11.4.4 配置 agenthub 启动参数**
+
+如果你在 **代码 11.4.3** 中指定了环境变量 `NODE_LOG_DIR` 的话，这个地方就需要设置 `logdir`，agenthub 无法上报数据。
+
+最后运行 `agenthub ~/alinode.json` 启动 agenthub，注意如果你在启动 agenthub 之前就已经通过 pm2 启动了应用，必须通过 pm2 kill 杀死当前进程，然后再重新启动，否则设置不会生效。
+
+最终我们在性能平台中点击之前创建应用的主页，鼠标移动到左侧菜单中的`实例`上，会看到之前配置的那台机器：
+
+![](images/alinode_instance.png)
+
+**图 11.4.1 alinode 实例**
+
+点击这个实例，然后在右侧的进程列表中选择你需要监控的进程：
+
+![](images/alinode_process_list.png)
+
+**图 11.4.2 alinode 进程列表**
+
+同时，你可以在右侧面板中找到一系列的性能数据收集工具，包括我们之前用过的堆快照和 CPU Profile。下面着重讲解一下 alinode 平台中，CPU Profile 收集的功能，我们点击一下 `CPU Profile` 按钮，会提示 `操作成功，请访问 文件列表 查看详情`，点击`文件列表` 链接，我们等待 CPU Profile 生成完成，然后选择 `转储` 按钮，它会将生成的文件从 Node 运行所在的服务器上传到 alinode 平台。转储完成之后，点击 `分析` 按钮，你会查看到生成的火焰图；点击 `分析(devtools)` 会将 CPU Profile 呈现在控制台中，跟图 **图 11.2.6 ** 中呈现的效果是相同的。
+
+火焰图是一种非常有效的性能分析工具，因为它很直观，即使你并不是代码的编写者，你也一眼能看出哪一块代码运行时间长：
+
+![](images/alinode_flame.png)
+
+**图 14.3.3 火焰图**
