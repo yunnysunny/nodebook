@@ -104,7 +104,7 @@ NODE_MODULE(hello_nan, Init)
 
 ###  10.3 映射 C++ 类
 
-C++ addone 最精髓的地方，就是将 一个 JavaScript 类映射为一个 C++ 类，这样就会产生一个有趣的效果，你通过 new 构建的 js 对象，它的成员函数都被映射成 C++ 类中的成员函数。
+C++ addon 最精髓的地方，就是将 一个 JavaScript 类映射为一个 C++ 类，这样就会产生一个有趣的效果，你通过 new 构建的 js 对象，它的成员函数都被映射成 C++ 类中的成员函数。
 
 下面举的例子可能可能看上去很傻，因为我们又写 对 `a+b` 求值的函数了，但是这种很天真的代码最好理解不过了。注意，这个例子改写自项目 [node-addon-examples](https://github.com/nodejs/node-addon-examples)  中的 [object_wrap](https://github.com/nodejs/node-addon-examples/tree/master/6_object_wrap/nan) 小节。首先是 C++ 头文件定义：
 
