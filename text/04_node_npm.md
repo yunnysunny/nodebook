@@ -20,7 +20,7 @@ npm 目前拥有数以百万计的包，可以在 https://www.npmjs.com/ 使用�
 ```
   ├─┬ node_modules 
   │ └── coffee-script 
-```  
+```
 **目录结构 4.1.1 将包安装到本地后的目录结构**  
 一般情况下，我们在node项目目录下创建package.json，里面包含项目名称、作者、依赖包等配置，我们可以通过 `npm init`快速创建一个package.json文件，我们新建一个目录，然后在命令执行`npm init`，则会要求你填入若干信息：
 
@@ -50,7 +50,7 @@ About to write to I:\node\app\package.json:
                                                            
                                                            
 Is this ok? (yes)                                       
-```  
+```
 **命令输入 4.1.1 npm init命令输入示例**  
 我们接着在项目中安装express包（在第5章会讲到这个包的使用），不过我们执行命令的时候加个参数：`npm install express --save`。命令执行完成之后，再看package.json，发现多了一个配置属性：
 
@@ -58,7 +58,7 @@ Is this ok? (yes)
 "dependencies": {
     "express": "^4.14.0"
 }
-```  
+```
 这个dependencies属性里面描述的就是当前项目依赖的各种包，你可以通过运行`npm install packageName --save`来将其安装到本地的同时在package.json中同时添加依赖声明。当你代码开发完成时，要把项目往服务器上部署，那么这时候package.json中的依赖声明都已经写好了，这时候，你直接在项目目录运行`npm install`，就可以自动将声明中的文件全部下载安装到项目目录的`node_modules`子目录下。  
 我们在来稍微留意一下，我们配置的这个express的版本号，咦，`^`是个什么鬼？讲这个东东，还要从[Semantic Versioning](http://semver.org/)这个概念讲起，它将版本号分为三段：  
 
@@ -72,7 +72,7 @@ Is this ok? (yes)
 一般情况下，我们通过将依赖安装到项目目录下，但是有时候我们需要做全局安装，这种全局安装的包一般都是些命令行程序，这些命令行程序安装到全局后就可以保证我们通过 cmd.exe（或者bash） 中调用这些程序了。下面我们演示一下如何全局安装[express-generator](https://www.npmjs.com/package/express-generator)：  
 ```
 npm install -g express-generator
-```  
+```
 安装完成后会提示安装到了目录 `C:\Users\[用户名]\AppData\Roaming\npm\node_modules`目录下，其实这个安装目录是可以自指定的，老是往系统盘安装会让人抓狂，下面要讲到这个问题。  
 安装完 express-generator ，我们在命令行中新建一个目录`mkdir first-express`，然后进入这个目录运行 `express` ，如果发现生成了一堆express项目文件，恭喜你成功了！
 
@@ -82,14 +82,14 @@ npm install -g express-generator
 
 ```
 npm install -g cnpm --registry=https://registry.npm.taobao.org
-```  
+```
 **命令 4.2.1**
 
 不过你需要注意，由于最新版本的cnpm不兼容低版本node,如果你当前使用的node版本低于4.x，那么你需要在安装的时候指定版本号：  
 
 ```
 npm install -g cnpm@3.4.1 --registry=https://registry.npm.taobao.org
-```  
+```
 **命令 4.2.2**
 
 否则的话，安装完之后运行命令会报错。  
@@ -114,21 +114,21 @@ npm ERR!
 npm ERR! Please try running this command again as root/Administrator.
 
 npm ERR! Please include the following file with any support request:
-```  
+```
 **输出 4.2.1 cnpm全局安装错误输出**  
 为啥呢？首先，cnpm 会在将包默认安装在nodejs安装目录下的`node_modules`子文件夹中，其次我们这里将node安装到了系统盘`C:\Program Files (x86)`目录下，最后写入这个目录需要超级管理员权限。  
 本来就讨厌往系统盘写入数据文件，这下子非要改掉它这个默认设置不可了。我们命令
 
 ```
 npm config set prefix "D:\npm"
-```  
+```
 **命令 4.2.3**
 
 这样你使用 `npm install -g package` 命令安装的包就会被放置到 ${prefix}/node_modules   下。同时使用命令
 
 ```
 npm config set cache "D:\npm\node_modules\npm-cache"
-```  
+```
 **命令 4.2.4**
 
 可以设置npm的缓存路径，否则的话它默认会缓存一部分下载的包到系统目录中。
@@ -176,7 +176,7 @@ array-flatten@1.1.1:
 content-disposition@0.5.1:
   version "0.5.1"
   resolved "https://registry.yarnpkg.com/content-disposition/-/content-disposition-0.5.1.tgz#87476c6a67c8daa87e32e87616df883ba7fb071b"
-```  
+```
 **代码 4.2.1 yarn.lock示例**  
 
 你会发现里面罗列了express各个依赖的版本号（ version 字段），下载地址（ resolved 字段），我们仅仅截取了前面几行，因为 express 包中依赖关系比较复杂，生成的这个 lock 文件也比较长。项目初始化的老兄，通过 yarn add 的方式安装好包之后，需要将这个 yarn.lock 提交到版本库，这样你的小伙伴通过 `yarn install` 安装的各个依赖就和初始化的老兄用的一样了，这样就避免了团队中各个开发者通过 npm install 安装到本地的包的版本号不一致而导致的各种难以排查的问题了。
@@ -185,12 +185,12 @@ content-disposition@0.5.1:
 
 不过我们在使用 yarn 的时候，因为 yarn 在底层依然得使用 npm 进行安装，所以依然无法避免因网络原因导致的包无法下载的问题，不过我们可以直接将 npm 的安装源设置为 cnpm 提供的安装源：
 
-```
-yarn config set registry http://registry.cnpmjs.org
+```shell
+yarn config set registry https://registry.npm.taobao.org
 ```
 **命令4.4.1**  
 
-   
+
 ### 4.5 发布自己的包到 npmjs  
 刚才演示了这么命令都是安装别人的包，现在我们自己开发一个包。首先你要注册一个npmjs的账号（注册地址：https://www.npmjs.com/signup ）。注册完成后，通过`npm adduser`命令来将注册的账号绑定到本地机器上，运行完改命令后会让你输入 npmjs 的注册账号和密码。  
 要想在 npmjs 上发布自己的包，首先要做的是明确你发布的包名在这个网站上有没有存在，在4.1小节，我们上来就介绍了怎么通过包名搜索npmjs上的包。不过，这里提供一个简单暴力的方法，就是直接在浏览器里输入：npmjs.com/package/packageName ， 将packName替换成你所想创建的包名，然后回车，如果打开的网页中有404映入你的眼帘，恭喜你，这个包名没有被占用。  
@@ -205,6 +205,6 @@ git repository: git@github.com:yunnysunny/slogger.git
 keywords:  logger                                                
 author: yunnysunny                                         
 license: (ISC) MIT
-```  
+```
 **输出 4.5.1 运行 npm init 后的部分输出**  
 注意我们在 `git repository` 位置填写了一个 git 地址，这就意味着当前的代码要托管在github上。接着我们编写代码，然后将代码push到github，接着给预发布的代码打一个tag，最后运行`npm publish`，打完收工，现在我们看 https://npmjs.com/package/node-slogger ，包已经可以访问了！
