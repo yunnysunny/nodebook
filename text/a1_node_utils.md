@@ -4,7 +4,7 @@
 
 ### A1.1  log.io
 
-Real-time log monitoring in your browser
+可以在浏览器中实时监控服务器的日志的一个库。
 
 <http://logio.org/>
 
@@ -15,7 +15,7 @@ log.io server start
 
 http://localhost:8998
 ```
-    
+
 ### A1.2 log4js
 
 node日志打印工具，可以在控制台格式化输出日志，可以将日志打印到指定文件，日志文件可以按照日期或者大小进行拆分。我们在**代码 7.1**中曾经出现过它的身影。
@@ -26,14 +26,14 @@ node日志打印工具，可以在控制台格式化输出日志，可以将日�
 npm install log4js
 ```
 
-### A1.3 mongoskin
+### A1.3 mongoose
 
-对于原生 mongo node 驱动进行封装，使其对开发者更友好。在6.2章节曾经拿出一整节来讲它的使用。
+对于原生 mongo node 驱动进行封装，使其对开发者更友好。在 5.2 章节曾经拿出一整节来讲它的使用。
 
-<https://github.com/kissjs/node-mongoskin>
+<https://mongoosejs.com>
 
 ```
-npm install mongoskin
+npm install mongoose
 ```
 
 ### A1.4 socket.io
