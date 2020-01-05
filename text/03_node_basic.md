@@ -25,7 +25,7 @@ console.log(a.doAdd(1,2));
 和普通前端 javascript 不同的是，这里有两个关键字 `exports` 和 `require`。这就牵扯到化的概念了，javascript 这门语言设计的初衷是开发一门脚本语言，让美工等从业人员也能快速掌握并做出各种网页特效来，加之当初语言创作者开发这门语言的周期非常之短，所以在 javascript 漫长的发展过程中一直是没有模块这个语言特性的（直到最近ES6的出现才打破了这个格局）。
 
 >
-Node 是最近几年才发展起来的语言，前端 js 发展的历史要远远长于他，2000年以后随着 [Ajax](https://zh.wikipedia.org/wiki/AJAX)技术越来越流行，js的代码开始和后端代码进行交互，逻辑越来越复杂，也越来越需要以工程化的角度去组织它的代码。模块化就是其中一项亟待解决的问题，期间出现了很多模块化的规范，[CommonJS](https://en.wikipedia.org/wiki/CommonJS)就是其中的一个解决方案。由于其采用同步的模式加载模块，逐渐被前端所抛弃，但是却特别适合服务器端的架构，服务器端只需要在启动前的时候把所有模块加载到内存，启动完成后所有模块就都可以被调用了。
+Node 是最近几年才发展起来的语言，前端 js 发展的历史要远远长于他，2000 年以后随着 [Ajax](https://zh.wikipedia.org/wiki/AJAX) 技术越来越流行，js的代码开始和后端代码进行交互，逻辑越来越复杂，也越来越需要以工程化的角度去组织它的代码。模块化就是其中一项亟待解决的问题，期间出现了很多模块化的规范，[CommonJS](https://en.wikipedia.org/wiki/CommonJS) 就是其中的一个解决方案。由于其采用同步的模式加载模块，逐渐被前端所抛弃，但是却特别适合服务器端的架构，服务器端只需要在启动前的时候把所有模块加载到内存，启动完成后所有模块就都可以被调用了。
 
 我们在命令行中进入刚才我们新创建的那个文件夹下，然后运行 `node b.js`，会输出 `3` ，这就意味着你的第一个node程序编写成功了。
 
@@ -79,7 +79,7 @@ exports.getData = function(path,callback) {
 ```
 **代码 3.2.4 c.js**
 
-代码 3.2.4中 函数 `exists` 用来判断文件是否存在， `createReadStream` 函数返回一个 **readable stream(可读流)**，node 中IO（包括文件IO和网络IO）处理采用[stream](https://nodejs.org/dist/latest-v6.x/docs/api/stream.html)(流)的方式进行处理。同时在流的内部还使用[EventEmitter](https://nodejs.org/dist/latest-v6.x/docs/api/events.html#events_class_eventemitter)来触发事件，具体到 代码 3.2.4中，我们会看到 `data` 事件和 `end` 事件，分别表示当前有新读入的数据、当前的数据全都读取完毕了。
+代码 3.2.4中 函数 `exists` 用来判断文件是否存在， `createReadStream` 函数返回一个 **readable stream(可读流)**，node 中IO（包括文件IO和网络IO）处理采用 [stream](https://nodejs.org/dist/latest-v6.x/docs/api/stream.html) (流)的方式进行处理。同时在流的内部还使用[EventEmitter](https://nodejs.org/dist/latest-v6.x/docs/api/events.html#events_class_eventemitter)来触发事件，具体到 **代码 3.2.4** 中，我们会看到 `data` 事件和 `end` 事件，分别表示当前有新读入的数据、当前的数据全都读取完毕了。
 
 接下来我们写一个测试代码来对 c.js 进行测试：
 
@@ -170,6 +170,11 @@ server.listen(port, hostname, () => {
 
 ![最终我们的apache显示效果](images/success.png)  
 **图 3.3.2 最终我们的apache显示效果**
+## 3.4 流进阶
+
+node 的 stream API 是 node 的核心，HTTP 和 TCP 的各种 API ，都是基于 stream 之上的。但是 stream API 本身又过于复杂，让人难以理解。虽然官方文档洋洋洒洒写了一长串的说明，但是好多实现的细节是没有在文档中透露出来的，究其原因还是内部逻辑太繁琐，导致很难用几段话讲清楚。
+
+首先 stream 的设计初衷是为了“节流”，说的直白些就是内存中待处理的数据量过大，如果处理的速度过慢，就是导致内存中挤压的数据越来越多，最终导致进程不稳定或者内存溢出进而崩溃，而 stream 的存在，就是构建一个缓冲地带。stream 的类（从功能上分为两种 [`Writable`](https://nodejs.org/dist/latest-v12.x/docs/api/stream.html#stream_class_stream_writable) 和 [`Readable`](https://nodejs.org/dist/latest-v12.x/docs/api/stream.html#stream_class_stream_readable) ）在初始化的时候会指定一个 `highWaterMark` 参数，借助此来约定内部使用缓冲区的长度，超过这个参数，就不应该往缓冲区添加数据了。
 
 ## 3.4 HTTP请求参数
 
