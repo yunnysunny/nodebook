@@ -184,6 +184,45 @@ node 的 stream API 是 node 的核心，HTTP 和 TCP 的各种 API ，都是基
 
 ### 3.4.2 创建自定义读写流
 
+实现一个可读流：
+
+```javascript
+const { Readable } = require('stream');
+
+class MyReadable extends Readable {
+  constructor(options) {
+    super(options);
+    
+  }
+  _read() {
+    console.log('_read has been called');
+    const index = Math.random() * 0xff;
+    this.push(Buffer.from([index & 0xff]));
+  }
+}
+
+const reader = new MyReadable({
+    highWaterMark:4,
+});
+const initSize =6;
+for (let i=0;i<initSize;i++) {
+    const pushResult = reader.push(Buffer.from([i & 0xff]));
+    if (!pushResult) {
+        console.warn('reach highwatermark, you have better not to push',i);
+    }
+}
+console.log(reader.read());
+
+```
+
+**代码 3.4.2.1**
+
+可读流依靠 `push` 函数来将数据添加到内部缓冲区，同时在当前事件轮询 “阶段” 的末尾判断缓冲区长度是否低于 `highWaterMark` ，如果低于这个值，就会强制触发调用 `read(0)`，这个调用只会填充满当前的缓冲区，尝试让其的长度达到 `highWaterMark`。
+
+> Node 中使用 process.nextTick 函数来将代码置于当前事件轮询 “阶段” 的末尾执行。事件轮询处在 1.2 节中有介绍，常见的阶段有 定时器回调阶段、pending 回调阶段、IO 事件轮询回调阶段、check 回调阶段，在任意以上阶段的回调中使用 nextTick 函数的话，则 nextTick 函数回调中将次阶段回调队列执行完成后，跟随执行。不过需要注意，如果 nextTick 执行次数过多，将会延长当前阶段的执行时间，导致其他阶段 “饥饿”。
+
+read 函数内部会级联调用 _read ，我们一般会将数据的 push 操作放到 _read 中，虽然你可以手动调用 push 来写入内部缓冲区，但是将数据写入放到 _read 中可以尽量让流本身在读写之间达到平衡。
+
 
 
 ## 3.5 总结
