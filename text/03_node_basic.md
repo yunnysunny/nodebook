@@ -184,7 +184,9 @@ node 的 stream API 是 node 的核心，HTTP 和 TCP 的各种 API ，都是基
 
 ### 3.4.2 创建自定义读写流
 
-实现一个可读流：
+#### 3.4.2.1 自定义可读流
+
+先实现一个可读流，具体代码如下：
 
 ```javascript
 const { Readable } = require('stream');
@@ -215,13 +217,60 @@ console.log(reader.read());
 
 ```
 
-**代码 3.4.2.1**
+**代码 3.4.2.1.1**
 
 可读流依靠 `push` 函数来将数据添加到内部缓冲区，同时在当前事件轮询 “阶段” 的末尾判断缓冲区长度是否低于 `highWaterMark` ，如果低于这个值，就会强制触发调用 `read(0)`，这个调用只会填充满当前的缓冲区，尝试让其的长度达到 `highWaterMark`。
 
 > Node 中使用 process.nextTick 函数来将代码置于当前事件轮询 “阶段” 的末尾执行。事件轮询处在 1.2 节中有介绍，常见的阶段有 定时器回调阶段、pending 回调阶段、IO 事件轮询回调阶段、check 回调阶段，在任意以上阶段的回调中使用 nextTick 函数的话，则 nextTick 函数回调中将次阶段回调队列执行完成后，跟随执行。不过需要注意，如果 nextTick 执行次数过多，将会延长当前阶段的执行时间，导致其他阶段 “饥饿”。
 
 read 函数内部会级联调用 _read ，我们一般会将数据的 push 操作放到 _read 中，虽然你可以手动调用 push 来写入内部缓冲区，但是将数据写入放到 _read 中可以尽量让流本身在读写之间达到平衡。
+
+#### 3.4.2.2 自定义可写流
+
+```javascript
+const { Writable } = require('stream');
+
+class MyWritable extends Writable {
+  _write(chunk, encoding, callback) {
+    setTimeout(function() {
+      callback();
+    },100);
+  }
+}
+
+const writer = new MyWritable({
+  highWaterMark: 3
+});
+
+for (var i=0;i<6;i++) {
+   const result = writer.write(Buffer.from([i & 0xff]));
+   console.log('推荐下次继续写',result);
+}
+writer.on('drain',function() {
+  console.log('现在可以放心写了');
+});
+writer.on('error',function(err) {
+  console.error('写错误',err);
+});
+```
+
+**代码 2.4.2.2.1**
+
+这里为了更快的观察可写流内置缓冲区被写满的现象，这里将 `highWaterMark` 的值设置为 3，这样在 15 行循环到 2 的时候写操作就会返回 false。正常情况下 write 函数返回 false 的时候，就需要停下写入，等待 `drain` 事件触发后再写入，上面的程序明显是一个不规范的写法。
+
+`_write` 函数是供给内部调用使用的，在自己来实现可写流的子类时，这个函数是必须要实现的。`_write` 内部通过 `callback` 函数来标记写入完成。这个回调函数调用之前，认为数据是没有写入成功的。
+
+### 3.4.3 可读流的两种读取模式
+
+可读流提供了两种读取模式，flow 模式和 no-flow 模式，可读流有一个 `readableFlowing` 属性，默认为 `null`。如果给可读流对象增加 `data` 事件监听、调用函数 `resume` / `pipe` ，将会使用可读流进入 flow 模式，当时`readableFlowing` 会被置为 true。调用 `pause` / `unpipe` 函数会将可读流切换到 no-flow 模式，并且将 `readableFlowing` 置为 false，这个时候必须手动调用函数 `resume` / `pipe` 才能将其切换回 flow 模式，如果在这种情况下添加 `data` 事件是无法切换为 flow 模式的。
+
+将流职位 no-flow 还有一种方式就是添加 `readable` 事件监听。注意，如果你同时给可读流添加了 `readable` 和 `data` 的事件，则 `readable` 的优先级高于 `data`，流将回进入 no-flow 模式。当你将 `readable` 事件移出，只保留 `data` 事件时，则回到 flow 模式。
+
+在可读流的使用过程中，你应该尽量选择一种读取模式，以此降低自己代码的复杂度。Node 中通过调用可读流不同函数来隐式的修改其工作模式的方式，确实是一种比较让人艰涩难懂的设计。
+
+### 3.4.4 可写流的缓冲区
+
+为了防止可写写流写入的速度过快，可写流提供了两个函数 `cork` 和 `uncork`，调用 `cork` 后会把要写入的数据缓存起来，直到调用函数 `uncork` 后才会一股脑将缓存的数据做真正的写入。
 
 
 
