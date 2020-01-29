@@ -272,6 +272,14 @@ writer.on('error',function(err) {
 
 为了防止可写写流写入的速度过快，可写流提供了两个函数 `cork` 和 `uncork`，调用 `cork` 后会把要写入的数据缓存起来，直到调用函数 `uncork` 后才会一股脑将缓存的数据做真正的写入。
 
+### 3.4.5 highWaterMark 的计算单位
+
+`highWaterMark` 默认以字节为单位，但是在以下两种情况下，它的单位会发生改变：流对象的构造函数支持传入 `objectMode` 参数，默认为 `false`，如果设置为 `true`，则 `highWaterMark` 的单位变成对象个数；流对象的构造函数支持传入 `defaultEncoding` 参数，对于可读流来说默认为 `null`（此时 `highWaterMark` 的单位为字节），对于可写流来说默认为 `utf-8`（此时如果写入的数据中含有中文等字符，则写入的元素个数算 1 个，而不是 3 个）。 不过如果同时设置 `objectMode` 为 `true` 和 自定义的 `defaultEncoding` 参数时，`defaultEncoding` 参数将会被忽略。
+
+流对象，还支持通过调用 `setDefaultEncoding` 来在使用过程中修改编码方式，这个时候会使读写流的计数方式动态发生更改，也算是一个比较隐蔽的坑。
+
+### 3.4.6 使用实践
+
 
 
 ## 3.5 总结
