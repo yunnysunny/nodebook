@@ -221,7 +221,7 @@ console.log(reader.read());
 
 可读流依靠 `push` 函数来将数据添加到内部缓冲区，同时在当前事件轮询 “阶段” 的末尾判断缓冲区长度是否低于 `highWaterMark` ，如果低于这个值，就会强制触发调用 `read(0)`，这个调用只会填充满当前的缓冲区，尝试让其的长度达到 `highWaterMark`。
 
-> Node 中使用 process.nextTick 函数来将代码置于当前事件轮询 “阶段” 的末尾执行。事件轮询处在 1.2 节中有介绍，常见的阶段有 定时器回调阶段、pending 回调阶段、IO 事件轮询回调阶段、check 回调阶段，在任意以上阶段的回调中使用 nextTick 函数的话，则 nextTick 函数回调中将次阶段回调队列执行完成后，跟随执行。不过需要注意，如果 nextTick 执行次数过多，将会延长当前阶段的执行时间，导致其他阶段 “饥饿”。
+> Node 中使用 process.nextTick 函数来将代码置于当前事件轮询 “阶段” 的末尾执行。事件轮询处在 1.2 节中有介绍，常见的阶段有 定时器回调阶段、pending 回调阶段、IO 事件轮询回调阶段、check 回调阶段，在任意以上阶段的回调中使用 nextTick 函数的话，则 nextTick 函数回调中将此阶段回调队列执行完成后，跟随执行。不过需要注意，如果 nextTick 执行次数过多，将会延长当前阶段的执行时间，导致其他阶段 “饥饿”。
 
 read 函数内部会级联调用 _read ，我们一般会将数据的 push 操作放到 _read 中，虽然你可以手动调用 push 来写入内部缓冲区，但是将数据写入放到 _read 中可以尽量让流本身在读写之间达到平衡。
 
@@ -278,7 +278,15 @@ writer.on('error',function(err) {
 
 流对象，还支持通过调用 `setDefaultEncoding` 来在使用过程中修改编码方式，这个时候会使读写流的计数方式动态发生更改，也算是一个比较隐蔽的坑。
 
-### 3.4.6 使用实践
+## 3.5 TCP
+
+之所以将 TCP 的内容放到流教程的后面，是由于 TCP 中的 [net.Socket](https://nodejs.org/dist/latest-v12.x/docs/api/net.html#net_class_net_socket) 类就是继承自 [stream.Duplex](https://nodejs.org/dist/latest-v12.x/docs/api/stream.html#stream_class_stream_duplex) 类。上一节中没有讲 `Duplex` 类，它相当于将可读流和可写流的功能合二为一，不过其内部读写的数据是分别存储在两个缓冲区中，不相互影响；于其对应的是类 [stream.Transform](https://nodejs.org/dist/latest-v12.x/docs/api/stream.html#stream_class_stream_transform)，它也是将可读流和可写流的功能合二为一，不过其内部读写流的缓冲区是共享的。
+
+TCP 属于传输层协议，大家都对 HTTP 的服务编写比较熟悉，我们可以通过 API 方便的发送请求、接收响应数据。但是你发送的 HTTP 请求时，在 API 底层要封装成符合 HTTP 协议的请求数据数据包，同意在接收响应后，也是 API 底层帮我们把 HTTP 数据包解析出来，抛到应用层。HTTP 1.x 时代，只能通过客户端发送请求来触发通信流动，服务器端不能主动给客户端发送数据，如果想实现全双工的通信，就直接的就是借助 TCP 层面的协议。
+
+> HTTP 2.x 开始，服务器端和客户端可以互相发送数据，与此类似的功能，还包括 html5 标准中的 websocket 协议。
+
+
 
 
 

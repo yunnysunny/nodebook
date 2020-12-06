@@ -208,3 +208,5 @@ license: (ISC) MIT
 ```
 **输出 4.5.1 运行 npm init 后的部分输出**  
 注意我们在 `git repository` 位置填写了一个 git 地址，这就意味着当前的代码要托管在github上。接着我们编写代码，然后将代码push到github，接着给预发布的代码打一个tag，最后运行`npm publish`，打完收工，现在我们看 https://npmjs.com/package/node-slogger ，包已经可以访问了！
+
+如果你待发布的代码中含有可执行脚本，且在安装的时候需要运行这个可执行脚本，则你的 publish 命令是不能在 Windows 上运行的，否则你发布的包是没有可执行权限的。

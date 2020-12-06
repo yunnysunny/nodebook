@@ -45,3 +45,4 @@ paid for this book.**
 npm install gitbook-cli -g
 ```
 然后在项目目录中运行`gitbook serve`即可编译生成html，并且创建一个本地预览网站，其他详细的编译参数可以参照[官方文档](https://toolchain.gitbook.com/setup.html)。
+
