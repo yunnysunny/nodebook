@@ -250,7 +250,7 @@ source ~/.bashrc
 
 **代码 11.4.1 安装 tnvm**
 
-接下来需要安装你需要的 tnvm 版本，阿里官方提供了一份 alinode 和原始 Node 的版本对照，详细数据可以参照[官方文档](https://help.aliyun.com/knowledge_detail/60811.html)。大体上的规则是 alinode 的 2.x 对应原始 Node 的 6.x 版本，3.x 对应 8.x，4.x 对应 10.x。举一个例子，从官方文档得知，原始 Node v6.14.4  对应的 alinode 为 v2.5.2 ，那么安装这个版本的命令如下：
+接下来需要安装你需要的 tnvm 版本，阿里官方提供了一份 alinode 和原始 Node 的版本对照，详细数据可以参照 [官方文档](https://help.aliyun.com/knowledge_detail/60811.html) 。大体上的规则是 alinode 的 2.x 对应原始 Node 的 6.x 版本，3.x 对应 8.x，4.x 对应 10.x。举一个例子，从官方文档得知，原始 Node v6.14.4  对应的 alinode 为 v2.5.2 ，那么安装这个版本的命令如下：
 
 ```shell
 tnvm install alinode-v2.5.2 # 安装需要的版本
