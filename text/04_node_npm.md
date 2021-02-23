@@ -124,10 +124,12 @@ npm config set prefix "D:\npm"
 ```
 **命令 4.2.3**
 
+> 设置完成后，记得将 d:\npm 添加到环境变量 PATH 中，否则在终端中无法找到全局安装的命令。
+
 这样你使用 `npm install -g package` 命令安装的包就会被放置到 ${prefix}/node_modules   下。同时使用命令
 
 ```
-npm config set cache "D:\npm\node_modules\npm-cache"
+npm config set cache "D:\npm-cache"
 ```
 **命令 4.2.4**
 
@@ -189,6 +191,26 @@ content-disposition@0.5.1:
 yarn config set registry https://registry.npm.taobao.org
 ```
 **命令4.4.1**  
+
+同时你可以通过命令来设置 yarn 命令安装的包的路径：
+
+```shell
+yarn config set global-folder "d:\yarn"
+```
+
+**命令 4.4.2**
+
+> 设置完后，记得将对应的 d:\yarn\global\bin 添加到环境变量，这样全局安装的命令行程序才能被从终端上找得到。
+
+当然与 npm 命令对应的，也可以设置缓存路径：
+
+```shell
+yarn config set cache-folder "D:\yarn_cache"
+```
+
+**命令 4.4.3**
+
+
 
 
 ### 4.5 发布自己的包到 npmjs  
