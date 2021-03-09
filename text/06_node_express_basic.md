@@ -105,7 +105,7 @@ express处理网络请求，是以一种被称之为 `middlewave(也翻译为中
 
 `app.use(cookieParser());`是用来处理cookie的，没有这个 middleware 的话，无法读取 http 请求中的cookie数据。
 
-`app.use(express.static(path.join(__dirname, 'public')));`是定义从 `public` 路径读取静态文件。之前讲过当前项目目录中存在`public` 文件夹，假设我们在其下 `javascripts` 目录中放置一个 `query.js` 文件，那么我们在html中就可以这么引用这个静态文件：
+`app.use(express.static(path.join(__dirname, 'public')));`是定义从 `public` 路径读取静态文件。之前讲过当前项目目录中存在`public` 文件夹，假设我们在其下 `javascripts` 目录中放置一个 `jquery.js` 文件，那么我们在html中就可以这么引用这个静态文件：
 
 `<script type="text/javascript" src="/javascripts/jquery.js"></script>`
 
@@ -114,7 +114,7 @@ express处理网络请求，是以一种被称之为 `middlewave(也翻译为中
 上面讲了 express-generator 默认添加的若干 middleware, 不过如果是做网站项目的话，还缺少对于session的支持，这个要在后面单独讲。接下来是很重要的路由映射部分，因为项目中的url映射都是
 在这里配置的。我们这里只看 `routes/index.js` 文件：
 
-```javasripts
+```javascripts
 var express = require('express');
 var router = express.Router();
 
@@ -166,7 +166,7 @@ router.use(function timeLog(req, res, next) {
 ```
 **代码 6.2.5**  
 那么上述代码定义的这个middleware就仅仅对 `index.js` 内部定义的地址起作用，对于这个路由器文件外的代码是不起作用的，这个设计就比较灵活了。之前咱们在 `app.js` 中通过 `app.use` 来定义middleware，那么理论上所有的请求都要经过这种middleware进行处理的，除非在经过这个middleware之前，已经有其他的middleware把HTTP请求处理完成了。   
-最后看错误捕获这一块了，`app.js`中对于代码捕获区分了相中情况，如果当前是开发环境就在出错的时候打印堆栈，否则只显示错误名称。我们现在修改一下 `/user` 的路由代码：  
+最后看错误捕获这一块了，`app.js`中对于代码捕获区分了两种情况，如果当前是开发环境就在出错的时候打印堆栈，否则只显示错误名称。我们现在修改一下 `/user` 的路由代码：  
 
 ```javascript
 router.get('/user', function(req, res) {
