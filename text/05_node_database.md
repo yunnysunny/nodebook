@@ -350,13 +350,13 @@ new Article({
 
 **代码 5.2.1.9 在 schema 中使用校验器**
 
-mongoose 内建了好多校验器（validator），多余所有类型字段来说都可以使用 [required](http://mongoosejs.com/docs/api.html#schematype_SchemaType-required) 校验器，对于 Number 类型字段来说，可以使用 [min](http://mongoosejs.com/docs/api.html#schema_number_SchemaNumber-min) 和 [max](http://mongoosejs.com/docs/api.html#schema_number_SchemaNumber-max) 校验器，对于 String 类型字段来说，可以使用 [enum](http://mongoosejs.com/docs/api.html#schema_string_SchemaString-enum) [match](http://mongoosejs.com/docs/api.html#schema_string_SchemaString-match) [maxlength](http://mongoosejs.com/docs/api.html#schema_string_SchemaString-maxlength) [minlength](http://mongoosejs.com/docs/api.html#schema_string_SchemaString-minlength) 校验器。
+mongoose 内建了好多校验器（validator），对于所有类型字段来说都可以使用 [required](http://mongoosejs.com/docs/api.html#schematype_SchemaType-required) 校验器，对于 Number 类型字段来说，可以使用 [min](http://mongoosejs.com/docs/api.html#schema_number_SchemaNumber-min) 和 [max](http://mongoosejs.com/docs/api.html#schema_number_SchemaNumber-max) 校验器，对于 String 类型字段来说，可以使用 [enum](http://mongoosejs.com/docs/api.html#schema_string_SchemaString-enum) [match](http://mongoosejs.com/docs/api.html#schema_string_SchemaString-match) [maxlength](http://mongoosejs.com/docs/api.html#schema_string_SchemaString-maxlength) [minlength](http://mongoosejs.com/docs/api.html#schema_string_SchemaString-minlength) 校验器。
 
-所有校验器都可以设置在校验失败后的错误提示信息，如果相对某一个字段设置 required 约束，那么可以写成 `required:true` ，还可以进一步指定校验失败后的提示信息，也就是写成这样 `requried:[true,'这个字段必须指定']` 。但是对于 enum 来说，由于本身定义的时候就是一个数组结构（参见上面代码中 `level` 字段的定义），所以 mongoose 内部在定义其 message 属性时使用这样一个 Object 结构：`{values:[/*枚举字段定义*/],message:'出错提示信息'}` 。
+所有校验器都可以设置在校验失败后的错误提示信息，如果相对某一个字段设置 required 约束，那么可以写成 `required:true` ，还可以进一步指定校验失败后的提示信息，也就是写成这样 `required:[true,'这个字段必须指定']` 。但是对于 enum 来说，由于本身定义的时候就是一个数组结构（参见上面代码中 `level` 字段的定义），所以 mongoose 内部在定义其 message 属性时使用这样一个 Object 结构：`{values:[/*枚举字段定义*/],message:'出错提示信息'}` 。
 
 还记得在**代码 5.2.1.8**中我们自定义的那个 content 字段的校验中间件不？这个中间件可以直接写到 schema 定义中，在**代码 5.2.1.9**中的 content 字段中的 validate 属性，就能替换掉之前我们写过的校验中间件。
 
-最终你在调用 save 函数之前，这层层的字段定义约束都会被执行，如果校验出错，那么 save 回调函数返回的第一个参数中的 name 属性的值将是 `ValidationError`，让你后其 errors 属性中保存着字段的详细信息的一个 key-value数据结构，键名是出错的字段名，值是一个包含错误详情的对象，这个对象中 message 属性就是我们在 schema 中设置的出错信息， path 是出错的字段名，value 是引起出错的具体的设置的值。
+最终你在调用 save 函数之前，这层层的字段定义约束都会被执行，如果校验出错，那么 save 回调函数返回的第一个参数中的 name 属性的值将是 `ValidationError`，然后其 errors 属性中保存着字段的详细信息的一个 key-value数据结构，键名是出错的字段名，值是一个包含错误详情的对象，这个对象中 message 属性就是我们在 schema 中设置的出错信息， path 是出错的字段名，value 是引起出错的具体的设置的值。
 
 最终需要注意，unique 这个约束并不是一个  ValidationError （实际上其 name 属性值为 MongoError），所以你  save 失败后得到的error 对象中没有errors 属性。unique 和 sparse 仅仅是 schema 调用 mongodb 的驱动创建了数据库索引而已。**代码 5.2.1.9** 中关于 isbn 的约束，也可以通过 schema 中的 [index](http://mongoosejs.com/docs/api.html#schema_Schema-index) 函数来实现：
 
@@ -376,7 +376,7 @@ _author : {type:Schema.Types.ObjectId,ref:'user'},
 
 **代码 5.2.1.11**
 
-至于其中的 _ref 属性是怎么回事，我们先买个关子，一会儿再说。
+至于其中的 _ref 属性是怎么回事，我们先卖个关子，一会儿再说。
 
 mongoose 在查询方面，有好多细节做了优化，比如说在筛选返回字段的时候可以直接通过字符串来指定：
 
