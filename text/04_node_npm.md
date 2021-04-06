@@ -95,6 +95,14 @@ npm install -g cnpm@3.4.1 --registry=https://registry.npm.taobao.org
 否则的话，安装完之后运行命令会报错。  
 接着你可以使用 cnpm 来代替 npm，比如说`cnpm install`来代替`npm install`，又可以愉快的玩耍了。  
 
+但是我们在使用一些第三方工具的时候，其包裹的命令行内部会调用 npm install 命令来安装依赖包，这时候 cnpm 排不上用场，那么将 npm 的安装源手动切换到淘宝源，就是解决这个问题的大法：
+
+```shell
+npm config set registry https://registry.npm.taobao.org
+```
+
+**命令 4.2.3**
+
 接着，我们尝试使用cnpm全局安装lodash，运行假设你的nodejs安装在windows的C盘的话，运行完`cnpm install lodash -g`后，你会惊奇的发现报错了：
 
 ```
@@ -122,7 +130,7 @@ npm ERR! Please include the following file with any support request:
 ```
 npm config set prefix "D:\npm"
 ```
-**命令 4.2.3**
+**命令 4.2.4**
 
 > 设置完成后，记得将 d:\npm 添加到环境变量 PATH 中，否则在终端中无法找到全局安装的命令。
 
@@ -131,7 +139,7 @@ npm config set prefix "D:\npm"
 ```
 npm config set cache "D:\npm-cache"
 ```
-**命令 4.2.4**
+**命令 4.2.5**
 
 可以设置npm的缓存路径，否则的话它默认会缓存一部分下载的包到系统目录中。
 
@@ -192,6 +200,8 @@ yarn config set registry https://registry.npm.taobao.org
 ```
 **命令4.4.1**  
 
+> 如果之前通过 **命令 4.2.3** 命令设置过第三方源，那么这个设置的优先级会大于通过 yarn 命令设置的优先级。特别是 npm 命令和 yarn 命令设置的源地址不同的时候，你会发现明明 yarn 切换到了淘宝源，运行 yarn add 后源地址却不是淘宝源的。其实通过 yarn 命令切换源后，它会在 ~/.yarnrc 中写入新的源的配置，同样使用 config 命令切换源后，它会写入 ~/.npmrc 中。运行 yarn add 时，它会先读取 ~/.npmrc 中的配置，再读取 ~/.yarnrc 的配置。所以解决问题的思路就是要么删除 ~/.npmrc 中关于 registry 的配置，要么将其改成跟 yarn 中配置的源地址一致。
+
 同时你可以通过命令来设置 yarn 命令安装的包的路径：
 
 ```shell
@@ -229,6 +239,10 @@ author: yunnysunny
 license: (ISC) MIT
 ```
 **输出 4.5.1 运行 npm init 后的部分输出**  
-注意我们在 `git repository` 位置填写了一个 git 地址，这就意味着当前的代码要托管在github上。接着我们编写代码，然后将代码push到github，接着给预发布的代码打一个tag，最后运行`npm publish`，打完收工，现在我们看 https://npmjs.com/package/node-slogger ，包已经可以访问了！
+注意我们在 `git repository` 位置填写了一个 git 地址，这就意味着当前的代码要托管在github上。接着我们编写代码，然后将代码push到github，接着给预发布的代码打一个tag，最后运行`npm publish`（在此之前需要运行 `npm login` 完成在 npmjs 网站上的授权），打完收工，现在我们看 https://npmjs.com/package/node-slogger ，包已经可以访问了！
+
+使用 publish 命令有如下两个注意点：
 
 如果你待发布的代码中含有可执行脚本，且在安装的时候需要运行这个可执行脚本，则你的 publish 命令是不能在 Windows 上运行的，否则你发布的包是没有可执行权限的。
+
+其次如果你之前使用 **命令4.2.3** 手动切换非官方源的话，是没法直接 publish 成功的，这种情况下执行 publish 命令，会将其发布到淘宝源上去，但是我们又没有淘宝源的账号（况且我们也不想发布到淘宝源）。解决的方法是删除 ~/.npmrc 中的这行配置 `registry=https://registry.npm.taobao.org/`。当然通过 `npm config set registry https://registry.npmjs.org/` 也能实现相当的效果。
