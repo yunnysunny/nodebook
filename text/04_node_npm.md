@@ -220,7 +220,13 @@ yarn config set cache-folder "D:\yarn_cache"
 
 **命令 4.4.3**
 
+使用 yarn 的还有一个好处是，当前项目版本是锁定的 yarn.lock 文件中的（从 node 6 开始，也有类似的功能，有一个 package.lock 的文件来锁定版本号）。这样带来的好处是，假设 package.json 中定义的某个版本号是 ^1.0.0，按理来说 1.0.0 和 1.n.m 都是符合这个版本约束的，两个开发者在协作开发的时候，如果两人安装的小版本号不一致，就会导致未知问题。yarn.lock 的一个重要作用就是，就是将各个包用的版本号一开始就锁死。例如在 **代码 4.2.1** 中，yarn.lock 规定 accepts 用的是 1.3.3，多个开发者在协作开发时，从代码仓库中检出项目代码，初始化运行 yarn install 后安装的 accepts 也会是 1.3.3，即使当前 accepts 包有最新的版本 1.4.x，也不会被安装。
 
+随着项目的开发迭代，各个包的版本难免会被更新，更新 yarn.lock 的某个包的版本号大体有如下几种方法。
+
+直接使用 `yarn add packageName@x.y.z`， 这样 yarn.lock 和 package.json 都会被更新，且 package.json 中的包版本号会被写死为 `x.y.z`，而不是我们常见的  `^a.b.c` 格式。
+
+使用 `yarn upgrade-interactive --latest` , 需要手动选择升级的依赖包，按空格键选择，a 键切换所有，i 键反选选择。这种方式如果升级的包的版本号中主版本号没有变，则只会更改 yarn.lock，不会更改 package.json。比如说当前安装版本是 1.1.0，升级到版本是 1.20，则用这个命令后，package.json 不改变；当前安装版本为 1.1.0，升级到版本是 2.0.0，则用这个命令后，package.json 和 yarn.lock 都会更改。
 
 
 ### 4.5 发布自己的包到 npmjs  
