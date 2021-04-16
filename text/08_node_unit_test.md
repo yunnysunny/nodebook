@@ -239,6 +239,44 @@ describe('Backend',function() {
 我们在模板 `user/admin.ejs` 有这么一句：`<title><%=user.account%></title>`，所以我们这里在测试时使用正则 `/<title>admin<\/title>/` 来验证是否真的进入后台了。  还有就是在读取 `cookie` 变量的时候没有直接在 require 完成之后立即读取，因为那个时候，这个变量还没有被赋值，而是在测试用例内部通过 `before.cookie` 读取。
 > 注意，由于我们使用了 redis 来存储 session 数据，所以如果你忘记启动 redis 服务器的话，我们的登录操作会失败，而且在 mocha 中给出的报错提示是请求超时，这个问题比较隐蔽，大家一定要注意。
 
+#### 8.1.4 仿真测试
+
+上面讲的所有的断言都是对结果进行断言，执行某一个函数，查看返回值是否符合预期，或者请求某一个接口看看响应内容是否符合预期。但是某些情况下，我们想对中间步骤进行测试，比如说在执行 `函数 A` 的时候，正常情况下其内部应该调用了 `函数 B`，我们想验证 `函数 B` 是否真的被调用了。
+
+解决这个需求，就需要用到 [sinon](https://npmjs.com/package/sinon) 这个包。将代码 **代码 8.1.1.1** 稍作改造：
+
+```javascript
+function add(a,b) {
+    console.log(a, b);
+    return a+b;
+}
+```
+
+**代码 8.1.4.1**
+
+然后我们可以编写测试用例，用来验证 console.log 是否被调用了：
+
+```javascript
+var assert = require('assert');
+var sinon = require('sinon');
+var calculator = require('./calculator');
+
+describe('Calculator sinon', function () {
+    describe('#add()', function () {
+        it('should call console.log in add function', function () {
+            var spy = sinon.spy(console, 'log');
+            calculator.add(1, 2);
+            assert(spy.calledWith(1, 2));
+            console.log.restore();
+        });
+    });
+});
+```
+
+**代码 8.1.4.2**
+
+上述代码的最后一行也可以写成 `sion.restore()` , 这样的话，会将所有通过 sinon 改造的函数都做还原。
+
 ### 8.2 测试覆盖率
 
 我们写测试用例是为了及时发现开发中产生的 bug，这就引申出来一个问题，怎样写测试用例才能更好的将潜在的 bug 更好的暴漏出来，这也就是我们现在要讲的话题——测试覆盖率。
