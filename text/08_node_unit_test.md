@@ -266,6 +266,7 @@ describe('Calculator sinon', function () {
         it('should call console.log in add function', function () {
             var spy = sinon.spy(console, 'log');
             calculator.add(1, 2);
+            assert(spy.calledOnce);
             assert(spy.calledWith(1, 2));
             console.log.restore();
         });
@@ -276,6 +277,34 @@ describe('Calculator sinon', function () {
 **代码 8.1.4.2**
 
 上述代码的最后一行也可以写成 `sion.restore()` , 这样的话，会将所有通过 sinon 改造的函数都做还原。
+
+上面的 spy 函数相当于做了一个钩子，可以检测是否被调用，可以获取调用时传的参数。有了这个函数，就可以让我们的代码测试的覆盖面更广。但是有的时候，我们的代码在调用中间件时，肯定要书写中间件不可用时的处理逻辑，但是真实情况是，我们的中间件绝大多数情况下都是可用的，按照正常流程测试，这部分错误处理函数从来都不会被触发，这时候我们就要用到 stub 这个函数。
+
+```javascript
+const {expect} = require('chai');
+const sinon = require('sinon');
+const {UserModel} = require('../../models');
+const user = require('../../models/user_model');
+
+describe('user check sinon', function() {
+    it('错误处理', function(done) {
+        const myFake = sinon.stub(UserModel, 'findOne').callsFake(function(filter, fields, option, callback) {
+            callback(new Error('error from sinon'));
+        });
+        user.loginCheck('','', function(err) {
+            expect(err).not.be.null;
+            myFake.restore();
+            done();
+        });
+    });
+});
+```
+
+**代码 8.1.4.3**
+
+这里面对于 `UserModel.findOne` 函数进行改写，强制让其 callback 触发时返回一个 Error 对象，这样我们就可以测试我们代码在数据库查询失败的逻辑处理了。当然在每次测试完成之后，按照惯例需要对于改造进行还原，也就是 `myFake.restroe` 这句代码的调用，如果不写这句话，`UserModel.findOne` 就会一直处在被改写的状态，很有可能影响下面的测试。
+
+stub 这个函数不仅仅可以用来模拟中间件出错的场景，还可以用来模拟调用第三方服务返回数据的场景，模拟这种场景可以让你的测试代码脱离第三方服务的依赖。
 
 ### 8.2 测试覆盖率
 
