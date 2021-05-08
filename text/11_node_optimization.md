@@ -146,7 +146,7 @@ Debugger attached
 上面讲了很多 JMeter 的基本使用都是基于 UI 的，正式使用的时候，UI 会占用若干资源，所以官方推荐使用命令行来运行，UI 工具只是用来负责生成 jmx 文件。点击保存按钮即可生成当前 UI 设置的 jmx 文件，然后在命令行中使用如下命令：
 
 ```shell
-bin/jmeter.sh -n -t the_path_of_jmx -l the_path_of_jtl -e -o /data/ouput
+bin/jmeter.sh -n -t the_path_of_jmx -l the_path_of_jtl -e -o the_result_output_path
 ```
 
 **命令 11.2.1**
