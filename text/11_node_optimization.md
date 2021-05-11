@@ -146,12 +146,28 @@ Debugger attached
 上面讲了很多 JMeter 的基本使用都是基于 UI 的，正式使用的时候，UI 会占用若干资源，所以官方推荐使用命令行来运行，UI 工具只是用来负责生成 jmx 文件。点击保存按钮即可生成当前 UI 设置的 jmx 文件，然后在命令行中使用如下命令：
 
 ```shell
-bin/jmeter.sh -n -t the_path_of_jmx -l the_path_of_jtl -e -o the_result_output_path
+bin/jmeter.sh -n -t the_path_of_jmx -l the_path_of_jtl -e -o the_result_output_directory
 ```
 
 **命令 11.2.1**
 
 `jmeter.sh` 可以在 JMeter 的 bin 目录下找到 (Windows 下是 jmeter.bat)； `the_path_of_jmx` 即保存后生成 jmx 文件；`the_path_of_jtl` 代表生成的每条测试情况详情，多次运行命令时，要保证每次用的文件名不一致。
+
+如果在设置线程组的时候，指定了循环次数为无线循环，则 jmeter 在命令行运行过程中无法判断什么时候结束，如果手动 CRTL+C 结束命令行时，`the_result_output_directory` 中不会生成测试报表 html 文件。
+
+![](images/jmeter_loop_count.png)
+
+**图 11.2.8**
+
+这时候，你需要使用命令行讲 jtl 文件转化成报表文件，具体命令为：
+
+```shell
+bin/jmeter.sh -g the_path_of_jtl -e -o the_path_of_result_report_html
+```
+
+**命令 11.2.2**
+
+如果在 **图 11.2.8** 中指定了一个循环次数，则运行完 **命令 11.2.1** 后，会在目录 `the_result_output_directory` 直接生成报表文件。
 
 ### 11.3 内存分析
 
