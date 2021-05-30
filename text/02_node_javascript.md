@@ -195,17 +195,17 @@ var async = require('async');
 async.waterfall([
     function(callback) {
         setTimeout(function() {
-            callback(false,2+3);
+            callback(null, 2+3);
         },100);
     },
     function(sum,callback) {
         setTimeout(function() {
-            callback(false,sum-1);
+            callback(null, sum-1);
         },100);
     },
     function(left,callback) {
         setTimeout(function() {
-            callback(false,left * 2);
+            callback(null, left * 2);
         },100);
     }
 ],function(err,result) {
@@ -220,17 +220,17 @@ async.waterfall([
 ```javascript
 function(callback) {
   setTimeout(function() {
-    callback(false,2+3);
+    callback(null, 2+3);
   },100);
 }
 ```
 
-注意`callback(false,2+3);`这一句，调用完这一句，它就参数 2+3 这个值传递到下一个任务中去了，然后数组的第二个元素：
+注意`callback(null, 2+3);`这一句，调用完这一句，它就参数 2+3 这个值传递到下一个任务中去了，然后数组的第二个元素：
 
 ```javascript
 function(sum,callback) {
   setTimeout(function() {
-    callback(false,sum-1);
+    callback(null, sum-1);
   },100);
 }
 ```
@@ -239,7 +239,7 @@ function(sum,callback) {
 
 ```javascript
 function(err,result) {
-    console.log(err,result);
+    console.log(err, result);
 }
 ```
 
