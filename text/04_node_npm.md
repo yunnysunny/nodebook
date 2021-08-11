@@ -15,6 +15,8 @@ npm 目前拥有数以百万计的包，可以在 https://www.npmjs.com/ 使用�
 找到需要的包后，即可使用以下指令安装：
 
     npm install coffee-script
+> 在 win 10 下的 powershell 中运行命令，如果出现提示 `无法加载文件，因为在此系统上禁止运行脚本` 的提示，那么需要使用超级管理员打开 powershell ，然后运行 `set-ExecutionPolicy RemoteSigned`，接着会提示`是否要更改执行策略`，输入 y。操作完成之后，即可执行 npm 命令。
+
 运行完之后，就会在当前目录下的 `node_modules`目录下安装coffee-script包。
 
 ```
