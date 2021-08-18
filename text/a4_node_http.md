@@ -5,8 +5,8 @@
 ### A4.1 GET 请求
 
 首先我们来简单描述一下 HTTP 请求，打开浏览器，并且打开开发者工具，然后使用谷歌搜 `node`，我们定向到开发者工具的 Network 标签页，然后开第一条网络请求，鼠标单击点开这条网络请求，会显示格式化好的HTTP 请求和响应的数据包内容：  
-![谷歌搜索](E:/kuaipan/code/markdown/nodebook/text/images/google_search.png)  
-**图A4.1.2 使用谷歌搜索 node**  
+![谷歌搜索](./images/google_search.png)  
+**图 A4.1.2 使用谷歌搜索 node**  
 
 我们这里仅仅关注一下 `General` 部分，`Request URL` 中 `?` 后面是一大串请求参数，在我们这里是
 
@@ -79,12 +79,12 @@ server.listen(port, hostname, () => {
 
 由于不能直接通过浏览器输入地址来测试 POST 请求，所以推荐大家使用一个 chrome app来测试 POST 请求，它就是 [Postman](https://chrome.google.com/webstore/detail/postman/fhbjgbiflinjbdggehcddcbncdddomop?utm_source=chrome-ntp-icon)。安装完成之后，打开主界面，下拉菜单区域选择 `POST`，然后输入地址 `http://localhost:3000`，打开 Body 标签，选择`x-www-form-urlencoded`，最后点击 Send 按钮，完成后就会输出`Hello sunny World from unknown`。
 
-![Postman 发送 POST 请求](E:/kuaipan/code/markdown/nodebook/text/images/postman_post.png)  
-**图A4.2.1 Postman 发送 POST 请求**
+![Postman 发送 POST 请求](./images/postman_post.png)  
+**图 A4.2.1 Postman 发送 POST 请求**
 
 这里之所以需要选择`x-www-form-urlencoded`，是由于 POST 数据包有很多组织方式，我们最常用的就是这种方式，其数据格式依然是`key1=value1&key2=value2`，而 Node 自带的 [querystring.parse函数](https://nodejs.org/dist/latest-v6.x/docs/api/querystring.html#querystring_querystring_parse_str_sep_eq_options) 正是用来处理这种字符串的。同时我们可以点击 Code 按钮，来查看 POST请求发送的请求数据包：
 
-![POST请求数据包](E:/kuaipan/code/markdown/nodebook/text/images/post_package.png)  
-**图A4.2.2 POST请求数据包**
+![POST请求数据包](./images/post_package.png)  
+**图 A4.2.2 POST请求数据包**
 
 你可以留意到请求包中当中有一个空行（HTTP协议中用空行来分割请求头和请求正文），空格下面的`name=sunny&password=1234`就是我们 POST 到后台的数据。
