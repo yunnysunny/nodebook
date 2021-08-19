@@ -5,11 +5,8 @@ Node 的优点是处理 IO 密集型操作，对于互联网应用来说，很�
 Node 的 C++ 扩展功能是依赖于 V8 来实现的，但是在 Node 每次做大的版本升级的时候，都会有可能对应升级 V8 的版本，相应的扩展 API 的定义也很有可能发生变化，所以下面要重点介绍 nan 这个第三方包的，它提供了一系列的宏定义和包装函数，来对这些不同版本的扩展 API 进行封装。
 
 ### 10.1 准备工作
-为了能够编译我们的 C++ 扩展，我们需要做一些准备工作，首先需要全局安装 [node-gyp](https://github.com/nodejs/node-gyp) 这个包：`npm install -g node-gyp`。不过此包还依赖于 python 2.7（必须得用2.7版本，安装3.0是不管用的）。同时需要安装 C++ 编译工具，在 linux 下需要使用 [GCC](https://gcc.gnu.org/)，Mac 下需要使用 [Xcode](https://developer.apple.com/xcode/download/)，Windows 下需要安装 [Visual Studio](https://www.visualstudio.com/products/visual-studio-community-vs) (版本要求是2015，低于此版本的不可以，高于此版本的作者本身没有做过测试)，大家可以选择安装社区版，因为专业版和旗舰版都是收费的，如果想进一步减小安装后占用磁盘的体积可以安装 [Visual C++ Build Tools](http://landinghub.visualstudio.com/visual-cpp-build-tools) 。按照官方说明在windows下安装完 Visual Stuido 和 node-gyp 后，还需要使用命令 `npm config set msvs_version 2015` 来指定 node-gyp 使用的 VS 版本。
+为了能够编译我们的 C++ 扩展，我们需要做一些准备工作，首先需要全局安装 [node-gyp](https://github.com/nodejs/node-gyp) 这个包：`npm install -g node-gyp`。同时需要安装 C++ 编译工具，在 linux 下需要使用 [GCC](https://gcc.gnu.org/)，Mac 下需要使用 [Xcode](https://developer.apple.com/xcode/download/)，Windows 下需要安装 [Visual Studio](https://www.visualstudio.com/products/visual-studio-community-vs) ，大家可以选择安装社区版，因为专业版和旗舰版都是收费的，如果想进一步减小安装后占用磁盘的体积可以安装 [Visual C++ Build Tools](http://landinghub.visualstudio.com/visual-cpp-build-tools) 。详细的安装说明可以参见 [附 A6](https://nodebook.whyun.com/a6_node_native_addon_config)。
 
-> 不过经笔者测试发现，如果在 Windows 中同时安装了多个 VS 工具时， node-gyp 有可能使用错误的版本进行编译，笔者电脑上同时安装了 build tool 2015 和 vs 2012，编译的时候老是会选择使用 vs 2012，不得已将 vs 2012 卸载掉，但是依然报错，最后在 node-gyp 命令中添加参数 ` --msvs_version=2015` 才解决。
-
-### 10.2 hello world
 为了演示如何编译一个 C++ 扩展，我们从亘古不变的 hello world 程序入手，这个程序取自 Node [C++扩展的官方文档](https://nodejs.org/dist/latest-v6.x/docs/api/addons.html)。我们的目的是在 C++ 扩展中实现如下代码：
 
 ```javascript
