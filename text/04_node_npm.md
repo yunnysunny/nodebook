@@ -255,3 +255,43 @@ license: (ISC) MIT
 
 其次如果你之前使用 **命令4.2.3** 手动切换非官方源的话，是没法直接 publish 成功的，这种情况下执行 publish 命令，会将其发布到淘宝源上去，但是我们又没有淘宝源的账号（况且我们也不想发布到淘宝源）。解决的方法是删除 ~/.npmrc 中的这行配置 `registry=https://registry.npm.taobao.org/`。当然通过 `npm config set registry https://registry.npmjs.org/` 也能实现相当的效果。
 
+### 4.6 发布自己的包到私有仓库
+
+有的时候，我们写的包是公司内部使用的，不适合公开发布，为了方便大家协作开发，需要一个私有仓库。网上很多教程，都是借用 cnpm 的源代码，自己搭建类似于 cnpm 的系统来做私有仓库，不过这么做维护比较复杂，笔者没有这么做过，而是借用 npm 自带的功能来实现类似的功能。
+
+npm 中的 dependices ，默认是从镜像仓库中来拉取代码，其实这个地址也可以写成一个 git 地址，比如说类似于 `https://git-domain/project-path.git` 或者 `git@git-domain:project-path.git` 这种格式。不过推荐使用后者，这样可以借助于 git 仓库自带的部署密钥的功能，更好的控制权限。
+
+鉴于目前市面上使用最多的 git 私有托管工具是 gitlab，所以下面的教程内容会直接使用 [gitlab](https://gitlab.com) 做演示。首先在 gitlab 上创建一个项目，https://gitlab.com/yunnysunny/myecho。提交完代码后，打开菜单 **Repository** -> **Tags**，点击 **New tag** 按钮，创建一个 git tag。
+
+![](images/create_tag_on_gitlab.png)
+
+**图 4.6.1**
+
+这里创建的版本号是 v0.1.0。
+
+接着到了关键的一步，设置部署密钥。输入 key 的内容和标题后，点击 **Add key** 按钮。
+
+![](images/add_deploy_key_on_gitlab.png)
+
+**图 4.6.2**
+
+添加成功后，就会显示在下面的列表中
+
+![](images/enabled_deploy_key_on_gitlab.png)
+
+**图 4.6.3**
+
+这样就算是配置完成了，下次在发布新版本的时候，直接按照 **图4.6.1** 的步骤打个 tag 即可。
+
+最后就是引用这个新创建的包了，使用命令 `npm install git@gitlab.com:yunnysunny/myecho.git#v0.1.0`, 即可完成安装（注意井号后面是 tag 名称）。一般来说，如果是公司的开发人员的话，对于要安装的自定义依赖包是有项目权限的，这时候不用更改任何 ssh 配置，就能完成对其的下载。但是如果要在服务器上运行这个安装命令的话，大家肯定不会把某一位同事的开发用的 git 密钥文件放置在服务器上，这时候就需要在服务器上配置部署密钥了，修改 ~/.ssh/config ，添加类似如下配置即可：
+
+```
+# 主机名要改成内网的 gitlab 地址
+Host gitlab.com
+  Hostname gitlab.com
+  User git
+  IdentityFile ~/.ssh/test_ssh
+```
+
+
+
