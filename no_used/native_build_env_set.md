@@ -56,7 +56,7 @@ Remove-Item : 找不到路径“C:\Users\yunny\AppData\Local\Temp\chocolatey\cho
     + FullyQualifiedErrorId : PathNotFound,Microsoft.PowerShell.Commands.RemoveItemCommand
 ```
 
-排查了一下，应该是下载的 C:\Users\yunny\AppData\Local\Temp\chocolatey\chocoInstall\[chocolatey.zip](http://chocolatey.zip/) 文件没有被正常解压，导致后续的文件找不到。
+排查了一下，应该是下载的 C:\Users\yunny\AppData\Local\Temp\chocolatey\chocoInstall\chocolatey.zip 文件没有被正常解压，导致后续的文件找不到。
 
 我接着看官方文档，除了在 powershell 中直接安装外，还有好多安装方式，最简单的一种是使用 nuget 命令。不过需要先安装 nuget 命令。我从 https://dist.nuget.org/win-x86-commandline/latest/nuget.exe 上将其下载下来，然后移动到任意一个环境变量 PATH 所在目录中，然后执行 
 

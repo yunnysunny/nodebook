@@ -84,7 +84,7 @@ Node 的开发者 Ryan dahl，起初想构建一个可以处理大量HTTP连接�
 
 我们前面的内容是基于 linux 描述的，但是类似于 epoll 的操作，在不同的操作系统实现库函数是不同的，在 windows 上有IOCP，MAC上有kqueue,SunOS上有event ports，这个时候有一个抽象层对外提供统一的 api 是一个好的选择，libuv就解决了这个问题，但是这不是他所有的功能。
 
-libuv的[官方文档](http://docs.libuv.org/en/v1.x/design.html)在阐述他的架构的时候给出来这么一张图![一张图](http://docs.libuv.org/en/v1.x/_images/architecture.png)，但是仅仅凭着这么一张图并不能让你对其内部机制理解得更透彻。
+libuv的[官方文档](https://docs.libuv.org/en/v1.x/design.html)在阐述他的架构的时候给出来这么一张图![一张图](https://docs.libuv.org/en/v1.x/_images/architecture.png)，但是仅仅凭着这么一张图并不能让你对其内部机制理解得更透彻。
 
 我们知道 node 使用了 V8 引擎，但是在 node 里面 V8 充当的角色更多的是语法解析层面，另外它还充当了 JavaScript 和 c/c++ 的桥梁。但是我们都知道 Node 中一切皆可异步，但这并不是通过 V8 来实现的，充当这个角色的是 libuv。libuv 作为实现此功能的幕后工作者，一直不显山不露水，今天就要将其请到前台来给大家展示一下。
 
@@ -133,8 +133,8 @@ fs.exists(__filename, function (exists) {
 
 ### 1.3 参考链接
 
-- [Linux IO 概览](http://blog.lucode.net/linux/linux-io-overview.html)
-- [Libuv 源码阅读](http://masutangu.com/2016/10/libuv-source-code/)
+- [Linux IO 概览](https://blog.lucode.net/linux/linux-io-overview.html)
+- [Libuv 源码阅读](http://masutangu.com/2016/10/13/libuv-source-code/)
 - [The Node.js Event Loop, Timers, and `process.nextTick()`](https://nodejs.org/en/docs/guides/event-loop-timers-and-nexttick/)
 
 

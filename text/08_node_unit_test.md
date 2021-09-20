@@ -4,7 +4,7 @@
 
 #### 8.1.1 引子
 
-对于一个程序员来说不仅要写代码，还要验证一下代码写得到底对不对，写单元测试就是一个通用且有效的解决方案。单元测试很重要，可以将错误扼杀在摇篮中，如果你认为没有写单元测试也过得很好，也许等我介绍完 [mocha](http://mochajs.org/) 之后，你会改变主意的。  
+对于一个程序员来说不仅要写代码，还要验证一下代码写得到底对不对，写单元测试就是一个通用且有效的解决方案。单元测试很重要，可以将错误扼杀在摇篮中，如果你认为没有写单元测试也过得很好，也许等我介绍完 [mocha](https://mochajs.org/) 之后，你会改变主意的。  
 下面给出一个栗子，假设有一个计算器的项目，不过这个项目周期比较长，后期需要增加更多的人手，所以对于每一个模块都要有相应的测试用例。下面是程序员小明开工后写的第一个函数，一个加法函数：
 
 ```javascript
@@ -117,7 +117,7 @@ expect(calculator.add(1,2)).to.be(3);
 ```
 **代码 8.1.2.3 expect判断**  
 **3.chai**  
-[chai](http://chaijs.com/) 将前面提到的assert should expect融合到了一起，你仅仅需要使用 chai 这一个包就能享用以上三者的功能，所以前面讲到的三种判断在chai中是这么实现的：  
+[chai](https://www.chaijs.com/) 将前面提到的assert should expect融合到了一起，你仅仅需要使用 chai 这一个包就能享用以上三者的功能，所以前面讲到的三种判断在chai中是这么实现的：  
 
 ```javascript
 var chai = require('chai');
@@ -135,7 +135,7 @@ expect(calculator.add(1,2)).to.equal(3);
 这个 chai 还真是个大杀器呢。不过注意，在 chai 中下面关键字
 
     to be been is that which and has have with at of same
-只能作为属性使用，不能作为函数使用（除非你自己写代码把这些属性覆盖掉），所以 `to.be(3)` 要写作`to.equal(3)`，另外 chai 中也没有 `exactly`  这个函数，所以这里也是用 `equal` 来替代，同时在 chai 中 `a` 只能作为函数使用，其函数声明为 `a(type)` ,所以这里用了 `a('number')`，其他技术细节，请移步官方API [BDD部分](http://chaijs.com/api/bdd/)。  
+只能作为属性使用，不能作为函数使用（除非你自己写代码把这些属性覆盖掉），所以 `to.be(3)` 要写作`to.equal(3)`，另外 chai 中也没有 `exactly`  这个函数，所以这里也是用 `equal` 来替代，同时在 chai 中 `a` 只能作为函数使用，其函数声明为 `a(type)` ,所以这里用了 `a('number')`，其他技术细节，请移步官方API [BDD部分](https://www.chaijs.com/api/bdd/)。  
 
 #### 8.1.3 HTTP 测试 
 

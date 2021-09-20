@@ -40,7 +40,7 @@ npm install mongoose
 
 websocket给前端带来了变革，从此前端也可以光明正大的用上长连接，socket.io正是顺应此时势而生的的。它在高版本浏览器上使用 websocket ， 在低版本浏览器上使用 ajax 轮询，保证对所有浏览器的兼容。虽然本书没有对其拿出专门的章节进行介绍，但是它真的很重要。
 
-<http://socket.io/>
+<https://socket.io/>
 
 ```
 npm install socket.io
@@ -50,7 +50,7 @@ npm install socket.io
 
 鼎鼎大名js单元测试框架，本书专门拿出7.3一个章节对其进行介绍。
 
-<http://mochajs.org/>
+<https://mochajs.org/>
 
 ```
 npm install --global mocha

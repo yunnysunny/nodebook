@@ -100,11 +100,11 @@ redis.multi().set('foo', 'bar').get('foo').exec(function (err, results) {
 
 ### 5.2 mongodb
 
- [mongodb](https://www.mongodb.com/)官方提供了 Node.js 的 mongodb 驱动，不过鉴于其提供驱动的功能太过于简单，所以又涌现了许多基于官方驱动上开发的第三方驱动。下面要讲一个使用广泛的第三方驱动， [mongoose](http://mongoosejs.com/) 。
+ [mongodb](https://www.mongodb.com/)官方提供了 Node.js 的 mongodb 驱动，不过鉴于其提供驱动的功能太过于简单，所以又涌现了许多基于官方驱动上开发的第三方驱动。下面要讲一个使用广泛的第三方驱动， [mongoose](https://mongoosejs.com/) 。
 
 #### 5.2.1 mongoose
 
-前面讲了 mongskin ，算是 mongodb 知识点的开胃菜， mongoskin 中的函数绝大部分和 mongodb 命令行是类似的。下面要讲的 mongoose 却稍有不同，因为其有一个 ODM (**O**bject **D**ata **M**odel) 的概念，类似于 [hibernate](http://hibernate.org/) 开发中用到的 [ORM (**O**bject **R**elational **M**apping)](https://zh.wikipedia.org/wiki/%E5%AF%B9%E8%B1%A1%E5%85%B3%E7%B3%BB%E6%98%A0%E5%B0%84) 的概念，它提供了一种将 mongodb 中字段映射为 JavaScript 对象属性的能力。如果我们用 mongoose 来实现一系列的增删改查操作，就必须先定义一个 Schema，不过下面要先讲怎样在 mongoose 中建立连接，否则接下来的例子就没法运行了：
+前面讲了 mongskin ，算是 mongodb 知识点的开胃菜， mongoskin 中的函数绝大部分和 mongodb 命令行是类似的。下面要讲的 mongoose 却稍有不同，因为其有一个 ODM (**O**bject **D**ata **M**odel) 的概念，类似于 [hibernate](https://hibernate.org/) 开发中用到的 [ORM (**O**bject **R**elational **M**apping)](https://zh.wikipedia.org/wiki/%E5%AF%B9%E8%B1%A1%E5%85%B3%E7%B3%BB%E6%98%A0%E5%B0%84) 的概念，它提供了一种将 mongodb 中字段映射为 JavaScript 对象属性的能力。如果我们用 mongoose 来实现一系列的增删改查操作，就必须先定义一个 Schema，不过下面要先讲怎样在 mongoose 中建立连接，否则接下来的例子就没法运行了：
 
 ```javascript
 var mongoose = require('mongoose');
@@ -114,7 +114,7 @@ mongoose.connect('mongodb://localhost/live', {/*user:'username',pass:'password'*
 
 **代码 5.2.1.1 mongoose 建立连接代码**
 
-在 mongoose 中使用 [connect](http://mongoosejs.com/docs/connections.html) 函数可以初始化 mongodb 连接，第一个参数代表 mongodb 的连接字符串，第二个参数存放连接控制参数，比如说用户名、密码之类的。其实第一个字符串中有更多连接参数控制，可以参考 mongodb 的 [官方文档](https://docs.mongodb.com/manual/reference/connection-string/)，其中就包括用户名和密码信息（格式为` mongodb://username:password@host:port/database?options...`），但是如果你的密码中有特殊字符的话（比如说`@`），就比较难办了，所以将用户名和密码放到第二个参数中比较保险。
+在 mongoose 中使用 [connect](https://mongoosejs.com/docs/connections.html) 函数可以初始化 mongodb 连接，第一个参数代表 mongodb 的连接字符串，第二个参数存放连接控制参数，比如说用户名、密码之类的。其实第一个字符串中有更多连接参数控制，可以参考 mongodb 的 [官方文档](https://docs.mongodb.com/manual/reference/connection-string/)，其中就包括用户名和密码信息（格式为` mongodb://username:password@host:port/database?options...`），但是如果你的密码中有特殊字符的话（比如说`@`），就比较难办了，所以将用户名和密码放到第二个参数中比较保险。
 
 接下来就将mongoose中非常之重要的 Schema，首先直接构造一个我们在 5.2.1 小节中使用过的 article 的schema 声明：
 
@@ -161,7 +161,7 @@ var articleSchema = new Schema({/*此处省略字段定义*/},{collection:'artic
 
 这样将 articleShema 插入model 后得到的 Article 就绑定表 article 上了。
 
-说了插入单条，再说一下批量插入，这时候使用 [insertMany](http://mongoosejs.com/docs/api.html#model_Model.insertMany) 函数即可：
+说了插入单条，再说一下批量插入，这时候使用 [insertMany](https://mongoosejs.com/docs/api.html#model_Model.insertMany) 函数即可：
 
 ```javascript
 Article.insertMany([
@@ -350,7 +350,7 @@ new Article({
 
 **代码 5.2.1.9 在 schema 中使用校验器**
 
-mongoose 内建了好多校验器（validator），对于所有类型字段来说都可以使用 [required](http://mongoosejs.com/docs/api.html#schematype_SchemaType-required) 校验器，对于 Number 类型字段来说，可以使用 [min](http://mongoosejs.com/docs/api.html#schema_number_SchemaNumber-min) 和 [max](http://mongoosejs.com/docs/api.html#schema_number_SchemaNumber-max) 校验器，对于 String 类型字段来说，可以使用 [enum](http://mongoosejs.com/docs/api.html#schema_string_SchemaString-enum) [match](http://mongoosejs.com/docs/api.html#schema_string_SchemaString-match) [maxlength](http://mongoosejs.com/docs/api.html#schema_string_SchemaString-maxlength) [minlength](http://mongoosejs.com/docs/api.html#schema_string_SchemaString-minlength) 校验器。
+mongoose 内建了好多校验器（validator），对于所有类型字段来说都可以使用 [required](https://mongoosejs.com/docs/api.html#schematype_SchemaType-required) 校验器，对于 Number 类型字段来说，可以使用 [min](https://mongoosejs.com/docs/api.html#schema_number_SchemaNumber-min) 和 [max](https://mongoosejs.com/docs/api.html#schema_number_SchemaNumber-max) 校验器，对于 String 类型字段来说，可以使用 [enum](https://mongoosejs.com/docs/api.html#schema_string_SchemaString-enum) [match](https://mongoosejs.com/docs/api.html#schema_string_SchemaString-match) [maxlength](https://mongoosejs.com/docs/api.html#schema_string_SchemaString-maxlength) [minlength](https://mongoosejs.com/docs/api.html#schema_string_SchemaString-minlength) 校验器。
 
 所有校验器都可以设置在校验失败后的错误提示信息，如果相对某一个字段设置 required 约束，那么可以写成 `required:true` ，还可以进一步指定校验失败后的提示信息，也就是写成这样 `required:[true,'这个字段必须指定']` 。但是对于 enum 来说，由于本身定义的时候就是一个数组结构（参见上面代码中 `level` 字段的定义），所以 mongoose 内部在定义其 message 属性时使用这样一个 Object 结构：`{values:[/*枚举字段定义*/],message:'出错提示信息'}` 。
 
@@ -358,7 +358,7 @@ mongoose 内建了好多校验器（validator），对于所有类型字段来�
 
 最终你在调用 save 函数之前，这层层的字段定义约束都会被执行，如果校验出错，那么 save 回调函数返回的第一个参数中的 name 属性的值将是 `ValidationError`，然后其 errors 属性中保存着字段的详细信息的一个 key-value数据结构，键名是出错的字段名，值是一个包含错误详情的对象，这个对象中 message 属性就是我们在 schema 中设置的出错信息， path 是出错的字段名，value 是引起出错的具体的设置的值。
 
-最终需要注意，unique 这个约束并不是一个  ValidationError （实际上其 name 属性值为 MongoError），所以你  save 失败后得到的error 对象中没有errors 属性。unique 和 sparse 仅仅是 schema 调用 mongodb 的驱动创建了数据库索引而已。**代码 5.2.1.9** 中关于 isbn 的约束，也可以通过 schema 中的 [index](http://mongoosejs.com/docs/api.html#schema_Schema-index) 函数来实现：
+最终需要注意，unique 这个约束并不是一个  ValidationError （实际上其 name 属性值为 MongoError），所以你  save 失败后得到的error 对象中没有errors 属性。unique 和 sparse 仅仅是 schema 调用 mongodb 的驱动创建了数据库索引而已。**代码 5.2.1.9** 中关于 isbn 的约束，也可以通过 schema 中的 [index](https://mongoosejs.com/docs/api.html#schema_Schema-index) 函数来实现：
 
 ```javascript
 articleSchema.index('isbn',{unique:true,sparse:true});
@@ -391,7 +391,7 @@ Article.findOne({name:nameRand},'name -_id',function(err,item) {
 
 **代码 5.2.1.12 mongoose 查询使用字符串筛选字段**
 
-mongoose 的查询中的各个控制参数都可以链式的调用各个函数来解决，比如说上例中用到的字段筛选可以使用 [select](http://mongoosejs.com/docs/api.html#query_Query-select) 函数来替代，即改成 `Article.findOne({name:nameRand}).select('name -_id').exec(function(err,item) {});` 当中可以添加无数个链式函数来控制查询行为，比如说 [limit](http://mongoosejs.com/docs/api.html#query_Query-limit) [skip](http://mongoosejs.com/docs/api.html#query_Query-skip) [lean](http://mongoosejs.com/docs/api.html#query_Query-lean) 等等，最后以 [exec](http://mongoosejs.com/docs/api.html#query_Query-exec) 函数结尾添加回调函数。mongoose 查询默认返回的是 [MongooseDocuments](http://mongoosejs.com/docs/api.html#document-js) 类型对象，使用lean 函数后可以将其转成普通 javascript 对象：
+mongoose 的查询中的各个控制参数都可以链式的调用各个函数来解决，比如说上例中用到的字段筛选可以使用 [select](https://mongoosejs.com/docs/api.html#query_Query-select) 函数来替代，即改成 `Article.findOne({name:nameRand}).select('name -_id').exec(function(err,item) {});` 当中可以添加无数个链式函数来控制查询行为，比如说 [limit](https://mongoosejs.com/docs/api.html#query_Query-limit) [skip](https://mongoosejs.com/docs/api.html#query_Query-skip) [lean](https://mongoosejs.com/docs/api.html#query_Query-lean) 等等，最后以 [exec](https://mongoosejs.com/docs/api.html#query_Query-exec) 函数结尾添加回调函数。mongoose 查询默认返回的是 [MongooseDocuments](https://mongoosejs.com/docs/api.html#document-js) 类型对象，使用lean 函数后可以将其转成普通 javascript 对象：
 
 ```javascript
 Article.find({name:/^name/}).select('_author').lean().exec(function(err,items) {

@@ -122,7 +122,7 @@ addLater(1,2,function(result) {
 
 其实对象也是一种数据类型，只不过由于它太特殊，所以这里单独拿出来讲。在 ES6 之前 javascript 还是一门**基于对象**的编程语言，为啥叫基于呢，因为 ES5 和之前版本的 javascript 中原生语法中没有类（class）这个关键词，你只能拿原型（prototype）来模拟一个类的行为。
 
-> ES ( [ECMAScript](https://zh.wikipedia.org/wiki/ECMAScript) )，可以理解为 javascript 的语法标准， 2015年6月发布的 ES6 （又称 ES2015） 版本增加了N多语言特性，其中就包括类和继承的实现。由于 ES6 规避了之前版本中 javascript 中的一些糟粕设计，并且提升了开发效率，所以产生了学习 ES6 的大量前端开发人员，但是现行浏览器对于 ES6 语法的支持能力参差不齐，所以 [babeljs](https://babeljs.io) 应运而生，它提供了 ES6 转 ES5的功能，一时间产生了大量的拥趸。同时国内大神阮一峰也写了一本 [ECMAScript 6 入门](http://es6.ruanyifeng.com/) 开源图书，我想使用 ES6 语法的程序员，没有一位没有浏览过这本书的。另外 node 从4.x开始逐渐引入 ES6 语法，具体各个版本的实现情况可以参见[Node.js ES2015 Support](http://node.green/)。
+> ES ( [ECMAScript](https://zh.wikipedia.org/wiki/ECMAScript) )，可以理解为 javascript 的语法标准， 2015年6月发布的 ES6 （又称 ES2015） 版本增加了N多语言特性，其中就包括类和继承的实现。由于 ES6 规避了之前版本中 javascript 中的一些糟粕设计，并且提升了开发效率，所以产生了学习 ES6 的大量前端开发人员，但是现行浏览器对于 ES6 语法的支持能力参差不齐，所以 [babeljs](https://babeljs.io) 应运而生，它提供了 ES6 转 ES5的功能，一时间产生了大量的拥趸。同时国内大神阮一峰也写了一本 [ECMAScript 6 入门](https://es6.ruanyifeng.com/) 开源图书，我想使用 ES6 语法的程序员，没有一位没有浏览过这本书的。另外 node 从4.x开始逐渐引入 ES6 语法，具体各个版本的实现情况可以参见[Node.js ES2015 Support](https://node.green/)。
 
 我们这里先讲一下 ES5 中怎样模拟一个类，答案是使用原型：
 
