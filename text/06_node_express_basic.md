@@ -1,6 +1,6 @@
 ## 6 Express 介绍
 
-提到node，那么就不得不提大名鼎鼎的 [express](http://expressjs.com/)，作为一个web framework，它几乎满足了你所有的愿望 。
+提到node，那么就不得不提大名鼎鼎的 [express](https://expressjs.com/)，作为一个web framework，它几乎满足了你所有的愿望 。
 本篇的内容主要讲述express的基本使用。
 
 ### 6.1 Express 安装
@@ -193,7 +193,7 @@ ReferenceError: noneExistVar is not defined
     at router (D:\code\eapp\first-app\node_modules\express\lib\router\index.js:46:12)
 ```
 **输出 6.2.1**  
-这说明，程序默认走到 `app.get('env') === 'development'` 这个条件中去了。`app.get('env')` 其实是读取的环境变量 `NODE_ENV` ,这是一个express专用的环境变量，express官方推荐在生产环境将其设置为 `production`（参考[这里](http://expressjs.com/en/advanced/best-practice-performance.html#env)）后会带来三倍的性能提升。官方推荐使用 `systemd` 或者 `Upstart`来设置环境变量，不过如果你的程序不是开机自启动的话，直接配置 `.bash_profile`文件即可，也就是说直接在该文件中添加 `export NODE_ENV=production`。
+这说明，程序默认走到 `app.get('env') === 'development'` 这个条件中去了。`app.get('env')` 其实是读取的环境变量 `NODE_ENV` ,这是一个express专用的环境变量，express官方推荐在生产环境将其设置为 `production`（参考[这里](https://expressjs.com/en/advanced/best-practice-performance.html#env)）后会带来三倍的性能提升。官方推荐使用 `systemd` 或者 `Upstart`来设置环境变量，不过如果你的程序不是开机自启动的话，直接配置 `.bash_profile`文件即可，也就是说直接在该文件中添加 `export NODE_ENV=production`。
 
 ### 6.6 模板引擎 ###
 

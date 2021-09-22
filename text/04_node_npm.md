@@ -1,6 +1,6 @@
 ## 4 NPM 包管理工具
 
-在Node出现之前，我们在做前端的时候经常用到一些开发工具使用ruby和python开发的（比如说[sass](http://sass-lang.com/)，一种CSS预编译语言，依赖于ruby；(Pygments)[http://pygments.org/] ，一种代码语法高亮插件，依赖于python），这个时候就会看到[gem](https://rubygems.org/)和[pip](https://pypi.python.org/pypi)的身影。熟悉java的同学，应该也对[maven](https://maven.apache.org/)如数家珍。和这些语言类似，Node 也提供了包管理工具，它就是 npm ，全名为 **N**ode **P**ackage **M**anager，集成于 Node 的安装程序中。
+在Node出现之前，我们在做前端的时候经常用到一些开发工具使用ruby和python开发的（比如说[sass](https://sass-lang.com/)，一种CSS预编译语言，依赖于ruby；(Pygments)[https://pygments.org/] ，一种代码语法高亮插件，依赖于python），这个时候就会看到[gem](https://rubygems.org/)和[pip](https://pypi.python.org/pypi)的身影。熟悉java的同学，应该也对[maven](https://maven.apache.org/)如数家珍。和这些语言类似，Node 也提供了包管理工具，它就是 npm ，全名为 **N**ode **P**ackage **M**anager，集成于 Node 的安装程序中。
 
 ### 4.1 使用NPM
 npm 不仅可用于安装新的包，它也支持搜寻、列出已安装模块及更新的功能。
@@ -62,7 +62,7 @@ Is this ok? (yes)
 }
 ```
 这个dependencies属性里面描述的就是当前项目依赖的各种包，你可以通过运行`npm install packageName --save`来将其安装到本地的同时在package.json中同时添加依赖声明。当你代码开发完成时，要把项目往服务器上部署，那么这时候package.json中的依赖声明都已经写好了，这时候，你直接在项目目录运行`npm install`，就可以自动将声明中的文件全部下载安装到项目目录的`node_modules`子目录下。  
-我们在来稍微留意一下，我们配置的这个express的版本号，咦，`^`是个什么鬼？讲这个东东，还要从[Semantic Versioning](http://semver.org/)这个概念讲起，它将版本号分为三段：  
+我们在来稍微留意一下，我们配置的这个express的版本号，咦，`^`是个什么鬼？讲这个东东，还要从[Semantic Versioning](https://semver.org/)这个概念讲起，它将版本号分为三段：  
 
 1. 主版本，你可以在这个版本中做不兼容性改动
 2. 小版本，你可以在这个版本上增加共嗯那个，不过要向后兼容
@@ -70,7 +70,7 @@ Is this ok? (yes)
 
 在这里对于express来说，主版本号是`4`，小版本号是`14`，补丁版本号是`0`。啰嗦了这么多，那么`^`呢，它告诉你使用从`4.14.0`到`5.0.0`（不包括5.0.0）之间的最新版本，也就是说它选择的版本号x的取值范围:`4.14.0<=x<5.0.0`。  
 除了`^`，还有一个版本号标识符`~`也很常用，假设我们将这里express的版本号设置为`~4.14.0`，那么它表示从`4.14.0`到`4.15.0`（不包括4.15.0）之间的最新版本，也就是说它选择的版本号x的取值范围：`4.14.0<=x<4.15.0`。  
-另外还有一些版本号的特殊标志符，由于不常用，有需要的可以参考https://docs.npmjs.com/misc/semver 。
+另外还有一些版本号的特殊标志符，由于不常用，有需要的可以参考https://docs.npmjs.com/cli/v6/using-npm/semver 。
 一般情况下，我们通过将依赖安装到项目目录下，但是有时候我们需要做全局安装，这种全局安装的包一般都是些命令行程序，这些命令行程序安装到全局后就可以保证我们通过 cmd.exe（或者bash） 中调用这些程序了。下面我们演示一下如何全局安装[express-generator](https://www.npmjs.com/package/express-generator)：  
 ```
 npm install -g express-generator

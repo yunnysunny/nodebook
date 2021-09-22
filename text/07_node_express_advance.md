@@ -29,7 +29,7 @@ app.use(session({
 **代码 7.1.1 引入session**  
 其实express默认的session是存储在内存里的，但是这种做法不适合在生产环境使用，首先node如果使用cluster模式的话，内存无法共享，也就是说只能使用单进程；其次，如果在线人数一直增多的话，会造成内存猛增。所以这里的`store`参数使用了redis，这同样也意味着你需要在你本地（或者远程机器上）启动redis服务，否则程序会报错。
 session 函数的 `key` 参数代表生成cookie的名称。`resave`参数设置默认为`true`，代表每次请求结束都会重写`store`中的数据，不管当前的session有没有被修改。`saveUninitialized`参数值默认为`true`，代表将未赋值过的session写入到store，也就是说假设我们的网站需要登录，那么在未登陆之前，也会往`store`写入数据。所以我们将`resave`和`saveUninitialized`都设置为了false。
-> 如果你对 session 原理不是很清楚的话，可以参见我的博文 [session的安全性](http://blog.whyun.com/posts/session/)，里面提到了session的基本原理，安全性及攻击防范。  
+> 如果你对 session 原理不是很清楚的话，可以参见我的博文 [session的安全性](https://blog.whyun.com/posts/session/)，里面提到了session的基本原理，安全性及攻击防范。  
 
 为了减少篇幅，给出的代码都是片段形式：
 
@@ -121,7 +121,7 @@ exports.loginCheck = function(username,password,callback) {
 };
 ```
 **代码 7.3.1 登陆验证逻辑**  
-> 其实单纯用md5/sha1/sha256这些算法来说，都存在被破解的可能性，国内有网站http://cmd5.com 几乎可以破解一切弱密码，解决方案就是使用更长的密码（可以通过用户名和密码进行拼接来计算哈希值），或者使用hmac算法。这里为了演示，使用了最简单的方式。  
+> 其实单纯用md5/sha1/sha256这些算法来说，都存在被破解的可能性，国内有网站https://cmd5.com 几乎可以破解一切弱密码，解决方案就是使用更长的密码（可以通过用户名和密码进行拼接来计算哈希值），或者使用hmac算法。这里为了演示，使用了最简单的方式。  
 
 那么现在控制器中的代码就可以这么写：  
 

@@ -7,7 +7,7 @@ nodejs台湾协作电子书（源码参见[github地址](https://github.com/node
 
 但是在整理的过程中发现了若干问题，首先繁体中文和简体中文的语言使用上还是有差别，之前耳熟能详的词语到了繁体中文中就变了个叫法，搞的自己差点摸不着头脑；其次，当时书籍写作的时候 Node 的版本还是0.6，如今时过境迁 Node 连10.0都出来了，好多知识点也发生了变化；最后，我也对原书的有些章节安排不是很满意。正是以上三点原因促成了我重写此书的决定。
 
-线上预览地址：http://nodebook.whyun.com
+线上预览地址：https://nodebook.whyun.com
 
 本书github地址：https://github.com/yunnysunny/nodebook
 
