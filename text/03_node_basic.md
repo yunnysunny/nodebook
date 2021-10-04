@@ -215,9 +215,9 @@ writer.on('error',function(err) {
 
 ### 3.4.3 可读流的两种读取模式
 
-可读流提供了两种读取模式，flow 模式和 no-flow 模式，可读流有一个 `readableFlowing` 属性，默认为 `null`。如果给可读流对象增加 `data` 事件监听、调用函数 `resume` / `pipe` ，将会使用可读流进入 flow 模式，当时`readableFlowing` 会被置为 true。调用 `pause` / `unpipe` 函数会将可读流切换到 no-flow 模式，并且将 `readableFlowing` 置为 false，这个时候必须手动调用函数 `resume` / `pipe` 才能将其切换回 flow 模式，如果在这种情况下添加 `data` 事件是无法切换为 flow 模式的。
+可读流提供了两种读取模式，flow 模式和 no-flow 模式，可读流有一个 `readableFlowing` 属性，默认为 `null`。如果给可读流对象增加 `data` 事件监听、调用函数 `resume` / `pipe` ，将会使用可读流进入 flow 模式，此时 `readableFlowing` 会被置为 true。调用 `pause` / `unpipe` 函数会将可读流切换到 no-flow 模式，并且将 `readableFlowing` 置为 false，这个时候必须手动调用函数 `resume` / `pipe` 才能将其切换回 flow 模式，如果在这种情况下添加 `data` 事件是无法切换为 flow 模式的。
 
-将流职位 no-flow 还有一种方式就是添加 `readable` 事件监听。注意，如果你同时给可读流添加了 `readable` 和 `data` 的事件，则 `readable` 的优先级高于 `data`，流将回进入 no-flow 模式。当你将 `readable` 事件移出，只保留 `data` 事件时，则回到 flow 模式。
+将流置为 no-flow 还有一种方式就是添加 `readable` 事件监听。注意，如果你同时给可读流添加了 `readable` 和 `data` 的事件，则 `readable` 的优先级高于 `data`，流将回进入 no-flow 模式。当你将 `readable` 事件移出，只保留 `data` 事件时，则回到 flow 模式。同时需要注意到，添加了 `readable` 事件后，调用 `pause` `resume` 这两个函数是没有意义的。
 
 在可读流的使用过程中，你应该尽量选择一种读取模式，以此降低自己代码的复杂度。Node 中通过调用可读流不同函数来隐式的修改其工作模式的方式，确实是一种比较让人艰涩难懂的设计。
 
@@ -235,16 +235,111 @@ writer.on('error',function(err) {
 
 之所以将 TCP 的内容放到流教程的后面，是由于 TCP 中的 [net.Socket](https://nodejs.org/dist/latest-v12.x/docs/api/net.html#net_class_net_socket) 类就是继承自 [stream.Duplex](https://nodejs.org/dist/latest-v12.x/docs/api/stream.html#stream_class_stream_duplex) 类。上一节中没有讲 `Duplex` 类，它相当于将可读流和可写流的功能合二为一，不过其内部读写的数据是分别存储在两个缓冲区中，不相互影响；于其对应的是类 [stream.Transform](https://nodejs.org/dist/latest-v12.x/docs/api/stream.html#stream_class_stream_transform)，它也是将可读流和可写流的功能合二为一，不过其内部读写流的缓冲区是共享的。
 
-TCP 属于传输层协议，大家都对 HTTP 的服务编写比较熟悉，我们可以通过 API 方便的发送请求、接收响应数据。但是你发送的 HTTP 请求时，在 API 底层要封装成符合 HTTP 协议的请求数据数据包，同意在接收响应后，也是 API 底层帮我们把 HTTP 数据包解析出来，抛到应用层。HTTP 1.x 时代，只能通过客户端发送请求来触发通信流动，服务器端不能主动给客户端发送数据，如果想实现全双工的通信，就直接的就是借助 TCP 层面的协议。
+TCP 属于传输层协议，大家都对 HTTP 的服务编写比较熟悉，我们可以通过 API 方便的发送请求、接收响应数据。但是你发送的 HTTP 请求时，在 API 底层要封装成符合 HTTP 协议的请求数据数据包，对端在接收响应后，也是 API 底层帮我们把 HTTP 数据包解析出来，抛到应用层。HTTP 1.x 时代，只能通过客户端发送请求来触发通信流动，服务器端不能主动给客户端发送数据，如果想实现全双工的通信，就直接的就是借助 TCP 层面的协议。
 
-> HTTP 2.x 开始，服务器端和客户端可以互相发送数据，与此类似的功能，还包括 html5 标准中的 websocket 协议。
+> HTTP 2.x 开始，服务器端和客户端可以互相发送数据，与此类似的功能，还包括 html5 标准中的 WebSocket 协议。
 
+两端程序在使用 TCP 协议进行通信时，一个首要要解决的问题时，如何知道对方发送过来的是一个完整的数据包。这种要求初学者听上去可能有些过分，构建一个 http 服务的时候，也没有看到还得判断对方的包什么时候结束，这是由于语言底层代码已经帮你处理这些问题，不需要手动实现了。
 
+> 对于 HTTP 1.1 来说，服务器端需要先读取 HTTP 的头信息部分，读取到 \r\n 代表头信息部分结束。如果请求数据包中有正文内容的话，需要在头信息中指定 [Content-Length](https://httpwg.org/specs/rfc7230.html#header.content-length) 或者 [Transfer-Encoding](https://httpwg.org/specs/rfc7230.html#header.transfer-encoding)。服务器端根据这两个字段来决定请求正文部分如何解析，需要读取多少字节算是正文结尾。
+>
+> HTTP 1.1 协议，支持客户端在一条连接上发送多个请求，但是多个请求直接的数据包内容“不混杂”，也就是说如果发送一次请求，必须把当前请求包的数据一次性全发完，才能发送第二个请求包（但是发完第一个请求包之后，不用等待相应包返回，就可以直接发第二个请求包）。所以服务器端也需要根据上述规则来区分不同请求数据包，否则会发生数据紊乱。
 
+如果自己实现一个 TCP 协议的话，数据包之间的“分割”要自己实现。常见的设计思路是设定一个固定长度的头部信息，在其内部放置正文长度，服务器端读取完头部之后，就能拿到正文长度，（正常情况下）再读取一次后，就可以得到一个完整的数据包。
 
+这种情况下，使用 no-flow 模式显得更适合，这样就可以精确控制每次读取一个完整包，使用 flow 模式就显得比较麻烦。为了演示 TCP 的使用，会给出一个小 demo，下面的代码是从 [pandora](https://github.com/midwayjs/pandora) 项目中的一个模块演变而来。
 
-## 3.5 总结
+为了方便阅读代码，首先我们需要定义通信协议。
+
+![](images/tcp_package.png)
+
+**图 3.5.1**
+
+数据包总体上分为头部和正文两部分，头部一共五个字节，第一个字节用来存储一些元数据，剩下的四个字节用来存储正文数据部分的长度。
+
+> 正文长度如果用两个字节的话，就只能携带 64KB 的数据，如果使用三个字节的话可以携带 16MB 的数据，四个字节可以携带 4GB 的数据。很多 TCP 协议会使用四个字节来承载正文长度，其实真正在使用的过程中，很多应用采用 TCP 协议来做指令控制，其实正文数据不需要这么大，这里之所以采用四字节，其实是惯例使然。
+
+头信息中的首字节，只采用了最高位的 3 bit，其他 5 bit 留作以后控制用，采用的 3 bit 用来标识正文数据的数据类型，这里仅仅预设了两种类型： `000` 表示正文是 JSON 数据， `001` 标识正文是二进制数据。
+
+正文长度的四字节采用了大端（大小端的知识点，具体可以参见 [维基百科地址](https://zh.wikipedia.org/wiki/%E5%AD%97%E8%8A%82%E5%BA%8F)）的模式。
+
+这里只贴出 socket 数据读取部分的代码，因为这部分代码是讲解流 API 的关键代码。上面提到我们用了 noflow 模式，所以这里使用 readable 的监听事件：
+
+```javascript
+socket.on('readable', () => {
+    try {
+        // 在这里循环读，避免在 _readPacket 里嵌套调用，导致调用栈过长
+        let remaining = false;
+        do {
+            console.time('readPacket');
+            remaining = this._readPacket();
+            console.timeEnd('readPacket');
+        }
+        while (remaining);
+    } catch (err) {
+        slogger.error('', err);
+        err.name = 'PacketParsedError';
+        this._close(err);
+    }
+});
+```
+
+**代码 3.5.1**
+
+可以看的出来上述代码最核心的一句应该是 `remaining = this._readPacket()` ，这个 _readPacket 函数是做 socket 数据读取的关键函数：
+
+```javascript
+/**
+ * 读取服务器端数据，反序列化成对象
+ * 
+ * @fires Client~EVENT_NEW_MESSAGE
+ */
+_readPacket() {
+    if (!(this._bodyLength)) {
+        this._header = this.read(HEAD_LEN);
+        if (!this._header) {
+            console.log('头部数据尚不完整')
+            return false;
+        }
+        // 通过头部信息获得body的长度
+        this._bodyLength = this.getBodyLength(this._header);
+    }
+    console.log('正文长度' + this._bodyLength);
+    let body;
+    if (this._bodyLength > 0) {
+        body = this.read(this._bodyLength);
+        if (!body) {
+            slogger.info('正文数据尚不完整');
+            return false;
+        }
+    }
+    this._bodyLength = null;
+    let entity = this.decode(body, this._header);
+    // console.log(entity)
+    setImmediate(() => {
+        this.emit(EVENT_NEW_MESSAGE, entity.data, (res) => {
+            this.send(res);
+        }, this);
+    });
+    return true;
+}
+```
+
+**代码 3.5.2**
+
+stream 触发 readable 事件的时候，代表有数据可读了，但是我们应用层想要的数据未必完整，比如说 **图3.5.1** 中，我们要求一次性读取 5 个字节长度的头部数据来，好确认下面正文数据长度。stream 可能在收到一个字节的时候，就出发 readable 时间，这时候我们使用 read 函数的时候，无法读取出来 5 个字节，这时候 read 函数返回 null，_readPacket 函数返回 false，代码 3.5.1 中的 while 循环就会退出，这样我们就需要等待下一次 readable 事件触发的时候，再尝试读取 5 个字节看看能否读取出来。
+
+> 官方文档中，对于 net 包中 socket 对象的 read 函数是没有直接给出的，大家可以直接看 stream 包中 readable  的 [read](https://nodejs.org/api/stream.html#stream_readable_read_size) 函数文档。
+
+代码这样设计，还有一个好处，就是 TCP 协议天生会出现极小概率的 “断包” 问题，即发送端传输过程中，部分数据丢失，只能被迫重传，这样接收端一次读取的数据并不完整，需要再次尝试读取，而我们上述的代码天生具有这个特性。
+
+## 3.6 总结
 
 我们用两个小节讲述了 Node 中如何处理静态资源和动态请求，看完这些之后，如果你是一个初学者，可能会因此打退堂鼓，这也太麻烦了，如果通过这种方式来处理数据，跟 php java 之类的比起来毫无优势可言嘛。大家不要着急，Node 社区已经给大家准备了各种优秀的 Web 开发框架，比如说 [Express](https://expressjs.com/)、[Koa](https://koajs.com/)，绝对让你爱不释手。你可以从本书的第 6 章中学习到 express 基本知识。
 
 本章示例代码可以从这里找到：https://github.com/yunnysunny/nodebook-sample/tree/master/chapter3 。
+
+## 3.7 参考文档
+
+1. Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing https://httpwg.org/specs/rfc7230.html
+

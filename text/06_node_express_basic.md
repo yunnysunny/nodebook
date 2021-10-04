@@ -1,11 +1,11 @@
 ## 6 Express 介绍
 
-提到node，那么就不得不提大名鼎鼎的 [express](https://expressjs.com/)，作为一个web framework，它几乎满足了你所有的愿望 。
+提到node，那么就不得不提大名鼎鼎的 [express](https://expressjs.com/)，作为一个 web framework，它几乎满足了你所有的愿望 。
 本篇的内容主要讲述express的基本使用。
 
 ### 6.1 Express 安装
 
-当然作为一个web framework，必然要牵扯到各种配置。聪明人肯定不是吧所有配置代码从头到尾敲出来，
+当然作为一个 web framework，必然要牵扯到各种配置。聪明人肯定不是把所有配置代码从头到尾敲出来，
 这就要提到 [express-generator](https://github.com/expressjs/generator) 。首先运行
 
 `npm install -g express-generator`
@@ -13,7 +13,7 @@
 来安装，这里用`-g`参数来将其安装为全局位置，因为这个样子我们就能将其安装后生成的可执行程序添加到环境变量中了。
 
 
-接着运行`express -e first-app && cd first-app`，其中命令中`-e`参数是说使用 [ejs](https://github.com/tj/ejs)模板引擎来渲染视图。
+接着运行`express -e first-app && cd first-app`，其中命令中`-e`参数是说使用 [ejs](https://github.com/tj/ejs) 模板引擎来渲染视图。
 `first-app`就是我们生成程序生成的目录，紧接着我们通过 `cd` 命令进入了这个目录。最后我们运行 `npm install` 命令来安装所需依赖。
 最终在图形化界面中进入这个目录，会看到如下文件列表：  
 
