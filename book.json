@@ -1,5 +1,7 @@
 {
     "root":"text",
     "auth":"yunnysunny",
-    "structure.readme":"00_preface.md"
+    "structure.readme":"00_preface.md",
+	"pdf.margin.right": 30,
+	"pdf.margin.left": 30
 }

@@ -241,7 +241,7 @@ TCP 属于传输层协议，大家都对 HTTP 的服务编写比较熟悉，我�
 
 两端程序在使用 TCP 协议进行通信时，一个首要要解决的问题时，如何知道对方发送过来的是一个完整的数据包。这种要求初学者听上去可能有些过分，构建一个 http 服务的时候，也没有看到还得判断对方的包什么时候结束，这是由于语言底层代码已经帮你处理这些问题，不需要手动实现了。
 
-> 对于 HTTP 1.1 来说，服务器端需要先读取 HTTP 的头信息部分，读取到 \r\n 代表头信息部分结束。如果请求数据包中有正文内容的话，需要在头信息中指定 [Content-Length](https://httpwg.org/specs/rfc7230.html#header.content-length) 或者 [Transfer-Encoding](https://httpwg.org/specs/rfc7230.html#header.transfer-encoding)。服务器端根据这两个字段来决定请求正文部分如何解析，需要读取多少字节算是正文结尾。
+> 对于 HTTP 1.1 来说，服务器端需要先读取 HTTP 的头信息部分，读取到 `\r\n` 代表头信息部分结束。如果请求数据包中有正文内容的话，需要在头信息中指定 [Content-Length](https://httpwg.org/specs/rfc7230.html#header.content-length) 或者 [Transfer-Encoding](https://httpwg.org/specs/rfc7230.html#header.transfer-encoding)。服务器端根据这两个字段来决定请求正文部分如何解析，需要读取多少字节算是正文结尾。
 >
 > HTTP 1.1 协议，支持客户端在一条连接上发送多个请求，但是多个请求直接的数据包内容“不混杂”，也就是说如果发送一次请求，必须把当前请求包的数据一次性全发完，才能发送第二个请求包（但是发完第一个请求包之后，不用等待相应包返回，就可以直接发第二个请求包）。所以服务器端也需要根据上述规则来区分不同请求数据包，否则会发生数据紊乱。
 

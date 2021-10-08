@@ -14,19 +14,19 @@ Windows 环境比较复杂，需要手动安装 VS build tools 和 python。首�
 
 下载完成后双击运行，会弹出如下界面：
 
-![image-20210819185317920](images\vs_install_continue.png)
+![image-20210819185317920](images/vs_install_continue.png)
 
 **图 A 6.2.1**
 
 点击继续按钮，会弹出安装进度条
 
-![image-20210819185444968](E:\mywamp\markdown\nodebook\text\images\vs_install_progress.png)
+![image-20210819185444968](images/vs_install_progress.png)
 
 **图 A 6.2.2**
 
 正常情况下，进度条走完后会显示安装成功界面
 
-![image-20210819185549212](images\vs_install_success.png)
+![image-20210819185549212](images/vs_install_success.png)
 
 **图 A 6.2.3**
 
@@ -40,7 +40,7 @@ Windows 环境比较复杂，需要手动安装 VS build tools 和 python。首�
 
 如果你之前已经安装完成了，会显示如下界面
 
-![image-20210819190308564](images\install_python_already.png)
+![image-20210819190308564](images/install_python_already.png)
 
 **图 A 6.2.5**
 
