@@ -2,3 +2,5 @@ no_used/*
 .vscode
 output/*
 .git
+*.sh
+*.html

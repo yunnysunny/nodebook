@@ -15,17 +15,22 @@ RUN npm install gitbook-cli -g
 RUN gitbook fetch  3.2.3
 
 ENV DEBIAN_FRONTEND noninteractive
+# 官网给的安装依赖说明 https://calibre-ebook.com/download_linux
 RUN apt-get install python xdg-utils xz-utils -yq
 RUN wget --no-check-certificate -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin
 RUN ebook-convert --version
+# 官网未提及的依赖
 RUN apt-get install libnss3 libxdamage1 -y
+# 中文字体
 RUN apt-get install -y --force-yes --no-install-recommends fonts-wqy-microhei
 RUN useradd -ms /bin/bash gitbook
 RUN chown gitbook:gitbook -R /opt
 # RUN npm install gitbook -g
+
+USER gitbook
+RUN gitbook current
 WORKDIR /opt
 COPY . /opt
-USER gitbook
 RUN gitbook pdf .
 
 FROM scratch AS export-stage
