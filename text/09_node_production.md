@@ -266,7 +266,7 @@ COPY config.production.json config.json
 COPY process.production.json process.json
 
 #安装cnpm
-RUN npm install -g cnpm --registry=https://registry.npm.taobao.org
+RUN npm install -g cnpm --registry=https://registry.npmmirror.com
 #安装pm2
 RUN cnpm install pm2 -g
 RUN cnpm install

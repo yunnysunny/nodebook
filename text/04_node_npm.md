@@ -83,14 +83,14 @@ npm install -g express-generator
 幸好，阿里开发出了 [cnpm](https://npm.taobao.org/) ，一个完整 npmjs.org 镜像，每隔10分钟和官方库进行一次同步。其安装命令很简单：  
 
 ```
-npm install -g cnpm --registry=https://registry.npm.taobao.org
+npm install -g cnpm --registry=https://registry.npmmirror.com
 ```
 **命令 4.2.1**
 
 不过你需要注意，由于最新版本的cnpm不兼容低版本node,如果你当前使用的node版本低于4.x，那么你需要在安装的时候指定版本号：  
 
 ```
-npm install -g cnpm@3.4.1 --registry=https://registry.npm.taobao.org
+npm install -g cnpm@3.4.1 --registry=https://registry.npmmirror.com
 ```
 **命令 4.2.2**
 
@@ -100,7 +100,7 @@ npm install -g cnpm@3.4.1 --registry=https://registry.npm.taobao.org
 但是我们在使用一些第三方工具的时候，其包裹的命令行内部会调用 npm install 命令来安装依赖包，这时候 cnpm 排不上用场，那么将 npm 的安装源手动切换到淘宝源，就是解决这个问题的大法：
 
 ```shell
-npm config set registry https://registry.npm.taobao.org
+npm config set registry https://registry.npmmirror.com
 ```
 
 **命令 4.2.3**
@@ -198,7 +198,7 @@ content-disposition@0.5.1:
 不过我们在使用 yarn 的时候，因为 yarn 在底层依然得使用 npm 进行安装，所以依然无法避免因网络原因导致的包无法下载的问题，不过我们可以直接将 npm 的安装源设置为 cnpm 提供的安装源：
 
 ```shell
-yarn config set registry https://registry.npm.taobao.org
+yarn config set registry https://registry.npmmirror.com
 ```
 **命令4.4.1**  
 
@@ -253,7 +253,7 @@ license: (ISC) MIT
 
 如果你待发布的代码中含有可执行脚本，且在安装的时候需要运行这个可执行脚本，则你的 publish 命令是不能在 Windows 上运行的，否则你发布的包是没有可执行权限的。
 
-其次如果你之前使用 **命令4.2.3** 手动切换非官方源的话，是没法直接 publish 成功的，这种情况下执行 publish 命令，会将其发布到淘宝源上去，但是我们又没有淘宝源的账号（况且我们也不想发布到淘宝源）。解决的方法是删除 ~/.npmrc 中的这行配置 `registry=https://registry.npm.taobao.org/`。当然通过 `npm config set registry https://registry.npmjs.org/` 也能实现相当的效果。
+其次如果你之前使用 **命令4.2.3** 手动切换非官方源的话，是没法直接 publish 成功的，这种情况下执行 publish 命令，会将其发布到淘宝源上去，但是我们又没有淘宝源的账号（况且我们也不想发布到淘宝源）。解决的方法是删除 ~/.npmrc 中的这行配置 `registry=https://registry.npmmirror.com/`。当然通过 `npm config set registry https://registry.npmjs.org/` 也能实现相当的效果。
 
 ### 4.6 发布自己的包到私有仓库
 
