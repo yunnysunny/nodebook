@@ -18,11 +18,15 @@ Windows 环境比较复杂，需要手动安装 VS build tools 和 python。首�
 
 **图 A 6.2.1**
 
-点击继续按钮，会弹出安装进度条
+点击继续按钮，会弹出安装准备进度条，这期间会下载所需的安装包：
 
 ![image-20210819185444968](images/vs_install_progress.png)
 
 **图 A 6.2.2**
+
+安装包下载完成后，会弹出可选安装组件，只勾选 **Visual C++ 生成工具** ,然后点击 **修改** 按钮即可。
+
+![component](images/component.png)
 
 正常情况下，进度条走完后会显示安装成功界面
 
