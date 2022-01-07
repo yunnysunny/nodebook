@@ -2,10 +2,10 @@
 
 Node 的优点是处理 IO 密集型操作，对于互联网应用来说，很大一部分内容都是 IO 处理（包括文件 IO和网络IO），但是还是有部分功能属于计算密集型操作。如果遇到这种计算密集型操作，推荐的解决方案是使用其他语言来实现，然后提供一个服务，让 Node 来进行调用。不过我们这章要讲的是 Node 的 C++ 扩展，也就是说，我们可以通过这种方式是 Node 代码直接 “桥接” 到 C++ 上，以此来解决计算密集型操作。但是我在前面为什么推荐使用其他语言来提供计算密集型的服务呢，因为一旦你的这个计算服务稍微一上规模，你的代码开发就要面临横跨两个语种的境况，给程序调试增加了很多不确定性。所以说，如果你要做的计算应用的功能比较单一的话，可以考虑做成 C++ 扩展。
 
-Node 的 C++ 扩展功能是依赖于 V8 来实现的，但是在 Node 每次做大的版本升级的时候，都会有可能对应升级 V8 的版本，相应的扩展 API 的定义也很有可能发生变化，所以下面要重点介绍 nan 这个第三方包的，它提供了一系列的宏定义和包装函数，来对这些不同版本的扩展 API 进行封装。
+Node 的 C++ 扩展功能是依赖于 V8 来实现的，但是在 Node 每次做大的版本升级的时候，都会有可能对应升级 V8 的版本，相应的扩展 API 的定义也很有可能发生变化，所以下面会首先介绍 [nan](https://www.npmjs.com/package/nan) 这个第三方包的，它提供了一系列的宏定义和包装函数，来对这些不同版本的扩展 API 进行封装。
 
 ### 10.1 准备工作
-为了能够编译我们的 C++ 扩展，我们需要做一些准备工作，首先需要全局安装 [node-gyp](https://github.com/nodejs/node-gyp) 这个包：`npm install -g node-gyp`。同时需要安装 C++ 编译工具，在 linux 下需要使用 [GCC](https://gcc.gnu.org/)，Mac 下需要使用 [Xcode](https://developer.apple.com/xcode/download/)，Windows 下需要安装 [Visual Studio](https://www.visualstudio.com/products/visual-studio-community-vs) ，大家可以选择安装社区版，因为专业版和旗舰版都是收费的，如果想进一步减小安装后占用磁盘的体积可以安装 [Visual C++ Build Tools](https://visualstudio.microsoft.com/zh-hans/visual-cpp-build-tools/) 。详细的安装说明可以参见 [附 A6](https://nodebook.whyun.com/a6_node_native_addon_config)。
+为了能够编译我们的 C++ 扩展，我们需要做一些准备工作，首先需要全局安装 [node-gyp](https://github.com/nodejs/node-gyp) 这个包：`npm install -g node-gyp`。同时需要安装 C++ 编译工具，在 linux 下需要使用 [GCC](https://gcc.gnu.org/)；Mac 下需要使用 [Xcode](https://developer.apple.com/xcode/download/)；Windows 下需要安装 [Visual Studio](https://www.visualstudio.com/products/visual-studio-community-vs) ，大家可以选择安装社区版，因为专业版和旗舰版都是收费的，如果想进一步减小安装后占用磁盘的体积可以安装 [Visual C++ Build Tools](https://visualstudio.microsoft.com/zh-hans/visual-cpp-build-tools/) ，详细的安装说明可以参见 [附 A6](https://nodebook.whyun.com/a6_node_native_addon_config)。
 
 为了演示如何编译一个 C++ 扩展，我们从亘古不变的 hello world 程序入手，这个程序取自 Node [C++扩展的官方文档](https://nodejs.org/dist/latest-v6.x/docs/api/addons.html)。我们的目的是在 C++ 扩展中实现如下代码：
 
@@ -31,7 +31,8 @@ using v8::Value;
 
 void Method(const FunctionCallbackInfo<Value>& args) {
   Isolate* isolate = args.GetIsolate();
-  args.GetReturnValue().Set(String::NewFromUtf8(isolate, "world"));
+  args.GetReturnValue().Set(String::NewFromUtf8(
+      isolate, "world").ToLocalChecked());
 }
 
 void init(Local<Object> exports) {
@@ -113,7 +114,7 @@ C++ addon 最精髓的地方，就是将 一个 JavaScript 类映射为一个 C+
 
 class MyCalc : public Nan::ObjectWrap {
 public:
-    static void Init(v8::Handle<v8::Object> module);
+    static void Init(v8::Local<v8::Object> module);
 private:
     explicit MyCalc(double value=0);
     ~MyCalc();
@@ -130,7 +131,7 @@ private:
 
 **代码 10.3.1 MyCalc.h**
 
-首先注意的一点是，类 `MyCalc` 要继承自 `Nan::ObjectWrap` ，按照惯例这个类中还要有一个 Persistent 类型的句柄用来承载 js 类的构造函数，MyCalc 类中唯一对外公开的函数就是 Init，其参数 module 正是对应的是 Node 中的 module 对象。
+首先注意的一点是，类 `MyCalc` 要继承自 `Nan::ObjectWrap` ，按照惯例这个类中还要有一个 Persistent 类型的句柄用来承载 js 类的构造函数，MyCalc 类中唯一对外公开的函数就是 Init，其参数 `module` 正是对应的是 Node 中的 module 对象。
 
 ```c++
 #include "MyCalc.h"
@@ -145,7 +146,10 @@ MyCalc::~MyCalc() {
 
 }
 
-void MyCalc::Init(v8::Handle<v8::Object> module) {
+void MyCalc::Init(v8::Local<v8::Object> module) {
+    v8::Local<v8::Context> context = module->CreationContext();
+    Nan::HandleScope scope;
+
     // Prepare constructor template
     v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);//使用ShmdbNan::New<Object>函数作为构造函数
     tpl->SetClassName(Nan::New<v8::String>("MyCalc").ToLocalChecked());//js中的类名为MyCalc
@@ -154,15 +158,17 @@ void MyCalc::Init(v8::Handle<v8::Object> module) {
     Nan::SetPrototypeMethod(tpl,"addOne",PlusOne);//js类的成员函数名为addOne,我们将其映射为 C++中的PlusOne函数
     Nan::SetPrototypeMethod(tpl,"getValue",GetValue);//js类的成员函数名为getValue,我们将其映射为 C++中的GetValue函数
     
-    //Persistent<Function> constructor = Persistent<Function>::New/*New等价于js中的new*/(tpl->GetFunction());//new一个js实例
-    constructor.Reset(tpl->GetFunction());
-    module->Set(Nan::New<v8::String>("exports").ToLocalChecked(), tpl->GetFunction());
+    constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
+    module->Set(context,
+               Nan::New<v8::String>("exports").ToLocalChecked(),
+               tpl->GetFunction(context).ToLocalChecked());
 }
 
 NAN_METHOD(MyCalc::New) {
+    v8::Local<v8::Context> context = info.GetIsolate()->GetCurrentContext();
     if (info.IsConstructCall()) {
         // 通过 `new MyCalc(...)` 方式调用
-        double value = info[0]->IsUndefined() ? 0 : info[0]->NumberValue();
+        double value = info[0]->IsUndefined() ? 0 : info[0]->NumberValue(context).FromJust();
         MyCalc* obj = new MyCalc(value);
         obj->Wrap(info.This());
         info.GetReturnValue().Set(info.This());
@@ -171,7 +177,7 @@ NAN_METHOD(MyCalc::New) {
         const int argc = 1;
         v8::Local<v8::Value> argv[argc] = { info[0] };
         v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);
-        info.GetReturnValue().Set(cons->NewInstance(argc, argv));
+        info.GetReturnValue().Set(cons->NewInstance(context, argc, argv).ToLocalChecked());
     }
 }
 
@@ -181,8 +187,9 @@ NAN_METHOD(MyCalc::GetValue) {
 }
 
 NAN_METHOD(MyCalc::PlusOne) {
+    v8::Local<v8::Context> context = info.GetIsolate()->GetCurrentContext();
     MyCalc* obj = ObjectWrap::Unwrap<MyCalc>(info.Holder());
-    double wannaAddValue = info[0]->IsUndefined() ? 1 : info[0]->NumberValue();
+    double wannaAddValue = info[0]->IsUndefined() ? 1 : info[0]->NumberValue(context).FromJust();
 
     obj->_value += wannaAddValue;
     info.GetReturnValue().Set(Nan::New(obj->_value));
@@ -191,15 +198,15 @@ NAN_METHOD(MyCalc::PlusOne) {
 
 **代码 10.3.2 MyCalc.cc**
 
-注意到在 Init 函数中，定义了一个 js 类的实现，并且将其成员函数和 C++ 类的成员函数做了绑定，其中构造函数绑定为 New ，getValue 绑定为 GetValue，addOne 绑定为 PlusOne。Init 函数中的最后一行类似于我们在 js 中的 module.exports = MyCalc 操作。对于 C++ 函数 New GetValue PlusOne 来说，我们在定义的时候都使用了宏 NAN_METHOD，这样我们在函数内部就直接拥有了 info 这个变量，这个跟 **代码 10.2.4** 中的使用方法是一样的。
+注意到在 `Init` 函数中，定义了一个 js 类的实现，并且将其成员函数和 C++ 类的成员函数做了绑定，其中构造函数绑定为 `New` ，`getValue` 绑定为 `GetValue`，`addOne` 绑定为 `PlusOne`。`Init` 函数中的最后一行类似于我们在 js 中的 `module.exports = MyCalc` 操作。对于 C++ 函数 `New` `GetValue` `PlusOne` 来说，我们在定义的时候都使用了宏 `NAN_METHOD`，这样我们在函数内部就直接拥有了 `info` 这个变量，这个跟 **代码 10.2.4** 中的使用方法是一样的。
 
-同时留意到在函数 GetValue 和 PlusOne 中，`MyCalc* obj = ObjectWrap::Unwrap<MyCalc>(info.Holder());`，这一句将 js 对象转化为 C++对象，然后操作 C++ 对象的属性。相反在 函数 New 中 `obj->Wrap(info.This());` 是一个相反的过程，将 C++ 对象转化为 js 对象。
+同时留意到在函数 `GetValue` 和 `PlusOne` 中，`MyCalc* obj = ObjectWrap::Unwrap<MyCalc>(info.Holder());`，这一句将 js 对象转化为 C++对象，然后操作 C++ 对象的属性。相反在 函数 New 中 `obj->Wrap(info.This());` 是一个相反的过程，将 C++ 对象转化为 js 对象。
 
 ### 10.4 使用线程池
 
-前面几小节介绍了 Nan 的基本使用，可是即使使用了 C++ addon 技术，默认情况下，你所写的代码依然运行在 V8 主线程上，所以说在面对高并发的情况下，如果你的 C++ 代码是计算密集型的，它依然会抢占 V8 主线程的 CPU 时间，最严重的后果当然就是事件轮询的 CPU 时间被抢占导致整个 Node 处理效率下降。所以说釜底抽薪之术还是使用线程。
+前面几小节介绍了 Nan 的基本使用，可是即使使用了 C++ addon 技术，默认情况下，你所写的代码依然运行在 V8 主线程上，所以说在面对高并发的情况下，如果你的 C++ 代码是计算密集型的，它依然会抢占 V8 主线程的 CPU 时间，最严重的后果当然就是事件轮询的 CPU 时间被抢占导致整个 Node 处理效率下降。所以说使用多线程在这种情况下会是一个更优解。
 
-Nan 中提供了 AsyncWorker 类，它内部封装了 libuv 中的 uv_queue_work，可以在将计算代码直接丢到 libuv 的线程做处理，处理完成之后再通知 V8 主线程。
+Nan 中提供了 `AsyncWorker` 类，它内部封装了 libuv 中的 `uv_queue_work`，可以在将计算代码直接丢到 libuv 的线程做处理，处理完成之后再通知 V8 主线程。
 
 下面是一个简单的小例子：
 
@@ -324,7 +331,7 @@ NODE_MODULE(binding, InitAll)
 
 为了简单起见，将所有代码写到一个 c++ 文件中，注意到在**代码 10.4.1**中使用了自定义宏定义 `WINDOWS_SPECIFIC_DEFINE`，在 `binding.gyp` 中是支持添加自定义宏定义和编译参数的，下面是这个项目中用到的 `binding.gyp` 文件：
 
-```
+```json
 {
   'targets': [
     {
@@ -362,9 +369,9 @@ NODE_MODULE(binding, InitAll)
 
 **代码 10.4.2 binding.gyp**
 
-`binding.gyp` 中的最外层的 `defines` 变量是全局环境变量，`conditions` 中可以放置各种条件判断，`OS=="linux"` 代表当前的操作系统是 linux，其下的 `defines` 下定义的宏定义，只有在 linux 系统下才起作用，所以在代码 10.4.1 中的环境变量 `WINDOWS_SPECIFIC_DEFINE` 只用在 windows 上才起作用，我们使用这个宏定义来做条件编译，以保证能够正确使用线程函数（其实libuv 中封装了各种跨平台的线程函数，这里不做多讨论）。
+`binding.gyp` 中的最外层的 `defines` 变量是全局环境变量，`conditions` 中可以放置各种条件判断，`OS=="linux"` 代表当前的操作系统是 linux，其下的 `defines` 下定义的宏定义，只有在 linux 系统下才起作用，所以在 **代码 10.4.1** 中的环境变量 `WINDOWS_SPECIFIC_DEFINE` 只用在 windows 上才起作用，我们使用这个宏定义来做条件编译，以保证能够正确使用线程函数（其实 libuv 中封装了各种跨平台的线程函数，这里不做多讨论）。
 
-继续回到**代码 10.4.1**，类 ThreadWorker 中，函数 Execute 用来执行耗时函数，它将在 libuv 中的线程池中执行，函数 HandleOKCallback 在函数 Execute 执行完成后被调用，用来将处理结果通知 libuv 的事件轮询，它在 V8 主线程中执行。
+继续回到 **代码 10.4.1**，类 `ThreadWorker` 中，函数 `Execute` 用来执行耗时函数，它将在 libuv 中的线程池中执行，函数 `HandleOKCallback` 在函数 `Execute` 执行完成后被调用，用来将处理结果通知 libuv 的事件轮询，它在 V8 主线程中执行。
 
 最终给出测试用的 js 代码，又回到了我们熟悉的回调函数模式：
 
@@ -378,8 +385,22 @@ asyncSimple.doAsyncWork('prefix:',function(err,result) {
 
 **代码 10.4.3 addon.js**
 
-### 10.5 代码
+### 10.5 N-API
+
+Node 的 C++ addon 直接调用 V8 API 来完成原生代码和 JavaScript 的桥接工作，但是 V8 的 API 每年都几乎有大的版本升级，从而可能导致若干的数据类型或者函数被删除掉，这样就不得不迫使 addon 的开发者去升级他们的代码，以适应新版本的改动。Node 从 12.x 开始使用 7.x 版本的 v8，这个版本对于废弃 API 做了很多的删除，就导致了各个使用 addon 项目的社区一片哀鸿（具体可以参见这个 [issue](https://github.com/nodejs/node/issues/23122)）。
+
+> Node 12 开始，删除了 `V8:Handle`，需要使用 v8::Local 替代；删除了 `Local<Value>::ToString`，需要替换为 `MaybeLocal<String>::ToString(Local<Context>)` ，与此类似的还有  Value 类上的各种转化函数；删除了非 Maybe 版本的 `FunctionTemplate::GetFunction` `Function::New` `Function::Call` 等函数，需要在调用这些函数的时候传递 `Local<Context>` 参数以使用 Maybe 版本的 API。
+
+从 Node 8.x 开始，worker 线程的 API 被引入，这样导致一个问题，就是 c/c++ 中的静态变量，在整个进程中是共享的，而引入多线程机制后，这些静态变量可能会被多个线程读写，从而导致进程崩溃。Node 官方为此为 addon 提供了上下文感知功能。
+
+
+
+### 10.6 代码
 
 本章代码位于 https://github.com/yunnysunny/nodebook-sample/tree/master/chapter10
+
+### 参考资料
+
+- V8 API Changes https://docs.google.com/document/d/1g8JFi8T_oAE_7uAri7Njtig7fKaPDfotU6huOa1alds
 
  
