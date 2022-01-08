@@ -393,7 +393,89 @@ Node 的 C++ addon 直接调用 V8 API 来完成原生代码和 JavaScript 的�
 
 从 Node 8.x 开始，worker 线程的 API 被引入，这样导致一个问题，就是 c/c++ 中的静态变量，在整个进程中是共享的，而引入多线程机制后，这些静态变量可能会被多个线程读写，从而导致进程崩溃。Node 官方为此为 addon 提供了上下文感知功能。
 
+**代码 10.2.2** 中，为了导出 C++ 函数，使用了 `NODE_MODULE` 这个宏定义，与其对应的上下文感知版本的宏定义是 `NODE_MODULE_INIT`，这个宏定义仅仅是将以下内容缩写成了一行，便于大家少写代码：
 
+```c++
+extern "C" NODE_MODULE_EXPORT void
+NODE_MODULE_INITIALIZER(Local<Object> exports,
+                        Local<Value> module,
+                        Local<Context> context)
+```
+
+所以可以看出来使用宏定义 `NODE_MODULE_INIT`，你还需要自己编写函数体，这样才是一个完整的符合语法要求的代码块。那么这个函数体内应该写什么呢，你可以将你代码中牵扯到静态变量的清理的代码全都抽离到这个代码块中。当然你也可以使用原来的 `NODE_MODULE` 宏，在需要添加清理的地方，给自己的代码下桩，不过这个样子会让自己的代码显得比较混乱。下面的代码改编自是官方给出的[例子]()：
+
+```c++
+// addon.cc
+#include <node.h>
+#include <assert.h>
+#include <stdlib.h>
+
+using node::AddEnvironmentCleanupHook;
+using v8::HandleScope;
+using v8::Isolate;
+using v8::Local;
+using v8::Object;
+
+// Note: In a real-world application, do not rely on static/global data.
+static char cookie[] = "yum yum";
+static int cleanup_cb1_called = 0;
+static int cleanup_cb2_called = 0;
+
+static void cleanup_cb1(void* arg) {
+  Isolate* isolate = static_cast<Isolate*>(arg);
+  HandleScope scope(isolate);
+  Local<Object> obj = Object::New(isolate);
+  assert(!obj.IsEmpty());  // assert VM is still alive
+  assert(obj->IsObject());
+  cleanup_cb1_called++;
+}
+
+static void cleanup_cb2(void* arg) {
+  assert(arg == static_cast<void*>(cookie));
+  cleanup_cb2_called++;
+}
+
+static void sanity_check(void*) {
+  assert(cleanup_cb1_called == 1);
+  assert(cleanup_cb2_called == 1);
+}
+
+void Method(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  Isolate* isolate = args.GetIsolate();
+  args.GetReturnValue().Set(v8::String::NewFromUtf8(
+      isolate, "world").ToLocalChecked());
+}
+
+// Initialize this addon to be context-aware.
+NODE_MODULE_INIT(/* exports, module, context */) {
+  Isolate* isolate = context->GetIsolate();
+
+  AddEnvironmentCleanupHook(isolate, sanity_check, nullptr);
+  AddEnvironmentCleanupHook(isolate, cleanup_cb2, cookie);
+  AddEnvironmentCleanupHook(isolate, cleanup_cb1, isolate);
+  NODE_SET_METHOD(exports, "hello", Method);
+}
+```
+
+**代码 10.5.1**
+
+从上述代码上看，使用流程还是略显复杂的。`AddEnvironmentCleanupHook` 函数原型是
+
+```c++
+void AddEnvironmentCleanupHook(v8::Isolate* isolate,
+                               void (*fun)(void* arg),
+                               void* arg);
+```
+
+第 2 个参数是一个回调函数，第 3 个参数是传递给回调函数的参数，也就是被清理对象的指针。这些调用 `AddEnvironmentCleanupHook` 时传递的回调函数，会按照后进先出的顺序，在加载当前扩展的线程退出之前被执行，所以 **代码 10.5.1** 中三个回调函数的执行顺寻为 `cleanup_cb1` `cleanup_cb2` `sanity_check`。由于例子中给的静态变量都是在栈上申请的内存，所以在三个回调函数中没有写其销毁函数，如果你的静态变量的类型是句柄的话，需要调用其清理函数，完成对于句柄指向的对象的清理动作，对于代码 10.3.2 来说，就要在函数 `MyCalc::Init` 中添加如下代码：
+
+```c++
+node::AddEnvironmentCleanupHook(isolate, [](void*) {
+    constructor.Reset();
+}, nullptr);
+```
+
+Node 社区本身不维护 V8，对于 V8 的 API 变更只能采取跟随策略，所以每次 V8 有大的变动，都会伤筋动骨，所以 Node 从 8.x 开始引入了 N-API 的接口。它对于 V8 API 进行一次抽象，在其基础上又封装了一层，保证基于 N-API 开发的代码在 V8 API 发生变动的时候，可以保持不用更改。虽然 N-API 本身也会历经版本变动，但是总体上比 V8 的变动要小。
 
 ### 10.6 代码
 
