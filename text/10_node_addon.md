@@ -475,7 +475,129 @@ node::AddEnvironmentCleanupHook(isolate, [](void*) {
 }, nullptr);
 ```
 
-Node 社区本身不维护 V8，对于 V8 的 API 变更只能采取跟随策略，所以每次 V8 有大的变动，都会伤筋动骨，所以 Node 从 8.x 开始引入了 N-API 的接口。它对于 V8 API 进行一次抽象，在其基础上又封装了一层，保证基于 N-API 开发的代码在 V8 API 发生变动的时候，可以保持不用更改。虽然 N-API 本身也会历经版本变动，但是总体上比 V8 的变动要小。
+Node 社区本身不维护 V8，对于 V8 的 API 变更只能采取跟随策略，所以每次 V8 有大的变动，都会伤筋动骨，所以 Node 从 8.x 开始引入了 N-API 的接口。它对于 V8 API 进行一次抽象，在其基础上又封装了一层，保证基于 N-API 开发的代码在 V8 API 发生变动的时候，可以保持不用更改。虽然 N-API 本身也会历经版本变动，但是总体上比 V8 的变动要小。下面是一个 N-API 的 hello world 程序，代码来自官方文档：
+
+```c++
+// hello.cc using Node-API
+#include <node_api.h>
+
+namespace demo {
+
+napi_value Method(napi_env env, napi_callback_info args) {
+  napi_value greeting;
+  napi_status status;
+
+  status = napi_create_string_utf8(env, "world", NAPI_AUTO_LENGTH, &greeting);
+  if (status != napi_ok) return nullptr;
+  return greeting;
+}
+
+napi_value init(napi_env env, napi_value exports) {
+  napi_status status;
+  napi_value fn;
+
+  status = napi_create_function(env, nullptr, 0, Method, nullptr, &fn);
+  if (status != napi_ok) return nullptr;
+
+  status = napi_set_named_property(env, exports, "hello", fn);
+  if (status != napi_ok) return nullptr;
+  return exports;
+}
+
+NAPI_MODULE(NODE_GYP_MODULE_NAME, init)
+
+}  // namespace demo
+```
+
+**代码 10.5.2**
+
+N-API 的 API 设计符合如下风格：
+
+所有的 N-API 的调用的返回值都是 `napi_status` 类型，如果返回值为 `napi_ok`，则代表调用成功。
+
+ 你需要使用指针来承载你要返回的数据内容，比如说 **代码 10.5.2** 中第 10 行，通过函数 `napi_create_string_utf8` 来获取一个 JavaScript 字符串时，需要在最后一个参数位传递变量 `greeting` 的指针。
+
+所有的 JavaScript 类型，在 N-API 中都是 `napi_value` 类型。
+
+最后一条，由于 N-API 的调用返回值是 `napi_status` 类型，它是一个枚举类型，如果想获取具体的错误描述信息，可以调用 `napi_get_last_error_info` 函数来完成。不过在 N-API 的调用返回值为非 `napi_ok` 的情况下，还有可能函数内部会抛出异常，可以通过函数 `napi_is_exception_pending` 来判断当前调用是否会产生异常。下面是一个使用示例：
+
+```c++
+// addon.h
+#ifndef _ADDON_H_
+#define _ADDON_H_
+#include <js_native_api.h>
+napi_value create_addon(napi_env env);
+#endif  // _ADDON_H_
+```
+
+**代码 10.5.3**
+
+```c++
+// addon.c
+#include "addon.h"
+
+#define NAPI_CALL(env, call)                                      \
+  do {                                                            \
+    napi_status status = (call);                                  \
+    if (status != napi_ok) {                                      \
+      const napi_extended_error_info* error_info = NULL;          \
+      napi_get_last_error_info((env), &error_info);               \
+      const char* err_message = error_info->error_message;        \
+      bool is_pending;                                            \
+      napi_is_exception_pending((env), &is_pending);              \
+      if (!is_pending) {                                          \
+        const char* message = (err_message == NULL)               \
+            ? "empty error message"                               \
+            : err_message;                                        \
+        napi_throw_error((env), NULL, message);                   \
+        return NULL;                                              \
+      }                                                           \
+    }                                                             \
+  } while(0)
+
+static napi_value
+DoSomethingUseful(napi_env env, napi_callback_info info) {
+  // Do something useful.
+  return NULL;
+}
+
+napi_value create_addon(napi_env env) {
+  napi_value result;
+  NAPI_CALL(env, napi_create_object(env, &result));
+
+  napi_value exported_function;
+  NAPI_CALL(env, napi_create_function(env,
+                                      "doSomethingUseful",
+                                      NAPI_AUTO_LENGTH,
+                                      DoSomethingUseful,
+                                      NULL,
+                                      &exported_function));
+
+  NAPI_CALL(env, napi_set_named_property(env,
+                                         result,
+                                         "doSomethingUseful",
+                                         exported_function));
+
+  return result;
+}
+```
+
+**代码 10.5.4**
+
+```c++
+// addon_node.c
+#include <node_api.h>
+#include "addon.h"
+
+NAPI_MODULE_INIT() {
+  // This function body is expected to return a `napi_value`.
+  // The variables `napi_env env` and `napi_value exports` may be used within
+  // the body, as they are provided by the definition of `NAPI_MODULE_INIT()`.
+  return create_addon(env);
+}
+```
+
+**代码 10.5.5**
 
 ### 10.6 代码
 
