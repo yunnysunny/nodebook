@@ -391,7 +391,7 @@ Node 的 C++ addon 直接调用 V8 API 来完成原生代码和 JavaScript 的�
 
 > Node 12 开始，删除了 `V8:Handle`，需要使用 v8::Local 替代；删除了 `Local<Value>::ToString`，需要替换为 `MaybeLocal<String>::ToString(Local<Context>)` ，与此类似的还有  Value 类上的各种转化函数；删除了非 Maybe 版本的 `FunctionTemplate::GetFunction` `Function::New` `Function::Call` 等函数，需要在调用这些函数的时候传递 `Local<Context>` 参数以使用 Maybe 版本的 API。
 
-从 Node 8.x 开始，worker 线程的 API 被引入，这样导致一个问题，就是 c/c++ 中的静态变量，在整个进程中是共享的，而引入多线程机制后，这些静态变量可能会被多个线程读写，从而导致进程崩溃。Node 官方为此为 addon 提供了上下文感知功能。
+从 Node 10.x 开始，worker 线程的 API 被引入，这样导致一个问题，就是 c/c++ 中的静态变量，在整个进程中是共享的，而引入多线程机制后，这些静态变量可能会被多个线程读写，从而导致进程崩溃。Node 官方为此为 addon 提供了上下文感知功能。
 
 **代码 10.2.2** 中，为了导出 C++ 函数，使用了 `NODE_MODULE` 这个宏定义，与其对应的上下文感知版本的宏定义是 `NODE_MODULE_INIT`，这个宏定义仅仅是将以下内容缩写成了一行，便于大家少写代码：
 
