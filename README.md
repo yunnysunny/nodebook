@@ -6,7 +6,11 @@
 <https://nodebook.whyun.com/> <https://blog.whyun.com/nodebook>
 
 本书适合 Node.js初学者至进阶开发者，也欢迎您在学习时一起参与本书内容撰写。
+## 源码
 
+本书配套的源码网址如下：
+
+<https://github.com/yunnysunny/nodebook-sample>
 
 ## 根目录结构
 
@@ -31,12 +35,6 @@ paid for this book.**
 ## 作者
 
 -   yunnysunny <https://github.com/yunnysunny>
-
-## 源码
-
-本书配套的源码网址如下：
-
-<https://github.com/yunnysunny/nodebook-sample>
 
 ## 编译
 本书采用 [gitbook](https://www.gitbook.com/) 进行编译，如果你想在本地编译，需要安装 gitbook-cli：
