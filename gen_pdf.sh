@@ -45,16 +45,14 @@ save_cache() {
         echo cache directory "$CACHE_FROM_DIR" not exist
     fi
 }
-export DOCKER_BUILDKIT=1 
 SAVE_NAME=all_images
-BUILD_TAG=yunnysunny/nodebook
+BUILD_TAG=yunnysunny/nodebook:latest
 mkdir -p output
 
 load_cache ${SAVE_NAME}
 docker pull ubuntu:20.04
 docker build --target build-stage --tag ${BUILD_TAG}  --progress=plain .
 docker images
-docker push ${BUILD_TAG}
 docker build --output output .
 save_cache ${SAVE_NAME} ${BUILD_TAG}
 
