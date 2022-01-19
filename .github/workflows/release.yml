@@ -50,7 +50,7 @@ jobs:
       # Build and push Docker image with Buildx (don't push on PR)
       - name: Build and push Docker image
         working-directory: ./
-        run: ./gen_pdf
+        run: ./gen_pdf.sh
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
