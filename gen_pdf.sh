@@ -40,7 +40,7 @@ save_cache() {
     FROM_PATH="${CACHE_FROM_DIR}/${SAVE_NAME}.tar"
     if [ -d "$CACHE_FROM_DIR" ] ; then
         echo save "$@" to "$FROM_PATH"
-        docker save "$(docker images -q)" > "$FROM_PATH"
+        docker save $(docker images -q) > "$FROM_PATH"
     else
         echo cache directory "$CACHE_FROM_DIR" not exist
     fi
