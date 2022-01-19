@@ -42,8 +42,9 @@ jobs:
           key: ${{ runner.os }}-multi-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-multi-buildx
-      - name: Init directory
-        run: mkdir -p output
+      - name: Init
+        run: |
+          mkdir -p output
       # Build and push Docker image with Buildx (don't push on PR)
       - name: Build And Gen Pdf
         working-directory: ./
@@ -51,6 +52,6 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: ./output/book.pdf
-          draft: true
+          files: ./output/${{ env.GITHUB_SHA }}.pdf
+          draft: false
           prerelease: true
