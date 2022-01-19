@@ -4,3 +4,4 @@ output/*
 .git
 *.sh
 *.html
+.github/*

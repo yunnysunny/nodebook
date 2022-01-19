@@ -52,6 +52,6 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: ./output/${{ env.GITHUB_SHA }}.pdf
+          files: ./output/${{ github.sha }}.pdf
           draft: false
           prerelease: true
