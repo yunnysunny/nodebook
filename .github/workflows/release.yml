@@ -48,7 +48,7 @@ jobs:
       - name: Init directory
         run: mkdir -p output
       # Build and push Docker image with Buildx (don't push on PR)
-      - name: Build and push Docker image
+      - name: Build And Gen Pdf
         working-directory: ./
         run: ./gen_pdf.sh
       - name: Release
