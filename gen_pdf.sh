@@ -22,38 +22,20 @@ info_print() {
     echo -e "\033[32;1m$*\033[0m"
 }
 
-load_cache() {
-    local SAVE_NAME="$1"
-    FROM_PATH="${CACHE_FROM_DIR}/${SAVE_NAME}.tar"
-    if [ -f "$FROM_PATH" ] ; then
-        echo load cache "$FROM_PATH"
-        docker load "$FROM_PATH"
-    else
-        echo cache "$FROM_PATH" not found
-    fi
-}
-
-save_cache() {
-    local SAVE_NAME="$1"
-    shift
-    mkdir -p "${CACHE_FROM_DIR}"
-    FROM_PATH="${CACHE_FROM_DIR}/${SAVE_NAME}.tar"
-    if [ -d "$CACHE_FROM_DIR" ] ; then
-        echo save "$@" to "$FROM_PATH"
-        docker save "$@" > "$FROM_PATH"
-    else
-        echo cache directory "$CACHE_FROM_DIR" not exist
-    fi
-}
 SAVE_NAME=all_images
+CACHE_FILE="${CACHE_FROM_DIR}/${SAVE_NAME}.tar"
 BUILD_TAG=yunnysunny/nodebook:latest
 mkdir -p output
 
-load_cache ${SAVE_NAME}
+# load_cache ${SAVE_NAME}
 docker pull ubuntu:20.04
-docker build --target build-stage --tag ${BUILD_TAG} --output=type=docker --progress=plain .
+docker build --target build-stage \
+    --tag ${BUILD_TAG}  \
+    --cache-from type=local,src=${CACHE_FILE} \
+    --cache-to type=local,mode=max,dest=${CACHE_FILE} \
+    --progress=plain .
 docker images
 docker build --output output .
-save_cache ${SAVE_NAME} ${BUILD_TAG}
+# save_cache ${SAVE_NAME} ${BUILD_TAG}
 
 #pandoc -N -s --toc  -f markdown+smart  --pdf-engine=xelatex -V CJKmainfont='KaiTi'  -V geometry:margin=1in 00_preface.md 01_node_introduce.md 02_node_javascript.md 03_node_basic.md 04_node_npm.md 05_node_database.md 06_node_express_basic.md 07_node_express_advance.md 08_node_unit_test.md 09_node_production.md 10_node_addon.md 11_node_optimization.md 12_node_web_security.md a1_node_utils.md a2_bibliography.md a3_convention.md a4_node_http.md a5_node_multi_versions.md a6_node_native_addon_config.md -o output.pdf

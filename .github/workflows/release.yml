@@ -10,8 +10,6 @@ on:
       - master
 
 env:
-  NEED_PUSH: 1
-  PUSH_TO_OFFICAL: 1
   CACHE_FROM_DIR: /tmp/.buildx-cache
   DOCKER_BUILDKIT: 1
 
