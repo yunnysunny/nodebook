@@ -51,7 +51,7 @@ mkdir -p output
 
 load_cache ${SAVE_NAME}
 docker pull ubuntu:20.04
-docker build --target build-stage --tag ${BUILD_TAG}  --progress=plain .
+docker build --target build-stage --tag ${BUILD_TAG} --output=type=docker --progress=plain .
 docker images
 docker build --output output .
 save_cache ${SAVE_NAME} ${BUILD_TAG}
