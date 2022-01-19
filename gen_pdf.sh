@@ -1,3 +1,5 @@
+#!/bin/bash
+
 mkdir -p output
 docker pull ubuntu:20.04
 DOCKER_BUILDKIT=1 docker build --file Dockerfile --output output --progress=plain .
