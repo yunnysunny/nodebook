@@ -49,9 +49,14 @@ jobs:
       - name: Build And Gen Pdf
         working-directory: ./
         run: ./gen_pdf.sh
+      - name: Generate release tag
+        id: tag
+        run: |
+          echo "::set-output name=release_tag::UserBuild_$(date +"%Y.%m.%d_%H-%M")"
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ steps.tag.outputs.release_tag }}
           files: ./output/${{ github.sha }}.pdf
           draft: false
           prerelease: true
