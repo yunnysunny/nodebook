@@ -8,6 +8,10 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - '**.html'
+      - 'static/**'
+      - 'no_used/**'
 
 env:
   CACHE_FROM_DIR: /tmp/.buildx-cache
