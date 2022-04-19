@@ -48,6 +48,12 @@ Windows 环境比较复杂，需要手动安装 VS build tools 和 python。首�
 
 **图 A 6.2.5**
 
+对于没有 windows store 的操作系统，可以直接从这个链接安装 python [https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe](https://link.zhihu.com/?target=https%3A//www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe) 安装时记得勾选添加到环境变量的标识。
+
+![](images/v2-79a239ec98fbea727a0354ba553d6660_720w.jpg)
+
+**图 A 6.2.5**
+
 ### A 6.3 测试
 
 接下来就可以测试一下刚才搭建的环境是否好使了，使用 `npm install native-linked-list` 来测试。注意如果你是在 Windows 上新安装的 python，那么不要在安装 python 之前的命令行的界面中运行上述测试命令，而是应该新打开一个命令行窗口来执行。
