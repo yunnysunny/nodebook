@@ -12,6 +12,7 @@
 * [11 Node.js 调优](11_node_optimization.md)
 * [12 Node.js Web 安全](12_node_web_security.md)
 * [13 Node Web Worker](13_node_web_worker.md)
+* [14 日志和监控](14_node_log_and_monitor.md)
 * [A1 Node.js 好用工具介绍](a1_node_utils.md)
 * [A2 参考资源](a2_bibliography.md)
 * [A3 书籍写作规范](a3_convention.md)
