@@ -76,6 +76,83 @@ typora-copy-images-to: ./images
 
 **图 14.2.1.4.1**
 
+#### 14.2.2 指标采集代码
+
+讲述玩 Prometheus 中的数据结构后，就可以编写代码了。首先 `prom-client` 根据 Prometheus [官方推荐](https://prometheus.io/docs/instrumenting/writing_clientlibs/#standard-and-runtime-collectors)已经内置了若干指标，可以通过如下代码进行收集：
+
+```javascript
+const client = require('prom-client');
+const collectDefaultMetrics = client.collectDefaultMetrics;
+collectDefaultMetrics();
+```
+
+**代码 14.2.2.1**
+
+里面包含 CPU 时间、堆大小、进程文件句柄数、Event Loop 暂停时间、libuv 句柄数、GC 耗时等信息。
+
+和其他语言的驱动不同，prom-client 没有和任何 http 框架集成，你需要手动将其包裹在一个 http 路由中：
+
+```javascript
+http.createServer((req, res) => {
+    if (req.url === '/metrics') {
+        client.register.metrics().then(function (str) {
+            res.end(str);
+        }).catch(function (err) {
+            res.end(err);
+        });
+        return;
+    }
+    res.end('Hello World');
+}).listen(port);
+```
+
+**代码 14.2.2.2**
+
+如果想收集自定义指标，使用起来也比较简单。现在拿 http 请求场景举例，请求计数，由于其只能增加，所以只能使用计数器数据结构；请求的处理时长，由于是上下波动的，所以可以使用仪表盘来上报，也可以指定若干桶数值将其上报为直方图结构，与其类似，指定百分位数就可上报为摘要结构。两者的示例代码如下：
+
+```javascript
+const client = require('prom-client');
+const counter = new client.Counter({
+    name: 'req_count',
+    help: 'http request count',
+});
+exports.addReqCount = function () {
+    counter.inc(); // Increment by 1
+    console.log('add one');
+};
+```
+
+**代码 14.2.2.3 对于计数器使用的示例代码**
+
+```javascript
+const client = require('prom-client');
+const gauge = new client.Gauge({
+    name: 'req_duration',
+    help: 'request duration'
+});
+const histogram = new client.Histogram({
+    name: 'req_duration_histogram',
+    help: 'request duration histogram',
+    buckets: [10, 20, 40, 60, 80, 100, 120, 140, 160, 180]
+});
+const summary = new client.Summary({
+    name: 'req_duration_summary',
+    help: 'request duration summary',
+    percentiles: [0.01, 0.1, 0.5, 0.9, 0.99],
+});
+exports.collectDuration = function (duration) {
+    gauge.set(duration); 
+    histogram.observe(duration);
+    summary.observe(duration);
+};
+```
+
+**代码 14.2.2.4 对于仪表盘、直方图、摘要的示例代码**
+
+### 示例代码
+
+本章节示例代码可以从这里找到 https://github.com/yunnysunny/nodebook-sample/tree/master/chapter14
+
 
 
 
