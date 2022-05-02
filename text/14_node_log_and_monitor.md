@@ -1,7 +1,3 @@
----
-typora-copy-images-to: ./images
----
-
 ## 14 日志和监控
 
 软件开发过程中，将一个需求以代码的形式实现，并且部署到线上，并不代表当前需求的开发周期完成了。首先我们无法保证这次交付的代码是没有逻辑缺陷；其次我们无法保证当前的代码能够高效运行，能够抗住高并发的冲击。对于前者，我们需要能在用户反馈软件的使用障碍的时候，能够方便找到他们使用过程中产生的现场数据，方便定位问题；对于后者我们需要将软件运行过程的性能指标数据收集起来，在指标数据超过设定阈值的时候能够立马采取人工干预，做扩容操作。
@@ -141,7 +137,7 @@ const summary = new client.Summary({
     percentiles: [0.01, 0.1, 0.5, 0.9, 0.99],
 });
 exports.collectDuration = function (duration) {
-    gauge.set(duration); 
+    gauge.set(duration);
     histogram.observe(duration);
     summary.observe(duration);
 };
