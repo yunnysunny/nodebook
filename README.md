@@ -6,6 +6,7 @@
 <https://nodebook.whyun.com/> <https://blog.whyun.com/nodebook>
 
 本书适合 Node.js初学者至进阶开发者，也欢迎您在学习时一起参与本书内容撰写。
+
 ## 源码
 
 本书配套的源码网址如下：
@@ -14,8 +15,8 @@
 
 ## 根目录结构
 
--   readme.md -&gt; 本书说明
--   text -&gt; 内含各章节详细资料
+- readme.md -&gt; 本书说明
+- text -&gt; 内含各章节详细资料
 
 ## 授权
 
@@ -34,13 +35,14 @@ paid for this book.**
 
 ## 作者
 
--   yunnysunny <https://github.com/yunnysunny>
+- yunnysunny <https://github.com/yunnysunny>
 
 ## 编译
+
 本书采用 [gitbook](https://www.gitbook.com/) 进行编译，如果你想在本地编译，需要安装 gitbook-cli：
 
 ```
 npm install gitbook-cli -g
 ```
-然后在项目目录中运行`gitbook serve`即可编译生成html，并且创建一个本地预览网站，其他详细的编译参数可以参照[官方文档](https://toolchain.gitbook.com/setup.html)。
 
+然后在项目目录中运行`gitbook serve`即可编译生成html，并且创建一个本地预览网站，其他详细的编译参数可以参照[官方文档](https://toolchain.gitbook.com/setup.html)。

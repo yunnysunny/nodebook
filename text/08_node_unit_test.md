@@ -12,6 +12,7 @@ function add(a,b) {
     return a+b;
 }
 ```
+
 **代码 8.1.1.1 add函数**  
 如果你之前没有接触过单元测试，可能写出的测试用例是这样的：
 
@@ -23,6 +24,7 @@ if (s == 3) {
     console.error('哎呦，加法测试出错了啊');
 }
 ```
+
 **代码 8.1.1.2 不使用测试框架的测试用例**  
 接着又需要写减法函数、乘法函数、除法函数，但是随着模块的增加，就会遇到一个问题，如果按照代码8.1.2的模式的话，一则输出格式比较乱，二则缺失测试结果统计。这时候大名鼎鼎的 `mocha` 就要闪亮登场了。  
 有了 `mocha` ,测试结果输出格式化和测试结果统计的需求就可以迎刃而解了。比如说对于上面那个加法测试用例，就可以这么写了：
@@ -37,6 +39,7 @@ describe('Calculator', function() {
   });
 });
 ```
+
 **代码 8.1.3 使用mocha改写测试用例**  
 
 > mocha 在使用的时候，可以选择全局安装的模式，也可以安装为当前项目的开发依赖包（即在安装的时候使用`--save-dev`参数），不过每个项目中使用的版本可能会略有差异，并且部分 IDE 对于全局安装的支持并不是很好，所以推荐安装为当前项目的开发依赖。  
@@ -55,6 +58,7 @@ describe('Calculator', function() {
   });
 });
 ```
+
 **代码 8.1.4 文件calculator_test.js部分代码**  
 接着运行`node calculator_test.js`，不出意外会报错：
 
@@ -73,6 +77,7 @@ ReferenceError: describe is not defined
     at startup (node.js:119:16)     
     at node.js:929:3
 ```
+
 **输出 8.1.1.1 命令 node calculator_test.js 的输出**  
 这是由于函数 `describe` 只有通过 mocha 命令运行时才存在，换成使用 `mocha calculator_test.js` 来运行则能看到正确结构：
 
@@ -81,9 +86,10 @@ e:\kuaipan\code\node\myapp\chapter7\src\test\mocha>mocha calculator_test.js
   Calculator                 
     #add()                    
       √ should get 3 when 1 add 2  
-      
+
   1 passing (7ms)
 ```
+
 **输出 8.1.1.2 命令 mocha calculator_test.js 的输出**  
 
 #### 8.1.2 断言
@@ -97,6 +103,7 @@ var should = require('should');
 
 (calculator.add(1,2)).should.be.exactly(3).and.be.a.Number();
 ```
+
 **代码 8.1.2.1 should判断1**  
 或者：  
 
@@ -105,7 +112,9 @@ var should = require('should/as-function');
 
 should(calculator.add(1,2)).be.exactly(3).and.be.a.Number();
 ```
+
 **代码 8.1.2.2 should判断2**  
+
 > 上面仅仅是简单说明使用方法，完整的测试用例大家可以参见第七章源码`test/mocha/calculator_should1.js` 和 `test/mocha/calculator_should2.js`。  
 
 **2.expect.js**  
@@ -115,6 +124,7 @@ should(calculator.add(1,2)).be.exactly(3).and.be.a.Number();
 var expect = require('expect.js');
 expect(calculator.add(1,2)).to.be(3);
 ```
+
 **代码 8.1.2.3 expect判断**  
 **3.chai**  
 [chai](https://www.chaijs.com/) 将前面提到的assert should expect融合到了一起，你仅仅需要使用 chai 这一个包就能享用以上三者的功能，所以前面讲到的三种判断在chai中是这么实现的：  
@@ -131,13 +141,15 @@ chai.should();//use should
 var expect = chai.expect;//use expect
 expect(calculator.add(1,2)).to.equal(3);
 ```
+
 **代码 8.1.2.4 使用chai判断**  
 这个 chai 还真是个大杀器呢。不过注意，在 chai 中下面关键字
 
     to be been is that which and has have with at of same
+
 只能作为属性使用，不能作为函数使用（除非你自己写代码把这些属性覆盖掉），所以 `to.be(3)` 要写作`to.equal(3)`，另外 chai 中也没有 `exactly`  这个函数，所以这里也是用 `equal` 来替代，同时在 chai 中 `a` 只能作为函数使用，其函数声明为 `a(type)` ,所以这里用了 `a('number')`，其他技术细节，请移步官方API [BDD部分](https://www.chaijs.com/api/bdd/)。  
 
-#### 8.1.3 HTTP 测试 
+#### 8.1.3 HTTP 测试
 
 上面演示的是对程序本地调用的测试，不过很多情况下，我门的 API 是通过 HTTP 的形式对外提供访问的，比如说我们将上面提到的计算器的功能改为使用 HTTP 方式对外提供访问，这样的项目依然可以给出测试用例。  
 HTTP请求和本地调用从流程是有很多不一样的地方的：当中隔着一个网络层，请求数据以 HTTP 报文的格式在网络上进行传输，服务器端解析 HTTP 报文内容后再调用本地 API 进行处理，然后再将处理结果通过 HTTP 报文返回给调用者。[supertest](https://github.com/visionmedia/supertest "")  这个工具可以很好得在 mocha 中处理 HTTP 请求断言。  
@@ -158,6 +170,7 @@ exports.doAdd = function(req, res) {
     res.send({code:0,data:a+b});
 };
 ```
+
 **代码 8.1.3.1 加法运算的 HTTP 接口**  
 
 对应的supertest的测试用例代码就是这样的：
@@ -177,7 +190,9 @@ describe('POST /calculator/add', function() {
   });
 });
 ```
+
 **代码 8.1.3.2 加法运算HTTP接口的单元测试代码**  
+
 > 此代码放置于第七章代码的目录 /src/test/http目录下，变量app其实是引用的项目根目录的app.js。  
 
 对于一个普通的网站来说，它的接口在访问之前，一定是经过授权的，否则就会将整个网站置于危险之中。用户名、密码登陆是我们常见的一种授权模式，为了简化我们的教程，我们姑且将 **代码7.1.3** 作为我们的登陆处理代码，那么登陆链接即为`/user/login`，管理后台首页为`/user/admin`。我们现在来测试登录到后台这个动作。
@@ -216,6 +231,7 @@ before(function(done) {
       });
 });
 ```
+
 **代码 8.1.3.3 钩子函数**  
 这里我们使用全局变量 cookie 来存储我们提到的 sessionid ，在 supertest 的 end 函数中，我们读取响应体变量res中的 set-cookie 头信息，通过正则把 sessionid 读取出来。注意我们这里将 `cookie` 这个变量还专门做导出了，这样子我们就可以在其他测试文件中引用这个变量了。  
 接着就可以使用这个读取到的cookie来进入后台了：  
@@ -235,8 +251,10 @@ describe('Backend',function() {
     });
 });
 ```
+
 **代码 8.1.3.4 请求中使用cookie**  
 我们在模板 `user/admin.ejs` 有这么一句：`<title><%=user.account%></title>`，所以我们这里在测试时使用正则 `/<title>admin<\/title>/` 来验证是否真的进入后台了。  还有就是在读取 `cookie` 变量的时候没有直接在 require 完成之后立即读取，因为那个时候，这个变量还没有被赋值，而是在测试用例内部通过 `before.cookie` 读取。
+
 > 注意，由于我们使用了 redis 来存储 session 数据，所以如果你忘记启动 redis 服务器的话，我们的登录操作会失败，而且在 mocha 中给出的报错提示是请求超时，这个问题比较隐蔽，大家一定要注意。
 
 #### 8.1.4 仿真测试

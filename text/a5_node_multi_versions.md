@@ -49,7 +49,6 @@ nvm-windows 比 nvm 多了一个功能，可以设定下载 Node 和 Npm 的地�
 $ nvm list
 
   * 14.17.4 (Currently using 64-bit executable)
-
 ```
 
 #### A 5.2.2 安装具体版本
@@ -78,4 +77,3 @@ nvm use 16.7.0
 ```shell
 $ nvm use 16.7.0
 ```
-

@@ -42,7 +42,7 @@ redis 中大多数的命令格式都是这样的 `command key param1 prama2 ...`
 
 ```javascript
 redis.set('foo','bar').then(function(reply) {
-  
+
 });
 ```
 

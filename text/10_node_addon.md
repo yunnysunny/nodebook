@@ -5,6 +5,7 @@ Node 的优点是处理 IO 密集型操作，对于互联网应用来说，很�
 Node 的 C++ 扩展功能是依赖于 V8 来实现的，但是在 Node 每次做大的版本升级的时候，都会有可能对应升级 V8 的版本，相应的扩展 API 的定义也很有可能发生变化，所以下面会首先介绍 [nan](https://www.npmjs.com/package/nan) 这个第三方包的，它提供了一系列的宏定义和包装函数，来对这些不同版本的扩展 API 进行封装。
 
 ### 10.1 准备工作
+
 为了能够编译我们的 C++ 扩展，我们需要做一些准备工作，首先需要全局安装 [node-gyp](https://github.com/nodejs/node-gyp) 这个包：`npm install -g node-gyp`。同时需要安装 C++ 编译工具，在 linux 下需要使用 [GCC](https://gcc.gnu.org/)；Mac 下需要使用 [Xcode](https://developer.apple.com/xcode/download/)；Windows 下需要安装 [Visual Studio](https://www.visualstudio.com/products/visual-studio-community-vs) ，大家可以选择安装社区版，因为专业版和旗舰版都是收费的，如果想进一步减小安装后占用磁盘的体积可以安装 [Visual C++ Build Tools](https://visualstudio.microsoft.com/zh-hans/visual-cpp-build-tools/) ，详细的安装说明可以参见 [附 A6](https://nodebook.whyun.com/a6_node_native_addon_config)。
 
 为了演示如何编译一个 C++ 扩展，我们从亘古不变的 hello world 程序入手，这个程序取自 Node [C++扩展的官方文档](https://nodejs.org/dist/latest-v6.x/docs/api/addons.html)。我们的目的是在 C++ 扩展中实现如下代码：
@@ -12,6 +13,7 @@ Node 的 C++ 扩展功能是依赖于 V8 来实现的，但是在 Node 每次做
 ```javascript
 exports.hello = () => 'world';
 ```
+
 **代码 10.2.1** 
 
 这看上去有些拿大炮打蚊子的味道，这段代码太简单了，而我们竟然要用 C++ 将其实现一番，是的这一节关注的并不是代码本身，还是如何使用工具进行编译，所以我们选择了最简单的代码。首先我们创建 hello.cc 文件：
@@ -100,7 +102,7 @@ NODE_MODULE(hello_nan, Init)
 
 可以看到和**代码10.2.2**相比**代码10.2.4**要简洁不少，这里 NAN_METHOD(Method) 经过宏定义解析为 `void Method(const Nan::FunctionCallbackInfo<v8::Value>& info)`，所以你看到在函数 `Method` 内部会有一个 info 对象，能够在编译的时候被正确识别。同时宏定义 NAN_MODULE_INIT(Init) 会被转化为 `void Init(v8::Local<v8::Object> target)` 所以你会在函数内部看到一个 target 对象。同时**代码 10.2.2** 第13行中 `Isolate* isolate = args.GetIsolate();` 这个代码在函数 `NaN::New<String>` 中被封装在其内部，所以在**代码 10.2.4** 中没有看到这段代码。
 
-###  10.3 映射 C++ 类
+### 10.3 映射 C++ 类
 
 C++ addon 最精髓的地方，就是将 一个 JavaScript 类映射为一个 C++ 类，这样就会产生一个有趣的效果，你通过 new 构建的 js 对象，它的成员函数都被映射成 C++ 类中的成员函数。
 
@@ -157,7 +159,7 @@ void MyCalc::Init(v8::Local<v8::Object> module) {
 
     Nan::SetPrototypeMethod(tpl,"addOne",PlusOne);//js类的成员函数名为addOne,我们将其映射为 C++中的PlusOne函数
     Nan::SetPrototypeMethod(tpl,"getValue",GetValue);//js类的成员函数名为getValue,我们将其映射为 C++中的GetValue函数
-    
+
     constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
     module->Set(context,
                Nan::New<v8::String>("exports").ToLocalChecked(),
@@ -245,7 +247,7 @@ NAN_METHOD(doAsyncWork);
 static ThreadId __getThreadId() {
     ThreadId nThreadID;
 #ifdef WINDOWS_SPECIFIC_DEFINE
-    
+
     nThreadID = GetCurrentProcessId();
     nThreadID = (nThreadID << 16) + GetCurrentThreadId();
 #else
@@ -303,13 +305,13 @@ NAN_METHOD(doAsyncWork) {
         ThrowError("Wrong number of arguments"); 
         return info.GetReturnValue().Set(Nan::Undefined());
     }
-  
-  
+
+
     if (!info[0]->IsString() || !info[1]->IsFunction()) {
         ThrowError("Wrong number of arguments");
         return info.GetReturnValue().Set(Nan::Undefined());
     }
-    
+
     //
     Callback *callback = new Callback(info[1].As<Function>());
     Nan::Utf8String param1(info[0]);
@@ -348,7 +350,7 @@ NODE_MODULE(binding, InitAll)
               'defines': [
                 'LINUX_DEFINE',
               ],
-              
+
               'libraries':[
                   '-lpthread'
               ],
@@ -361,7 +363,7 @@ NODE_MODULE(binding, InitAll)
               'sources': [ 'async_simple.cc' ]
             }]
         ]
-      
+
     }
   ]
 }
@@ -606,5 +608,3 @@ NAPI_MODULE_INIT() {
 ### 参考资料
 
 - V8 API Changes https://docs.google.com/document/d/1g8JFi8T_oAE_7uAri7Njtig7fKaPDfotU6huOa1alds
-
- 

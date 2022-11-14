@@ -84,10 +84,3 @@ Web Worker 通过数据拷贝的方式而不是通过共享内存的方式来进
 使用 Web Worker 能解决这个问题吗？前面可是讲到了，Web Worker 也是没有共享内存的啊。是的，没有错，但是我们可以使用线程间通信。那如果使用进程，也可以使用进程间通信啊，方案不是类似的吗？也没错，但是线程间的通信要更高效。不过我们依然要面临一个尴尬的问题，Web Worker 还只能支持父子之间通信，兄弟线程之间如果想通信，必须经过父线程做中转。好消息是，从 Node 15 开始，Node API 中增加 [BroadcastChannel](https://nodejs.org/dist/latest-v16.x/docs/api/worker_threads.html#class-broadcastchannel-extends-eventtarget) 类，它支持父子、兄弟线程之间广播数据，估计等上一年半载大家就能用上这个 API。
 
 如果说之前，Node 还是乖乖的实现 V8 API 中的 Web Worker API，那么这次新出来`BroadcastChannel` 的 API，算是对上述行为的“僭越”了。V8 原生的 Web Worker 毕竟设计初衷是为了应对前端计算密集型的场景，Node 官方最终也算是看出来它的不足。我大胆猜测，以后会有更多超出 V8 原生 API 的自定义 API 出现。目前的 Web Worker 在 Node 领域还只是一个初生牛犊，未来还需要茁壮成长。
-
-
-
-
-
-
-

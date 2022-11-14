@@ -3,8 +3,8 @@
 在Node出现之前，我们在做前端的时候经常用到一些开发工具使用ruby和python开发的（比如说[sass](https://sass-lang.com/)，一种CSS预编译语言，依赖于ruby；(Pygments)[https://pygments.org/] ，一种代码语法高亮插件，依赖于python），这个时候就会看到[gem](https://rubygems.org/)和[pip](https://pypi.python.org/pypi)的身影。熟悉java的同学，应该也对[maven](https://maven.apache.org/)如数家珍。和这些语言类似，Node 也提供了包管理工具，它就是 npm ，全名为 **N**ode **P**ackage **M**anager，集成于 Node 的安装程序中。
 
 ### 4.1 使用NPM
-npm 不仅可用于安装新的包，它也支持搜寻、列出已安装模块及更新的功能。
 
+npm 不仅可用于安装新的包，它也支持搜寻、列出已安装模块及更新的功能。
 
 npm 目前拥有数以百万计的包，可以在 https://www.npmjs.com/ 使用关键字搜寻包。举例来说，在关键字栏位输入“coffee-script”，下方的清单就会自动列出包含 coffee-script 关键字的包。
 
@@ -15,6 +15,7 @@ npm 目前拥有数以百万计的包，可以在 https://www.npmjs.com/ 使用�
 找到需要的包后，即可使用以下指令安装：
 
     npm install coffee-script
+
 > 在 win 10 下的 powershell 中运行命令，如果出现提示 `无法加载文件，因为在此系统上禁止运行脚本` 的提示，那么需要使用超级管理员打开 powershell ，然后运行 `set-ExecutionPolicy RemoteSigned`，接着会提示`是否要更改执行策略`，输入 y。操作完成之后，即可执行 npm 命令。
 
 运行完之后，就会在当前目录下的 `node_modules`目录下安装coffee-script包。
@@ -23,6 +24,7 @@ npm 目前拥有数以百万计的包，可以在 https://www.npmjs.com/ 使用�
   ├─┬ node_modules 
   │ └── coffee-script 
 ```
+
 **目录结构 4.1.1 将包安装到本地后的目录结构**  
 一般情况下，我们在node项目目录下创建package.json，里面包含项目名称、作者、依赖包等配置，我们可以通过 `npm init`快速创建一个package.json文件，我们新建一个目录，然后在命令执行`npm init`，则会要求你填入若干信息：
 
@@ -37,7 +39,7 @@ keywords:
 author: yunnysunny                                         
 license: (ISC) MIT                                         
 About to write to I:\node\app\package.json:                
-                                                           
+
 {                                                          
   "name": "test",                                          
   "version": "0.0.1",                                      
@@ -49,10 +51,11 @@ About to write to I:\node\app\package.json:
   "author": "yunnysunny",                                  
   "license": "MIT"                                         
 }                                                          
-                                                           
-                                                           
+
+
 Is this ok? (yes)                                       
 ```
+
 **命令输入 4.1.1 npm init命令输入示例**  
 我们接着在项目中安装express包（在第5章会讲到这个包的使用），不过我们执行命令的时候加个参数：`npm install express --save`。命令执行完成之后，再看package.json，发现多了一个配置属性：
 
@@ -61,6 +64,7 @@ Is this ok? (yes)
     "express": "^4.14.0"
 }
 ```
+
 这个dependencies属性里面描述的就是当前项目依赖的各种包，你可以通过运行`npm install packageName --save`来将其安装到本地的同时在package.json中同时添加依赖声明。当你代码开发完成时，要把项目往服务器上部署，那么这时候package.json中的依赖声明都已经写好了，这时候，你直接在项目目录运行`npm install`，就可以自动将声明中的文件全部下载安装到项目目录的`node_modules`子目录下。  
 我们在来稍微留意一下，我们配置的这个express的版本号，咦，`^`是个什么鬼？讲这个东东，还要从[Semantic Versioning](https://semver.org/)这个概念讲起，它将版本号分为三段：  
 
@@ -68,23 +72,27 @@ Is this ok? (yes)
 2. 小版本，你可以在这个版本上增加共嗯那个，不过要向后兼容
 3. 补丁版本，在这里可以做一些bug修复，不过依然要保持向后兼容
 
-在这里对于express来说，主版本号是`4`，小版本号是`14`，补丁版本号是`0`。啰嗦了这么多，那么`^`呢，它告诉你使用从`4.14.0`到`5.0.0`（不包括5.0.0）之间的最新版本，也就是说它选择的版本号x的取值范围:`4.14.0<=x<5.0.0`。  
+在这里对于express来说，主版本号是`4`，小版本号是`14`，补丁版本号是`0`。啰嗦了这么多，那么`^`呢，它告诉你使用从`4.14.0`到`5.0.0`（不包括5.0.0）之间的最新版本，也就是说它选择的版本号 x 的取值范围:`4.14.0<=x<5.0.0`。不过，如果版本号是 `0` 打头的一个字符串，比如说 `0.1.2` `0.0.2`，则会被特殊对待，对于前者来说， 0.1.0<=x<0.2.0，对于后者来说 0.0.0<=x<0.1.0。
 除了`^`，还有一个版本号标识符`~`也很常用，假设我们将这里express的版本号设置为`~4.14.0`，那么它表示从`4.14.0`到`4.15.0`（不包括4.15.0）之间的最新版本，也就是说它选择的版本号x的取值范围：`4.14.0<=x<4.15.0`。  
 另外还有一些版本号的特殊标志符，由于不常用，有需要的可以参考https://docs.npmjs.com/cli/v6/using-npm/semver 。
 一般情况下，我们通过将依赖安装到项目目录下，但是有时候我们需要做全局安装，这种全局安装的包一般都是些命令行程序，这些命令行程序安装到全局后就可以保证我们通过 cmd.exe（或者bash） 中调用这些程序了。下面我们演示一下如何全局安装[express-generator](https://www.npmjs.com/package/express-generator)：  
+
 ```
 npm install -g express-generator
 ```
+
 安装完成后会提示安装到了目录 `C:\Users\[用户名]\AppData\Roaming\npm\node_modules`目录下，其实这个安装目录是可以自指定的，老是往系统盘安装会让人抓狂，下面要讲到这个问题。  
 安装完 express-generator ，我们在命令行中新建一个目录`mkdir first-express`，然后进入这个目录运行 `express` ，如果发现生成了一堆express项目文件，恭喜你成功了！
 
 ### 4.2 NPM用不了怎么办
+
 互联网拉近了整个世界的距离，有时候让你感觉到近到只有一墙之隔。前面讲了很多npm的使用方法，但是我们要想到[npmjs](https://npmjs.org)毕竟是一个外国网站，作为一个开发人员，相信你也许经历过很多技术网站，安安静静的躺在那里，但是就是无法访问的问题，但是谁又能保证npmjs不会是下一个中枪者呢？  
 幸好，阿里开发出了 [cnpm](https://npm.taobao.org/) ，一个完整 npmjs.org 镜像，每隔10分钟和官方库进行一次同步。其安装命令很简单：  
 
 ```
 npm install -g cnpm --registry=https://registry.npmmirror.com
 ```
+
 **命令 4.2.1**
 
 不过你需要注意，由于最新版本的cnpm不兼容低版本node,如果你当前使用的node版本低于4.x，那么你需要在安装的时候指定版本号：  
@@ -92,6 +100,7 @@ npm install -g cnpm --registry=https://registry.npmmirror.com
 ```
 npm install -g cnpm@3.4.1 --registry=https://registry.npmmirror.com
 ```
+
 **命令 4.2.2**
 
 否则的话，安装完之后运行命令会报错。  
@@ -125,6 +134,7 @@ npm ERR! Please try running this command again as root/Administrator.
 
 npm ERR! Please include the following file with any support request:
 ```
+
 **输出 4.2.1 cnpm全局安装错误输出**  
 为啥呢？首先，cnpm 会在将包默认安装在nodejs安装目录下的`node_modules`子文件夹中，其次我们这里将node安装到了系统盘`C:\Program Files (x86)`目录下，最后写入这个目录需要超级管理员权限。  
 本来就讨厌往系统盘写入数据文件，这下子非要改掉它这个默认设置不可了。我们命令
@@ -132,6 +142,7 @@ npm ERR! Please include the following file with any support request:
 ```
 npm config set prefix "D:\npm"
 ```
+
 **命令 4.2.4**
 
 > 设置完成后，记得将 d:\npm 添加到环境变量 PATH 中，否则在终端中无法找到全局安装的命令。
@@ -141,6 +152,7 @@ npm config set prefix "D:\npm"
 ```
 npm config set cache "D:\npm-cache"
 ```
+
 **命令 4.2.5**
 
 可以设置npm的缓存路径，否则的话它默认会缓存一部分下载的包到系统目录中。
@@ -189,6 +201,7 @@ content-disposition@0.5.1:
   version "0.5.1"
   resolved "https://registry.yarnpkg.com/content-disposition/-/content-disposition-0.5.1.tgz#87476c6a67c8daa87e32e87616df883ba7fb071b"
 ```
+
 **代码 4.2.1 yarn.lock示例**  
 
 你会发现里面罗列了express各个依赖的版本号（ version 字段），下载地址（ resolved 字段），我们仅仅截取了前面几行，因为 express 包中依赖关系比较复杂，生成的这个 lock 文件也比较长。项目初始化的老兄，通过 yarn add 的方式安装好包之后，需要将这个 yarn.lock 提交到版本库，这样你的小伙伴通过 `yarn install` 安装的各个依赖就和初始化的老兄用的一样了，这样就避免了团队中各个开发者通过 npm install 安装到本地的包的版本号不一致而导致的各种难以排查的问题了。
@@ -200,6 +213,7 @@ content-disposition@0.5.1:
 ```shell
 yarn config set registry https://registry.npmmirror.com
 ```
+
 **命令4.4.1**  
 
 > 如果之前通过 **命令 4.2.3** 命令设置过第三方源，那么这个设置的优先级会大于通过 yarn 命令设置的优先级。特别是 npm 命令和 yarn 命令设置的源地址不同的时候，你会发现明明 yarn 切换到了淘宝源，运行 yarn add 后源地址却不是淘宝源的。其实通过 yarn 命令切换源后，它会在 ~/.yarnrc 中写入新的源的配置，同样使用 config 命令切换源后，它会写入 ~/.npmrc 中。运行 yarn add 时，它会先读取 ~/.npmrc 中的配置，再读取 ~/.yarnrc 的配置。所以解决问题的思路就是要么删除 ~/.npmrc 中关于 registry 的配置，要么将其改成跟 yarn 中配置的源地址一致。
@@ -230,11 +244,12 @@ yarn config set cache-folder "D:\yarn_cache"
 
 使用 `yarn upgrade-interactive --latest` , 需要手动选择升级的依赖包，按空格键选择，a 键切换所有，i 键反选选择。这种方式如果升级的包的版本号中主版本号没有变，则只会更改 yarn.lock，不会更改 package.json。比如说当前安装版本是 1.1.0，升级到版本是 1.20，则用这个命令后，package.json 不改变；当前安装版本为 1.1.0，升级到版本是 2.0.0，则用这个命令后，package.json 和 yarn.lock 都会更改。
 
+### 4.5 发布自己的包到 npmjs
 
-### 4.5 发布自己的包到 npmjs  
 刚才演示了这么命令都是安装别人的包，现在我们自己开发一个包。首先你要注册一个npmjs的账号（注册地址：https://www.npmjs.com/signup ）。注册完成后，通过`npm adduser`命令来将注册的账号绑定到本地机器上，运行完改命令后会让你输入 npmjs 的注册账号和密码。  
 要想在 npmjs 上发布自己的包，首先要做的是明确你发布的包名在这个网站上有没有存在，在4.1小节，我们上来就介绍了怎么通过包名搜索npmjs上的包。不过，这里提供一个简单暴力的方法，就是直接在浏览器里输入：npmjs.com/package/packageName ， 将packName替换成你所想创建的包名，然后回车，如果打开的网页中有404映入你的眼帘，恭喜你，这个包名没有被占用。  
-我这里演示一下，我开发包slogger的过程，首先在浏览器地址栏里输入：npmjs.com/package/slogger ，很不幸，slogger 这个包名已经被占用了。于是乎我输入 npmjs.com/package/node-slogger ，咦没有被占用（我们应该用发展的眼光的看待问题）。接着新建一个目录node-slogger，在命令行中进入这个目录，运行 `npm init`: 
+我这里演示一下，我开发包slogger的过程，首先在浏览器地址栏里输入：npmjs.com/package/slogger ，很不幸，slogger 这个包名已经被占用了。于是乎我输入 npmjs.com/package/node-slogger ，咦没有被占用（我们应该用发展的眼光的看待问题）。接着新建一个目录 node-slogger ，在命令行中进入这个目录，运行 `npm init`: 
+
 ```
 name: (node-slogger) node-slogger                                           
 version: (1.0.0) 0.0.1                                     
@@ -246,6 +261,7 @@ keywords:  logger
 author: yunnysunny                                         
 license: (ISC) MIT
 ```
+
 **输出 4.5.1 运行 npm init 后的部分输出**  
 注意我们在 `git repository` 位置填写了一个 git 地址，这就意味着当前的代码要托管在github上。接着我们编写代码，然后将代码push到github，接着给预发布的代码打一个tag，最后运行`npm publish`（在此之前需要运行 `npm login` 完成在 npmjs 网站上的授权），打完收工，现在我们看 https://npmjs.com/package/node-slogger ，包已经可以访问了！
 
@@ -292,6 +308,3 @@ Host gitlab.com
   User git
   IdentityFile ~/.ssh/test_ssh
 ```
-
-
-
