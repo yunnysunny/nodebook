@@ -16,7 +16,7 @@ RUN gitbook fetch  3.2.3
 
 ENV DEBIAN_FRONTEND noninteractive
 # 官网给的安装依赖说明 https://calibre-ebook.com/download_linux
-RUN apt-get install python xdg-utils xz-utils -yq
+RUN apt-get install python xdg-utils xz-utils libegl1 -yq
 RUN wget --no-check-certificate -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin
 RUN ebook-convert --version
 # 官网未提及的依赖
