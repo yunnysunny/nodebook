@@ -28,7 +28,6 @@ BUILD_TAG=yunnysunny/nodebook:latest
 mkdir -p output
 
 # load_cache ${SAVE_NAME}
-docker pull ubuntu:20.04
 docker build --target build-stage \
     --tag ${BUILD_TAG}  \
     --cache-from type=local,src=${CACHE_FILE} \
