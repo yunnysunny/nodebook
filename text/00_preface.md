@@ -20,4 +20,3 @@ nodejs台湾协作电子书（源码参见[github地址](https://github.com/node
 * 如果之前接触过 javascript ，但是没有接触过 Node.js ，可以从第3章开始阅读，第3章讲述了一些 Node.js 的基础 API。
 * 如果之前接触过 Node.js ，但是没有用过数据库操作，可以阅读第5章，第5章讲述了 Node 中操作 redis 、mongodb 的 API 如何使用；如果没有使用 express ，可以阅读第6章和第7章，这两章讲述了如何利用 express 这个 HTTP 编程框架。
 * 最后介绍一下一些独立章节，第4章讲述了 npm 命令的使用教程；第8章讲述了如何使用单元测试框架mocha；第9章讲述了一些线上环境的最佳实践，包括配置文件、进程管理、 docker 等内容；第10章讲述如何编写 c++ 扩展。
-
