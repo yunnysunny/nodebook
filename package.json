@@ -1,0 +1,19 @@
+{
+  "name": "nodebook",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "docs:dev": "vuepress dev text",
+    "dev": "npm run docs:dev",
+    "docs:build": "vuepress build text",
+    "build": "npm run docs:build",
+    "preview": "cd output && anywhere 8888"
+  },
+  "repository": "git@github.com:yunnysunny/nodebook.git",
+  "author": "yunnysunny <yunnysunny@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "markdown-it-disable-url-encode": "^1.0.1",
+    "vuepress": "^1.9.10"
+  }
+}

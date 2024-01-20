@@ -2,3 +2,6 @@
 .sass-cache
 /config/kitabu.yml
 /_book
+/text/.obsidian
+node_modules
+*.bkp

@@ -115,7 +115,7 @@ express处理网络请求，是以一种被称之为 `middlewave(也翻译为中
 上面讲了 express-generator 默认添加的若干 middleware, 不过如果是做网站项目的话，还缺少对于session的支持，这个要在后面单独讲。接下来是很重要的路由映射部分，因为项目中的url映射都是
 在这里配置的。我们这里只看 `routes/index.js` 文件：
 
-```javascripts
+```javascript
 var express = require('express');
 var router = express.Router();
 
