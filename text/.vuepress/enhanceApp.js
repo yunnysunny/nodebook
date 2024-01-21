@@ -9,14 +9,16 @@ export default ({
     return
   }
   console.log(siteData)
-  console.log('test==',location.href)
   const hash = location.hash
   const pages = siteData.pages
   if (hash) {
     for (let i = 0, len = pages.length; i < len; i++) {
       const path = pages[i].regularPath
-      if ('#' + path === hash) {
-        location.href = siteData.base + path
+      const name = path.slice(0, -'.html'.length)
+      if ('#' + name === hash) {
+        const url = siteData.base + path.substring(1)
+        console.log('navigate to ', url)
+        location.href = url
         break
       }
     }
