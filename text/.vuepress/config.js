@@ -25,7 +25,7 @@ module.exports = {
     logo: 'https://excalidraw.com/apple-touch-icon.png',
     nav: [
       { text: '首页', link: '/' },
-      { text: 'github', link: 'https://github.com/yunnysunny/nodeboo' },
+      { text: 'github', link: 'https://github.com/yunnysunny/nodebook' },
       { text: '博客', link: 'https://blog.whyun.com' },
     ]
   }
