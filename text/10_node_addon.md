@@ -18,7 +18,7 @@ exports.hello = () => 'world';
 
 这看上去有些拿大炮打蚊子的味道，这段代码太简单了，而我们竟然要用 C++ 将其实现一番，是的这一节关注的并不是代码本身，还是如何使用工具进行编译，所以我们选择了最简单的代码。首先我们创建 hello.cc 文件：
 
-```c++
+```cpp
 // hello.cc
 #include <node.h>
 
@@ -81,7 +81,7 @@ console.log(addon.hello());
 
 之前讲过本章的重点是使用 nan 这个包来实现扩展编写，所以我们就先拿这个 hello world 下手。首先是安装 nan 包：`npm install nan --save`。然后编写 hello.cc：
 
-```c++
+```cpp
 // hello.cc
 #include <nan.h>
 
@@ -108,7 +108,7 @@ C++ addon 最精髓的地方，就是将 一个 JavaScript 类映射为一个 C+
 
 下面举的例子可能可能看上去很傻，因为我们又写 对 `a+b` 求值的函数了，但是这种很天真的代码最好理解不过了。注意，这个例子改写自项目 [node-addon-examples](https://github.com/nodejs/node-addon-examples)  中的 [object_wrap](https://github.com/nodejs/node-addon-examples/tree/master/6_object_wrap/nan) 小节。首先是 C++ 头文件定义：
 
-```c++
+```cpp
 #ifndef MY_CALC_H
 #define MY_CALC_H
 
@@ -135,7 +135,7 @@ private:
 
 首先注意的一点是，类 `MyCalc` 要继承自 `Nan::ObjectWrap` ，按照惯例这个类中还要有一个 Persistent 类型的句柄用来承载 js 类的构造函数，MyCalc 类中唯一对外公开的函数就是 Init，其参数 `module` 正是对应的是 Node 中的 module 对象。
 
-```c++
+```cpp
 #include "MyCalc.h"
 
 Nan::Persistent<v8::Function> MyCalc::constructor;
@@ -212,7 +212,7 @@ Nan 中提供了 `AsyncWorker` 类，它内部封装了 libuv 中的 `uv_queue_w
 
 下面是一个简单的小例子：
 
-```c++
+```cpp
 #include <string>
 #include <nan.h>
 #include <sstream>
@@ -397,7 +397,7 @@ Node 的 C++ addon 直接调用 V8 API 来完成原生代码和 JavaScript 的�
 
 **代码 10.2.2** 中，为了导出 C++ 函数，使用了 `NODE_MODULE` 这个宏定义，与其对应的上下文感知版本的宏定义是 `NODE_MODULE_INIT`，这个宏定义仅仅是将以下内容缩写成了一行，便于大家少写代码：
 
-```c++
+```cpp
 extern "C" NODE_MODULE_EXPORT void
 NODE_MODULE_INITIALIZER(Local<Object> exports,
                         Local<Value> module,
@@ -406,7 +406,7 @@ NODE_MODULE_INITIALIZER(Local<Object> exports,
 
 所以可以看出来使用宏定义 `NODE_MODULE_INIT`，你还需要自己编写函数体，这样才是一个完整的符合语法要求的代码块。那么这个函数体内应该写什么呢，你可以将你代码中牵扯到静态变量的清理的代码全都抽离到这个代码块中。当然你也可以使用原来的 `NODE_MODULE` 宏，在需要添加清理的地方，给自己的代码下桩，不过这个样子会让自己的代码显得比较混乱。下面的代码改编自是官方给出的[例子]()：
 
-```c++
+```cpp
 // addon.cc
 #include <node.h>
 #include <assert.h>
@@ -463,7 +463,7 @@ NODE_MODULE_INIT(/* exports, module, context */) {
 
 从上述代码上看，使用流程还是略显复杂的。`AddEnvironmentCleanupHook` 函数原型是
 
-```c++
+```cpp
 void AddEnvironmentCleanupHook(v8::Isolate* isolate,
                                void (*fun)(void* arg),
                                void* arg);
@@ -471,7 +471,7 @@ void AddEnvironmentCleanupHook(v8::Isolate* isolate,
 
 第 2 个参数是一个回调函数，第 3 个参数是传递给回调函数的参数，也就是被清理对象的指针。这些调用 `AddEnvironmentCleanupHook` 时传递的回调函数，会按照后进先出的顺序，在加载当前扩展的线程退出之前被执行，所以 **代码 10.5.1** 中三个回调函数的执行顺寻为 `cleanup_cb1` `cleanup_cb2` `sanity_check`。由于例子中给的静态变量都是在栈上申请的内存，所以在三个回调函数中没有写其销毁函数，如果你的静态变量的类型是句柄的话，需要调用其清理函数，完成对于句柄指向的对象的清理动作，对于代码 10.3.2 来说，就要在函数 `MyCalc::Init` 中添加如下代码：
 
-```c++
+```cpp
 node::AddEnvironmentCleanupHook(isolate, [](void*) {
     constructor.Reset();
 }, nullptr);
@@ -479,7 +479,7 @@ node::AddEnvironmentCleanupHook(isolate, [](void*) {
 
 Node 社区本身不维护 V8，对于 V8 的 API 变更只能采取跟随策略，所以每次 V8 有大的变动，都会伤筋动骨，所以 Node 从 8.x 开始引入了 N-API 的接口。它对于 V8 API 进行一次抽象，在其基础上又封装了一层，保证基于 N-API 开发的代码在 V8 API 发生变动的时候，可以保持不用更改。虽然 N-API 本身也会历经版本变动，但是总体上比 V8 的变动要小。下面是一个 N-API 的 hello world 程序，代码来自官方文档：
 
-```c++
+```cpp
 // hello.cc using Node-API
 #include <node_api.h>
 
@@ -523,7 +523,7 @@ N-API 的 API 设计符合如下风格：
 
 最后一条，由于 N-API 的调用返回值是 `napi_status` 类型，它是一个枚举类型，如果想获取具体的错误描述信息，可以调用 `napi_get_last_error_info` 函数来完成。不过在 N-API 的调用返回值为非 `napi_ok` 的情况下，还有可能函数内部会抛出异常，可以通过函数 `napi_is_exception_pending` 来判断当前调用是否会产生异常。下面是一个使用示例：
 
-```c++
+```cpp
 // addon.h
 #ifndef _ADDON_H_
 #define _ADDON_H_
@@ -534,7 +534,7 @@ napi_value create_addon(napi_env env);
 
 **代码 10.5.3**
 
-```c++
+```cpp
 // addon.c
 #include "addon.h"
 
@@ -586,7 +586,7 @@ napi_value create_addon(napi_env env) {
 
 **代码 10.5.4**
 
-```c++
+```cpp
 // addon_node.c
 #include <node_api.h>
 #include "addon.h"

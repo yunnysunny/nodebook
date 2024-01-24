@@ -39,8 +39,9 @@ grant all privileges on xprofiler_logs.* to 'easy'@'%';
 flush privileges;
 ```
 #### 7.3.2 启动服务器端
+##### 7.3.2.1 启动容器
 为了简化部署，笔者做了一个集成 xtransit-server xprofiler-console xtransit-mannager 三个服务的 docker 容器，是基于官方的 [all-in-one](https://github.com/X-Profiler/all-in-one) 项目优化而来。之所以重新做一个镜像出来，是由于官方镜像将配置信息采用磁盘文件映射的方式来提供，不是很贴合传统运维使用习惯，所以这里提供了一版全部通过环境变量来设置的镜像。
-> 项目地址为 [whyun-docker/node (github.com)](https://github.com/whyun-docker/node)
+> 镜像项目地址为 [whyun-docker/node (github.com)](https://github.com/whyun-docker/node)
 
 由于牵扯到的环境变量比较多，所以这里直接给出一个 .env 文件：
 ```env
@@ -57,3 +58,102 @@ REDIS_PASSWORD=redis 密码
 CONSOLE_BASE_URL=console 服务的访问地址，例如 http://xxx-console.domian.com
 ```
 然后我们可以通过 `sudo docker run --env-file ./.env -p 8443:8443 -p 8543:8543 -p 9190:9190 --name=easy-monitor -d yunnysunny/easy-monitor` 来启动服务。
+##### 7.3.2.2 配置nginx
+如果当前网络拓扑结构中不需要配置 nginx，可以跳过此小节。如果需要配置 nginx 的话，则需要添加反向代理配置。其中对于 xprofiler-console 来说给出如下配置示例：
+```nginx
+server
+{
+    listen 80;
+    server_name ezm-console.your-domian.com;
+    client_max_body_size 100m;
+
+    location / {
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_pass http://127.0.0.1:8443;
+    }
+
+    access_log  /var/log/nginx/access.log  main;
+}
+```
+> 我们这里将反代的地址写成了  127.0.0.1，这是由于我的环境中 nginx 和 docker 是部署在一台机器上的，读者如果部署时，根据情况自己做修改。
+
+由于 xprofiler-console 是纯 HTTP 服务，所以反向代理的配置比较简单。需要注意的是，这里配置了一个 `client_max_body_size` 属性（此属性支持在 http server location 块中设置，具体使用方法参见官方[文档](https://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size)），这是由于 nginx 默认的上传大小是 1MB，但是我们生成的性能分析文件，大多数情况下又超过 1MB。如果使用默认值配置，稍后上传文件的时候 nginx 会返回 413 状态码，在 xprofiler-console 管理界面中会有弹出如下提示：
+![](images/too_large_upload_ezm.png)
+对于 xtransit-server 服务的配置，则比较特殊，因为其牵涉到 WebSocket 服务：
+```nginx
+# 如果没有Upgrade头，则$connection_upgrade为close，否则为upgrade
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+server
+{
+    listen 80;
+    server_name ezm-ws.your-domain.com;
+
+    location / {
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_pass http://127.0.0.1:9190;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        # 下面这两行是关键
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+    }
+
+    access_log  /var/log/nginx/access.log  main;
+}
+```
+首先反向代理的的 HTTP 协议版本要选择 1.1，其次要设置 Upgrade 和 Connection 两个头信息来请求 Node 服务，否则无法正常完成 WebSocket 的握手过程。
+### 7.4 配置客户端
+为了方便读者使用，这里我将继承 xtransit 继承的 node 镜像也制作出来了。可以先通过一个 dockerfile 文件了解一下使用步骤：
+```dockerfile
+ARG IMAGE_VERSION
+FROM yunnysunny/node-compiler:${IMAGE_VERSION} as build-stage
+
+COPY package.json .
+COPY yarn.lock .
+
+RUN yarn install
+
+FROM yunnysunny/node-xtransit:${IMAGE_VERSION}
+ARG JEMALLOC_HOME=/usr/lib/x86_64-linux-gnu
+RUN mkdir -p /app $JEMALLOC_HOME
+WORKDIR /app
+# 使用jemalloc
+COPY --from=build-stage ${JEMALLOC_HOME}/libjemalloc.so.2 $JEMALLOC_HOME
+COPY --from=build-stage /tmp/node_modules ./node_modules
+ENV LD_PRELOAD=${JEMALLOC_HOME}/libjemalloc.so.2
+COPY . .
+ARG EZM_APP_ID
+ENV EZM_APP_ID=${EZM_APP_ID}
+ARG EZM_APP_SECRET
+ENV EZM_APP_SECRET=${EZM_APP_SECRET}
+ARG XTRANSIT_SERVER
+ENV XTRANSIT_SERVER=${XTRANSIT_SERVER}
+CMD ["node", "src/app.js"]
+```
+注意最后面的那几个环境变量的设置，`EZM_APP_ID` `EZM_APP_SECRET` `XTRANSIT_SERVER` 是连接到 easy-monitor 必须的环境变量，`EZM_APP_ID` `EZM_APP_SECRET` 用来填写应用的 ID 和 密钥；`XTRANSIT_SERVER` 是连接到 `xtransit-server` 的 WebSocket 地址，格式为 `ws://host:port` 。
+> 如果 `xtransit-server` 启用了 https ，WebSocket 地址还可以写成 `wss://host:port` 格式。
+
+> 这里将环境变量通过 docker build 的 --build-arg 参数来指定，这样可以不用将环境变量写死在 dockerfile 中，同时从一定程度上保护了隐私。如果仅仅是测试用，可以直接将 ENV 写死在 dockerfile 中，当然也可以在 docker run 命令中通过 -e 参数来手动指定环境变量。
+
+配合这个 `yunnysunny/node-xtransit` 镜像，xtransit 的配置基本就搞定了。下面就剩下在应用程序中引入 xprofiler 了，如果你没有啥特殊配置的话，直接在程序入口第一行写入一句话即可：
+```javascript
+require('xprofiler').start();
+```
+> xprofiler 安装时要下载原生代码的预编译库，默认从 github 下载，考虑到众所周知原因，下载比较慢。`yunnysunny/node-xtransit` 镜像基于 `yunnysunny/node` 构建，里面配置 npm config 选项，将其下载地址指向阿里云，有效的解决了这个问题。
+
+如果构建完镜像后，容器运行完之后，xprofile-console 后台中迟迟看不到启动容器的监控实例。则需要查看容器的 ~/.xtransit.log 文件，比如说在启用 nginx 的情况下，反向代理配置错误，忘记添加 Upgrade 头信息了，就会报如下错误：
+```
+[2024-01-19 01:31:10] [2.4.1] [info] [36] websocket client connecting to ws://ezm-ws.your-domain.com...
+[2024-01-19 01:31:10] [2.4.1] [warn] [36] websocket client error: Error: Unexpected server response: 404.
+```
+通过日志我们就可以更快的定位问题所在。
