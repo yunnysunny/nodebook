@@ -1,5 +1,6 @@
 const toc = require('./toc')
 const base = process.env.CI ? '/nodebook/' : '/'
+const baseUrl = 'https://blog.whyun.com/nodebook'
 module.exports = {
   title: 'nodebook',
   description: 'Node 基础教程',
@@ -7,6 +8,7 @@ module.exports = {
   dest: 'output',
   markdown: {
     lineNumbers: true,
+    externalLinks: { target: '_blank', rel: 'nofollow noopener noreferrer' },
     extendMarkdown: md => {
       md.use(require('markdown-it-disable-url-encode'));
     }
@@ -28,6 +30,20 @@ module.exports = {
       { text: 'github', link: 'https://github.com/yunnysunny/nodebook' },
       { text: '博客', link: 'https://blog.whyun.com' },
     ]
+  },
+  plugins:{
+    autometa: {
+      site: {
+        name: 'nodebook',
+        twitter: 'yunnysunny',
+      },
+      canonical_base: baseUrl,
+    },
+    // 'sitemap': {
+    //   hostname: baseUrl,
+    //   // 排除无实际内容的页面
+    //   exclude: ["/404.html"]
+    // }
   }
 
 }

@@ -38,8 +38,8 @@ grant all privileges on xprofiler_console.* to 'easy'@'%';
 grant all privileges on xprofiler_logs.* to 'easy'@'%';
 flush privileges;
 ```
-#### 7.3.2 启动服务器端
-##### 7.3.2.1 启动容器
+#### A 7.3.2 启动服务器端
+##### A 7.3.2.1 启动容器
 为了简化部署，笔者做了一个集成 xtransit-server xprofiler-console xtransit-mannager 三个服务的 docker 容器，是基于官方的 [all-in-one](https://github.com/X-Profiler/all-in-one) 项目优化而来。之所以重新做一个镜像出来，是由于官方镜像将配置信息采用磁盘文件映射的方式来提供，不是很贴合传统运维使用习惯，所以这里提供了一版全部通过环境变量来设置的镜像。
 > 镜像项目地址为 [whyun-docker/node (github.com)](https://github.com/whyun-docker/node)
 
@@ -58,7 +58,7 @@ REDIS_PASSWORD=redis 密码
 CONSOLE_BASE_URL=console 服务的访问地址，例如 http://xxx-console.domian.com
 ```
 然后我们可以通过 `sudo docker run --env-file ./.env -p 8443:8443 -p 8543:8543 -p 9190:9190 --name=easy-monitor -d yunnysunny/easy-monitor` 来启动服务。
-##### 7.3.2.2 配置nginx
+##### A 7.3.2.2 配置nginx
 如果当前网络拓扑结构中不需要配置 nginx，可以跳过此小节。如果需要配置 nginx 的话，则需要添加反向代理配置。其中对于 xprofiler-console 来说给出如下配置示例：
 ```nginx
 server
@@ -112,7 +112,7 @@ server
 }
 ```
 首先反向代理的的 HTTP 协议版本要选择 1.1，其次要设置 Upgrade 和 Connection 两个头信息来请求 Node 服务，否则无法正常完成 WebSocket 的握手过程。
-### 7.4 配置客户端
+### A 7.4 配置客户端
 为了方便读者使用，这里我将继承 xtransit 继承的 node 镜像也制作出来了。可以先通过一个 dockerfile 文件了解一下使用步骤：
 ```dockerfile
 ARG IMAGE_VERSION
@@ -151,9 +151,14 @@ require('xprofiler').start();
 ```
 > xprofiler 安装时要下载原生代码的预编译库，默认从 github 下载，考虑到众所周知原因，下载比较慢。`yunnysunny/node-xtransit` 镜像基于 `yunnysunny/node` 构建，里面配置 npm config 选项，将其下载地址指向阿里云，有效的解决了这个问题。
 
+### A 7.5 疑难解答
+#### A 7.5.1 找不到应用实例
+
 如果构建完镜像后，容器运行完之后，xprofile-console 后台中迟迟看不到启动容器的监控实例。则需要查看容器的 ~/.xtransit.log 文件，比如说在启用 nginx 的情况下，反向代理配置错误，忘记添加 Upgrade 头信息了，就会报如下错误：
 ```
 [2024-01-19 01:31:10] [2.4.1] [info] [36] websocket client connecting to ws://ezm-ws.your-domain.com...
 [2024-01-19 01:31:10] [2.4.1] [warn] [36] websocket client error: Error: Unexpected server response: 404.
 ```
 通过日志我们就可以更快的定位问题所在。
+### A 7.6 未尽事宜
+由于本篇教程仅仅涉及部署内容，关于 easy-monitor 的操作指南，还请参照[官方文档](https://www.yuque.com/hyj1991/easy-monitor)。
