@@ -39,11 +39,11 @@ module.exports = {
       },
       canonical_base: baseUrl,
     },
-    // 'sitemap': {
-    //   hostname: baseUrl,
-    //   // 排除无实际内容的页面
-    //   exclude: ["/404.html"]
-    // }
+    'sitemap': {
+      hostname: baseUrl,
+      // 排除无实际内容的页面
+      exclude: ["/404.html"]
+    }
   }
 
 }

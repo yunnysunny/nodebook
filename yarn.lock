@@ -8505,6 +8505,11 @@ vuepress-plugin-container@^2.0.2:
     "@vuepress/shared-utils" "^1.2.0"
     markdown-it-container "^2.0.0"
 
+vuepress-plugin-go-top@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.npmmirror.com/vuepress-plugin-go-top/-/vuepress-plugin-go-top-1.0.4.tgz#b2c359d85280e8737c65a43fde6e6d42953878af"
+  integrity sha512-VxYrZmvC9agXVOEzy1G7mJj23p17O7CVmcXhlaFtQ+J827OcIqNC1X646/gOI8Hfn8or17+J+8/Bg0ZSRyizEA==
+
 vuepress-plugin-sitemap@^2.3.1:
   version "2.3.1"
   resolved "https://registry.npmmirror.com/vuepress-plugin-sitemap/-/vuepress-plugin-sitemap-2.3.1.tgz#51298aca77a5de96396fdbd1103e1637dd61ae6a"

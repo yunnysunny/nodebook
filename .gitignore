@@ -5,3 +5,5 @@
 /text/.obsidian
 node_modules
 *.bkp
+*.log
+
