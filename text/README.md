@@ -34,10 +34,8 @@ paid for this book.**
 
 ## 编译
 
-本书采用 [gitbook](https://www.gitbook.com/) 进行编译，如果你想在本地编译，需要安装 gitbook-cli：
+本书采用 [vuepress](https://vuepress.vuejs.org/) 进行编译，如果你想在本地编译，可以执行如下命令：
 
 ```
-npm install gitbook-cli -g
+npm run build
 ```
-
-然后在项目目录中运行`gitbook serve`即可编译生成html，并且创建一个本地预览网站，其他详细的编译参数可以参照[官方文档](https://toolchain.gitbook.com/setup.html)。
