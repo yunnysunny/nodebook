@@ -19,3 +19,4 @@
 * [A4 HTTP请求参数](a4_node_http.md)
 * [A5 安装多版本 Node](a5_node_multi_versions.md)
 * [A6 Node 原生扩展编译环境搭建](a6_node_native_addon_config.md)
+* [A7 easy-monitor 环境搭建](a7_easy_monitor_setup.md)

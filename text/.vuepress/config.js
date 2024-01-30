@@ -6,6 +6,17 @@ module.exports = {
   description: 'Node 基础教程',
   base,
   dest: 'output',
+  head: [
+    [
+      'script', // js 文件
+      {
+        src: '/js/seo.js',
+        async: true,
+        defer: true
+      }
+    ]
+
+  ],
   markdown: {
     lineNumbers: true,
     externalLinks: { target: '_blank', rel: 'nofollow noopener noreferrer' },
