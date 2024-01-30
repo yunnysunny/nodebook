@@ -11,8 +11,8 @@ module.exports = {
       'script', // js 文件
       {
         src: '/js/seo.js',
-        async: true,
-        defer: true
+        async: 'async',
+        defer: 'defer'
       }
     ]
 
