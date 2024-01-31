@@ -5,6 +5,11 @@ module.exports = {
   title: 'nodebook',
   description: 'Node 基础教程',
   base,
+  locales: {
+    '/': {
+      lang: 'zh-CN',
+    },
+  },
   dest: 'output',
   head: [
     [
