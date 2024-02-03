@@ -44,7 +44,7 @@ flush privileges;
 > 镜像项目地址为 [whyun-docker/node (github.com)](https://github.com/whyun-docker/node)
 
 由于牵扯到的环境变量比较多，所以这里直接给出一个 .env 文件：
-```env
+```shell
 CONSOLE_MYSQL_HOST=mysql 访问 ip 或者域名
 CONSOLE_MYSQL_PORT=mysql 端口号
 CONSOLE_MYSQL_USER=mysql 用户名

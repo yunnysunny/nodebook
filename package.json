@@ -6,13 +6,15 @@
     "docs:dev": "vuepress dev text",
     "dev": "npm run docs:dev",
     "docs:build": "vuepress build text",
-    "build": "npm run docs:build",
+    "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider npm run docs:build",
     "preview": "cd output && anywhere 8888"
   },
   "repository": "git@github.com:yunnysunny/nodebook.git",
   "author": "yunnysunny <yunnysunny@gmail.com>",
   "license": "MIT",
   "devDependencies": {
+    "cross-env": "^7.0.3",
+    "eslint": "^8.56.0",
     "markdown-it-disable-url-encode": "^1.0.1",
     "vuepress": "^1.9.10",
     "vuepress-plugin-autometa": "^0.1.13",
