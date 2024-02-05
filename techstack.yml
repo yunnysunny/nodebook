@@ -1,0 +1,130 @@
+repo_name: yunnysunny/nodebook
+report_id: a862b9584744aa654254e9181c0c96cc
+version: 0.1
+repo_type: Public
+timestamp: '2024-02-05T15:57:35+00:00'
+requested_by: yunnysunny
+provider: github
+branch: master
+detected_tools_count: 10
+tools:
+- name: JavaScript
+  description: Lightweight, interpreted, object-oriented language with first-class
+    functions
+  website_url: https://developer.mozilla.org/en-US/docs/Web/JavaScript
+  open_source: true
+  hosted_saas: false
+  category: Languages & Frameworks
+  sub_category: Languages
+  image_url: https://img.stackshare.io/service/1209/javascript.jpeg
+  detection_source_url: https://github.com/yunnysunny/nodebook
+  detection_source: Repo Metadata
+- name: Docker
+  description: Enterprise Container Platform for High-Velocity Innovation.
+  website_url: https://www.docker.com/
+  license: Apache-2.0
+  open_source: true
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Virtual Machine Platforms & Containers
+  image_url: https://img.stackshare.io/service/586/n4u37v9t_400x400.png
+  detection_source_url: https://github.com/yunnysunny/nodebook
+  detection_source: Repo Metadata
+- name: ESLint
+  description: The fully pluggable JavaScript code quality tool
+  website_url: http://eslint.org/
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Code Review
+  image_url: https://img.stackshare.io/service/3337/Q4L7Jncy.jpg
+  detection_source_url: https://github.com/yunnysunny/nodebook/blob/master/package.json
+  detection_source: package.json
+  last_updated_by: yunnysunny
+  last_updated_on: 2024-01-20 15:22:42.000000000 Z
+- name: Git
+  description: Fast, scalable, distributed revision control system
+  website_url: http://git-scm.com/
+  open_source: true
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Version Control System
+  image_url: https://img.stackshare.io/service/1046/git.png
+  detection_source_url: https://github.com/yunnysunny/nodebook
+  detection_source: Repo Metadata
+- name: GitHub Actions
+  description: Automate your workflow from idea to production
+  website_url: https://github.com/features/actions
+  open_source: false
+  hosted_saas: true
+  category: Build, Test, Deploy
+  sub_category: Continuous Integration
+  image_url: https://img.stackshare.io/service/11563/actions.png
+  detection_source_url: https://github.com/yunnysunny/nodebook/blob/master/.github/workflows/pages.yml
+  detection_source: ".github/workflows/pages.yml"
+  last_updated_by: yunnysunny
+  last_updated_on: 2024-01-21 00:46:02.000000000 Z
+- name: Yarn
+  description: A new package manager for JavaScript
+  website_url: https://yarnpkg.com/
+  open_source: true
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Front End Package Manager
+  image_url: https://img.stackshare.io/service/5848/44mC-kJ3.jpg
+  detection_source_url: https://github.com/yunnysunny/nodebook/blob/master/yarn.lock
+  detection_source: yarn.lock
+  last_updated_by: yunnysunny
+  last_updated_on: 2024-01-20 15:22:42.000000000 Z
+- name: npm
+  description: The package manager for JavaScript.
+  website_url: https://www.npmjs.com/
+  open_source: false
+  hosted_saas: false
+  category: Build, Test, Deploy
+  sub_category: Front End Package Manager
+  image_url: https://img.stackshare.io/service/1120/lejvzrnlpb308aftn31u.png
+  detection_source_url: https://github.com/yunnysunny/nodebook/blob/master/package.json
+  detection_source: package.json
+  last_updated_by: yunnysunny
+  last_updated_on: 2024-01-20 15:22:42.000000000 Z
+- name: Shell
+  description: A shell is a text-based terminal, used for manipulating programs and
+    files. Shell scripts typically manage program execution.
+  website_url: https://en.wikipedia.org/wiki/Shell_script
+  open_source: false
+  hosted_saas: false
+  category: Languages & Frameworks
+  sub_category: Languages
+  image_url: https://img.stackshare.io/service/4631/default_c2062d40130562bdc836c13dbca02d318205a962.png
+  detection_source_url: https://github.com/yunnysunny/nodebook
+  detection_source: Repo Metadata
+- name: VuePress
+  description: A static-site generator built by the Vue.js team
+  website_url: https://vuepress.vuejs.org/
+  version: 1.9.10
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Application Utilities
+  sub_category: Static Site Generators
+  image_url: https://img.stackshare.io/service/8863/paeckCWC.png
+  detection_source_url: https://github.com/yunnysunny/nodebook/blob/master/yarn.lock
+  detection_source: package.json
+  last_updated_by: yunnysunny
+  last_updated_on: 2024-01-28 10:19:40.000000000 Z
+- name: cross-env
+  description: Run scripts that set and use environment variables across platforms
+  package_url: https://www.npmjs.com/cross-env
+  version: 7.0.3
+  license: MIT
+  open_source: true
+  hosted_saas: false
+  category: Libraries
+  sub_category: npm Packages
+  image_url: https://img.stackshare.io/package/15828/default_14fd11531839d935f920b6d55bd6f3528c890ad7.png
+  detection_source_url: https://github.com/yunnysunny/nodebook/blob/master/yarn.lock
+  detection_source: package.json
+  last_updated_by: yunnysunny
+  last_updated_on: 2024-02-03 15:54:33.000000000 Z
