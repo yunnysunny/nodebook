@@ -39,7 +39,7 @@ Windows 环境需要使用  [nvm-windows](https://github.com/coreybutler/nvm-win
 
 安装过程中会让你选择 Node 程序的存放目录，如果这个目录中已经安装了 Node，使用 nvm 命令切换版本的时候，会强制将当前目录覆盖掉，不过一般我们的 Node 安装目录一般也不会放啥重要文件，所以说无所谓。
 
-nvm-windows 比 nvm 多了一个功能，可以设定下载 Node 和 Npm 的地址。通过运行 `nvm node_mirror https://npm.taobao.org/mirrors/node/` 和 `nvm npm_mirror https://npm.taobao.org/mirrors/npm/` 即可从阿里镜像站下载 Node 和 Npm 了。
+nvm-windows 比 nvm 多了一个功能，可以设定下载 Node 和 Npm 的地址。通过运行 `nvm node_mirror https://npmmirror.com/mirrors/node/ 和 `nvm npm_mirror https://npmmirror.com/mirrors/npm/` 即可从阿里镜像站下载 Node 和 Npm 了。
 
 ### A 5.2 使用
 

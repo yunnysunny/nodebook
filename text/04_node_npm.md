@@ -87,7 +87,7 @@ npm install -g express-generator
 ### 4.2 NPM用不了怎么办
 
 互联网拉近了整个世界的距离，有时候让你感觉到近到只有一墙之隔。前面讲了很多npm的使用方法，但是我们要想到[npmjs](https://npmjs.org)毕竟是一个外国网站，作为一个开发人员，相信你也许经历过很多技术网站，安安静静的躺在那里，但是就是无法访问的问题，但是谁又能保证npmjs不会是下一个中枪者呢？  
-幸好，阿里开发出了 [cnpm](https://npm.taobao.org/) ，一个完整 npmjs.org 镜像，每隔10分钟和官方库进行一次同步。其安装命令很简单：  
+幸好，阿里开发出了 [cnpm](https://npmmirror.com/) ，一个完整 npmjs.org 镜像，每隔10分钟和官方库进行一次同步。其安装命令很简单：  
 
 ```
 npm install -g cnpm --registry=https://registry.npmmirror.com
