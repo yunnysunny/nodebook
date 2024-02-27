@@ -12,6 +12,7 @@ easy-monitor 需要 MySQL 和 redis 两个外部服务来存储数据和缓存�
 easy-monitor 的组件比较复杂，所以需要先讲清楚其拓扑结构才能将其正确的部署。
 
 ![](images/easy_monitor_data_flow.drawio.png)
+**图 A7.2.1**
 
 > 这里面 xtransit-server 是一个 websocket 服务器，其他两个服务是 http 服务器。xtransit-server 用来和 xtransit 进程建立长连接，xprofiler-console 服务用来提供管理后台，xtransit-mannager 用来处理性能日志数据。
 
@@ -23,12 +24,14 @@ easy-monitor 的组件比较复杂，所以需要先讲清楚其拓扑结构才�
 
 对于需要配置反向代理服务器的情况，我们一般会选择使用 nginx，这种情况下，xtransit 进程会通过 nginx 来访问 xtransit-server 和 xprofiler-console 。下面只画出三者之间的拓扑结构：
 ![](images/easy_monitor_with_nginx_data_flow.drawio.png)
+**图 A7.2.2**
 为了实现上图的拓扑结构，需要在 nginx 中配置不同的域名来实现反代到不同服务的目的。
 ### A 7.3 运行服务器端
 #### A 7.3.1 数据库初始化
 
 库 `xprofiler_console` 使用 [xprofiler-console/db/init.sql](https://github.com/X-Profiler/xprofiler-console/blob/master/db/init.sql) 进行初始化，库 `xprofiler_logs` 使用 [xtransit-manager/db/init.sql](https://github.com/X-Profiler/xtransit-manager/blob/master/db/init.sql) 以及 [xtransit-manager/db/date.sql](https://github.com/X-Profiler/xtransit-manager/blob/master/db/date.sql) 进行初始化。
 > 使用 dbear 等工具的时候，新建完连接后，默认只能执行单条 SQL 语句，将上面的 SQL 代码全选复制到其控制台中执行时，会报语法错误。需要设置驱动属性的 `allowMultiQueries` 参数为 true ：![](images/allow_multi_sql.png)
+> **图 A7.3.1.1**
 
 
 这里需要注意的是，easy-monitor 后端服务使用的 MySQL 库是 [egg-mysql](https://github.com/eggjs/egg-mysql)，其最终是对 [mysql](https://github.com/mysqljs/mysql)的封装，但是这个库有一个缺陷，MySQL 8 默认使用的 caching_sha2_password 的鉴权方式，但是这个库不支持这种鉴权模式。所以在如果你使用的数据库是 MySQL 8 的话（使用 docker 创建的 MySQL 容器，默认版本就是 8.x 的版本），在不修改默认配置的情况下，得用超级管理员新建一个用户用来提供对 `xprofiler_console` 和 `xprofiler_logs` 两个库的访问：
@@ -57,7 +60,7 @@ REDIS_SERVER=reidsIp1:redisPort1[,redisIp2:redisPort2]
 REDIS_PASSWORD=redis 密码
 CONSOLE_BASE_URL=console 服务的访问地址，例如 http://xxx-console.domian.com
 ```
-然后我们可以通过 `sudo docker run --env-file ./.env -p 8443:8443 -p 8543:8543 -p 9190:9190 --name=easy-monitor -d yunnysunny/easy-monitor` 来启动服务。
+然后我们可以通过 `sudo docker run --env-file ./.env -p 8443:8443 -p 8543:8543 -p 9190:9190 --name=easy-monitor -d yunnysunny/easy-monitor` 来启动服务。注意环境变量 CONSOLE_BASE_URL 的配置，根据 **图 A7.2.1** 的拓扑结构结构，其值要保证集成 easy-monitor 的 Node 服务能够访问到，否则上传性能分析文件就会失败。
 ##### A 7.3.2.2 配置nginx
 如果当前网络拓扑结构中不需要配置 nginx，可以跳过此小节。如果需要配置 nginx 的话，则需要添加反向代理配置。其中对于 xprofiler-console 来说给出如下配置示例：
 ```nginx
@@ -113,7 +116,7 @@ server
 ```
 首先反向代理的的 HTTP 协议版本要选择 1.1，其次要设置 Upgrade 和 Connection 两个头信息来请求 Node 服务，否则无法正常完成 WebSocket 的握手过程。
 ### A 7.4 配置客户端
-为了方便读者使用，这里我将继承 xtransit 继承的 node 镜像也制作出来了。可以先通过一个 dockerfile 文件了解一下使用步骤：
+为了方便读者使用，这里我将集成 xtransit 的 node 镜像也制作出来了。可以先通过一个 dockerfile 文件了解一下使用步骤：
 ```dockerfile
 ARG IMAGE_VERSION
 FROM yunnysunny/node-compiler:${IMAGE_VERSION} as build-stage
