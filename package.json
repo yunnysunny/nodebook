@@ -7,12 +7,14 @@
     "dev": "npm run docs:dev",
     "docs:build": "vuepress build text",
     "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider npm run docs:build",
+    "pdf": "vuepress export text",
     "preview": "cd output && anywhere 8888"
   },
   "repository": "git@github.com:yunnysunny/nodebook.git",
   "author": "yunnysunny <yunnysunny@gmail.com>",
   "license": "MIT",
   "devDependencies": {
+    "@whyun/vuepress-plugin-pdf-export": "^1.2.0",
     "cross-env": "^7.0.3",
     "eslint": "^8.56.0",
     "markdown-it-disable-url-encode": "^1.0.1",

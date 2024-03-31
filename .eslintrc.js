@@ -6,6 +6,7 @@ module.exports = {
   env: {
     // Your environments (which contains several predefined global variables)
     'node': true,
+    es6: true,
   },
   globals: {
     // Your global variables (setting to false means it's not allowed to be reassigned)

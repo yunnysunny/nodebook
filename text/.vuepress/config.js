@@ -4,6 +4,7 @@ const baseUrl = 'https://blog.whyun.com/nodebook'
 module.exports = {
   title: 'nodebook',
   description: 'Node 基础教程',
+ host: '127.0.0.1',
   base,
   locales: {
     '/': {
@@ -59,6 +60,28 @@ module.exports = {
       hostname: baseUrl,
       // 排除无实际内容的页面
       exclude: ["/404.html"]
+    },
+    // 'vuepress-plugin-export': {
+      
+    // },
+    '@whyun/vuepress-plugin-pdf-export': {
+      puppeteerLaunchOptions: {
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      },
+      filter: function(page) {
+        return !(['/SUMMARY.html'].includes(page.path))
+      },
+      sorter: function(a, b) {
+        const pathA = a.path
+        const pathB = b.path
+        if (pathA < pathB) {
+          return -1
+        }
+        if (pathA > pathB) {
+          return 1
+        }
+        return 0
+      }
     }
   }
 
