@@ -86,7 +86,7 @@ npm install -g express-generator
 
 ### 4.2 NPM用不了怎么办
 
-互联网拉近了整个世界的距离，有时候让你感觉到近到只有一墙之隔。前面讲了很多npm的使用方法，但是我们要想到[npmjs](https://npmjs.org)毕竟是一个外国网站，作为一个开发人员，相信你也许经历过很多技术网站，安安静静的躺在那里，但是就是无法访问的问题，但是谁又能保证npmjs不会是下一个中枪者呢？  
+互联网拉近了整个世界的距离，有时候让你感觉到近到只有一墙之隔。前面讲了很多npm的使用方法，但是我们要想到 [npmjs](https://npmjs.org) 毕竟是一个外国网站，作为一个开发人员，相信你也许经历过很多技术网站，安安静静的躺在那里，但是就是无法访问的问题，但是谁又能保证npmjs不会是下一个中枪者呢？  
 幸好，阿里开发出了 [cnpm](https://npmmirror.com/) ，一个完整 npmjs.org 镜像，每隔10分钟和官方库进行一次同步。其安装命令很简单：  
 
 ```
@@ -159,13 +159,27 @@ npm config set cache "D:\npm-cache"
 
 我们推荐仅仅在全局安装命令行工具类型的包，因为同一个包在不同项目中很有可能使用不同的版本，所以如果将其安装在全局的话，就没办法使用不同版本了。如果你非要将某一个类库安装到全局的话，那就增加一个 `NODE_PATH` 环境变量，指向我们刚才设置的目录 `D:\npm`。
 
-### 4.3 其他一些命令
+### 4.3 我只想在某些项目中使用特定 npm 仓库
+
+上面讲了如何修改 Node 的安装仓库的地址，但是这个修改是全局的，一旦你修改了之后，装所有的包都是用同一个仓库。但是我们在实际开发过程中，公司内部一般都会自己搭建一个 npm 仓库，用来托管私有包并提供对于公开包的反向代理功能。这时候就必须将 npm 仓库地址改成公司库才行。但是这样还会带来其他问题，为了防止代码泄露，公司的私有仓库一般都是部署在内网，有时开发一些类似开源项目的时候还得不得不切换到公开仓库地址。那么有没有项目级别的 npm 配置呢？还真有。
+
+我们只需要在项目的根目录中创建 .npmrc 文件，并输入如下内容
+
+```
+registry="私有仓库地址"
+```
+
+**代码 4.3.1**
+
+这样你在项目中运行 npm install 时使用的就是私有仓库地址，而在其他地方运行时使用的还是默认仓库地址。
+
+### 4.4 其他一些命令
 
 如果你想查看当前全局安装了哪些包，可以使用`npm list -g`命令，运行完成后会打印一个目录树，但是如果安装的包比较多的话，在命令行中会打印不全，所以可以采用重定向的方式将打印结果输出到硬盘，例如`npm list -g > d:\package.txt`。 如果不加`-g`参数就是打印当前目录下 `node_modules` 文件夹下的包结构。
 
 有时候，我们需要将安装好的包删除掉，如果包是安装在项目目录下的话，其实直接可以把 `node_modules` 下对应的文件夹删除即可，如果是全局安装的话，那还是使用命令进行卸载吧，比如卸载我们上面安装的 express-generator ： `npm uninstall express-generator -g`。同样这里的 `-g` 是说卸载全局安装的 express-generator 包。
 
-### 4.4 yarn
+### 4.5 yarn
 
 我们在4.1节提到 Semantic Versioning 这个概念，但是这个约定全凭开发者去自觉遵守显然不现实。在之前的开发中，我使用supertest 这个包来做单元测试，当时安装的是 2.0.0 版本，过了几天我新建了一个项目使用 npm install 来安装依赖的时候被安装的是2.0.1版本。按理来说依照规则，小版本变更应该是用来修改bug的，没想到我运行单元测试之后直接在 supertest 中报了语法错误。去网上一查，当前报错代码在 node 4.x中才能避免，而我用的是 0.10.x，然后手动查看了一下 supertest 的 package.json 文件，发现它在这一个小版本改动中悄悄的将 engine 属性的 node 版本改为>=4.0.0。单纯使用一个包都可能会导致风险，更不用说在一个庞大的项目中使用大量的依赖，那个时候可真叫牵一发而动全身。
 
@@ -177,7 +191,7 @@ yarn 很多命令和 npm相似，比如说 `yarn init` 对应 `npm init` 来初�
 
 不过通过 `yarn install` 安装过程中，yarn 将下载下来的包都缓存到了本地（这个缓存路径在windows下默认为C:\Users\\[user]\AppData\Local\Yarn\cache），下次如果换个项目再安装相同包，并且版本号也跟之前安装的一样的话，它就直接从缓存中读取出来。同时，yarn 在安装包的时候是并行的，而 npm 在安装包时串行的，必须第一个包安装完成之后才能安装第二个包。所以综上两点，yarn 安装包的速度要比 npm 快。
 
-我们通过 `npm save [pakcage] --save` 来将依赖包安装到当前项目下，同时将配置写入 package.json 文件，在 yarn 中 使用 `yarn add [package]` 即可，如果你要想全局安装包可以用 `yarn global add [package]` (之前我们通过**命令4.2.3**设置过全局包安装的路径，yarn 也会读取这个设置)。此外 yarn global 还有一些很有用的命令，大家可以参见[这里](https://yarnpkg.com/en/docs/cli/global)。
+我们通过 `npm install [pakcage] --save` 来将依赖包安装到当前项目下，同时将配置写入 package.json 文件，在 yarn 中 使用 `yarn add [package]` 即可，如果你要想全局安装包可以用 `yarn global add [package]` (之前我们通过**命令4.2.3**设置过全局包安装的路径，yarn 也会读取这个设置)。此外 yarn global 还有一些很有用的命令，大家可以参见[这里](https://yarnpkg.com/en/docs/cli/global)。
 
 不过我们通过 `yarn add [package]` 后，他还会在当前目录下生成或者修改一个 yarn.lock 文件。例如我们运行 `yarn add express` 后就会发现文件 yarn.lock 中内容如下：
 
@@ -202,7 +216,7 @@ content-disposition@0.5.1:
   resolved "https://registry.yarnpkg.com/content-disposition/-/content-disposition-0.5.1.tgz#87476c6a67c8daa87e32e87616df883ba7fb071b"
 ```
 
-**代码 4.2.1 yarn.lock示例**  
+**代码 4.5.1 yarn.lock示例**  
 
 你会发现里面罗列了express各个依赖的版本号（ version 字段），下载地址（ resolved 字段），我们仅仅截取了前面几行，因为 express 包中依赖关系比较复杂，生成的这个 lock 文件也比较长。项目初始化的老兄，通过 yarn add 的方式安装好包之后，需要将这个 yarn.lock 提交到版本库，这样你的小伙伴通过 `yarn install` 安装的各个依赖就和初始化的老兄用的一样了，这样就避免了团队中各个开发者通过 npm install 安装到本地的包的版本号不一致而导致的各种难以排查的问题了。
 
@@ -214,7 +228,7 @@ content-disposition@0.5.1:
 yarn config set registry https://registry.npmmirror.com
 ```
 
-**命令4.4.1**  
+**命令4.5.1**  
 
 > 如果之前通过 **命令 4.2.3** 命令设置过第三方源，那么这个设置的优先级会大于通过 yarn 命令设置的优先级。特别是 npm 命令和 yarn 命令设置的源地址不同的时候，你会发现明明 yarn 切换到了淘宝源，运行 yarn add 后源地址却不是淘宝源的。其实通过 yarn 命令切换源后，它会在 ~/.yarnrc 中写入新的源的配置，同样使用 config 命令切换源后，它会写入 ~/.npmrc 中。运行 yarn add 时，它会先读取 ~/.npmrc 中的配置，再读取 ~/.yarnrc 的配置。所以解决问题的思路就是要么删除 ~/.npmrc 中关于 registry 的配置，要么将其改成跟 yarn 中配置的源地址一致。
 
@@ -224,7 +238,7 @@ yarn config set registry https://registry.npmmirror.com
 yarn config set global-folder "d:\yarn"
 ```
 
-**命令 4.4.2**
+**命令 4.5.2**
 
 设置完后，记得将对应的 ```d:/yarn/global/bin``` 添加到环境变量，这样全局安装的命令行程序才能被从终端上找得到。
 
@@ -234,7 +248,7 @@ yarn config set global-folder "d:\yarn"
 yarn config set cache-folder "D:\yarn_cache"
 ```
 
-**命令 4.4.3**
+**命令 4.5.3**
 
 使用 yarn 的还有一个好处是，当前项目版本是锁定的 yarn.lock 文件中的（从 node 6 开始，也有类似的功能，有一个 package.lock 的文件来锁定版本号）。这样带来的好处是，假设 package.json 中定义的某个版本号是 ^1.0.0，按理来说 1.0.0 和 1.n.m 都是符合这个版本约束的，两个开发者在协作开发的时候，如果两人安装的小版本号不一致，就会导致未知问题。yarn.lock 的一个重要作用就是，就是将各个包用的版本号一开始就锁死。例如在 **代码 4.2.1** 中，yarn.lock 规定 accepts 用的是 1.3.3，多个开发者在协作开发时，从代码仓库中检出项目代码，初始化运行 yarn install 后安装的 accepts 也会是 1.3.3，即使当前 accepts 包有最新的版本 1.4.x，也不会被安装。
 
@@ -244,6 +258,42 @@ yarn config set cache-folder "D:\yarn_cache"
 
 使用 `yarn upgrade-interactive --latest` , 需要手动选择升级的依赖包，按空格键选择，a 键切换所有，i 键反选选择。这种方式如果升级的包的版本号中主版本号没有变，则只会更改 yarn.lock，不会更改 package.json。比如说当前安装版本是 1.1.0，升级到版本是 1.20，则用这个命令后，package.json 不改变；当前安装版本为 1.1.0，升级到版本是 2.0.0，则用这个命令后，package.json 和 yarn.lock 都会更改。
 
+### 4.6 pnpm
+
+yarn 自从升级到 2.x 之后，命令的使用方式做了很多大改动，不同我们通过 npm install yarn 安装的 yarn 依然还是 1.x 版本，但是 1.x 版本官方已经不再维护导致出现的 bug 得不到修复，所以在新启动的项目中不推荐使用 yarn 来维护。
+
+pnpm 作为最近几年的后起之秀，在包管理这块拥有更新的理念。类似于 npm 和 yarn，在项目中安装包的时候，都需要将包文件实实在在的写入到项目中的 node_modules 文件夹下，但是 pnpm 采用的是文件链接的形式，真正的文件存储在其公共文件夹中，这个文件夹是所有项目所共享的，这中方式极大加快了包的安装的速度。所以在新项目中，可以使用 pnpm 来作为自己的包管理器。我们可以通过 `npm install pnpm -g` 来全局安装 pnpm。
+
+> 很多其他语言的包管理器也是采用类似链接的方式，比如说 Java 中的 maven。
+
+pnpm 的命令行使用方式和 npm 是类似的，`pnpm install` 等同于 `npm install` 。使用 pnpm 安装完成后，会生成或者更新一个 pnpm-lock.yaml 文件，其格式如下:
+
+```yaml
+lockfileVersion: '6.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+dependencies:
+  puppeteer:
+    specifier: ^22.6.3
+    version: 22.6.3
+
+packages:
+
+  /@babel/code-frame@7.24.2:
+    resolution: {integrity: sha512-y5+tLQyV8pg3fsiln67BVLD1P13Eg4lh5RW9mF0zUuvLrv9uIQ4MCL+CRT+FTsBlBjcIan6PGsLcBN0m3ClUyQ==}
+    engines: {node: '>=6.9.0'}
+    dependencies:
+      '@babel/highlight': 7.24.2
+      picocolors: 1.0.0
+    dev: false
+```
+
+**代码 4.6.1**
+
+pnpm 没有自己专有的 npm 仓库地址设置，而是借用了 npm 的仓库地址，所以你可以直接复用 **命令 4.2.3** 和 **代码 4.3.1** 两种方式来设置 pnpm 仓库地址。
 ### 4.5 发布自己的包到 npmjs
 
 刚才演示了这么命令都是安装别人的包，现在我们自己开发一个包。首先你要注册一个npmjs的账号（注册地址：https://www.npmjs.com/signup ）。注册完成后，通过`npm adduser`命令来将注册的账号绑定到本地机器上，运行完改命令后会让你输入 npmjs 的注册账号和密码。  
@@ -273,7 +323,7 @@ license: (ISC) MIT
 
 ### 4.6 发布自己的包到私有仓库
 
-有的时候，我们写的包是公司内部使用的，不适合公开发布，为了方便大家协作开发，需要一个私有仓库。网上很多教程，都是借用 cnpm 的源代码，自己搭建类似于 cnpm 的系统来做私有仓库，不过这么做维护比较复杂，笔者没有这么做过，而是借用 npm 自带的功能来实现类似的功能。
+有的时候，我们写的包是公司内部使用的，不适合公开发布，为了方便大家协作开发，需要一个私有仓库。网上很多教程，都是借用 cnpm 的源代码，自己搭建类似于 cnpm 的系统来做私有仓库，如果嫌这种私有仓库部署麻烦的话，可以借用 npm 自带的 git 链接功能来实现类似的功能。不过如果公司内部已经有私有仓库的话，还是直接用私有仓库，毕竟私有仓库是比较贴合原始 npm 用法的。
 
 npm 中的 dependices ，默认是从镜像仓库中来拉取代码，其实这个地址也可以写成一个 git 地址，比如说类似于 `https://git-domain/project-path.git` 或者 `git@git-domain:project-path.git` 这种格式。不过推荐使用后者，这样可以借助于 git 仓库自带的部署密钥的功能，更好的控制权限。
 
