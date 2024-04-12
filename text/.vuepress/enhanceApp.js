@@ -1,3 +1,48 @@
+function addGiscus () {
+  const script = document.createElement('script')
+  // use local file
+  // script.src = 'script.js';
+  script.src =
+    'https://giscus.app/client.js';
+  script.async = true;
+  script.crossOrigin = 'anonymous';
+  /**
+   * data-repo="yunnysunny/nodebook"
+        data-repo-id="MDEwOlJlcG9zaXRvcnk0MTAyNjM2Ng=="
+        data-category="Q&A"
+        data-category-id="MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyMTU4NDA2"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="preferred_color_scheme"
+        data-lang="zh-CN"
+   */
+  const attrs = {
+    'data-repo': 'yunnysunny/nodebook',
+    'data-repo-id': 'MDEwOlJlcG9zaXRvcnk0MTAyNjM2Ng==',
+    'data-category': 'Q&A',
+    'data-category-id': 'MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyMTU4NDA2',
+    'data-mapping': 'pathname',
+    'data-strict': '0',
+    'data-reactions-enabled': '1',
+    'data-emit-metadata': '0',
+    'data-input-position': 'bottom',
+    'data-theme': 'preferred_color_scheme',
+    'data-lang': 'zh-CN',
+  }
+  for (const key in attrs) {
+    script.setAttribute(key, attrs[key])
+  }
+  script.onload = () => {
+    console.log('Script loaded successfuly');
+  };
+  script.onerror = () => {
+    console.log('Error occurred while loading script');
+  };
+  document.querySelector('.page').appendChild(script)
+}
 export default ({
   Vue, // VuePress 正在使用的 Vue 构造函数
   options, // 附加到根实例的一些选项
@@ -44,4 +89,22 @@ export default ({
       }
     }
   }
+  // setTimeout(() => {    
+  //   addGiscus()
+  // }, 3000)
+  // 选择一个要监听的节点
+  const targetNode = document.body
+
+  // 创建一个新的 MutationObserver
+  const observer = new MutationObserver(() => {
+    if (document.querySelector('.page')) {
+      addGiscus();
+      observer.disconnect(); // 销毁监视者
+    }
+  })
+
+  const config = { childList: true, subtree: true } // 对哪些更改做出反应
+
+  // 绑定目标节点并启动监视者
+  observer.observe(targetNode, config)
 }

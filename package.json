@@ -14,7 +14,10 @@
   "author": "yunnysunny <yunnysunny@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "@whyun/vuepress-plugin-pdf-export": "^1.2.0",
+    "@vuepress/plugin-active-header-links": "^1.9.10",
+    "@vuepress/plugin-back-to-top": "^1.9.10",
+    "@vuepress/plugin-google-analytics": "^1.9.10",
+    "@vuepress/plugin-nprogress": "^1.9.10",
     "cross-env": "^7.0.3",
     "eslint": "^8.56.0",
     "markdown-it-disable-url-encode": "^1.0.1",

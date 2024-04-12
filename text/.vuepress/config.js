@@ -61,9 +61,13 @@ module.exports = {
       // 排除无实际内容的页面
       exclude: ["/404.html"]
     },
-    // 'vuepress-plugin-export': {
-      
-    // },
+    '@vuepress/google-analytics': {
+      ga: 'G-33K8GJ2J4R', 
+    },
+    '@vuepress/active-header-links': {},
+    '@vuepress/back-to-top': {},
+    '@vuepress/nprogress': {},
+    // 'vuepress-plugin-nuggets-style-copy': {},
     '@whyun/vuepress-plugin-pdf-export': {
       puppeteerLaunchOptions: {
         args: ['--no-sandbox', '--disable-setuid-sandbox']
