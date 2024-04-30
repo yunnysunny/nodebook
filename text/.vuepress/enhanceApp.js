@@ -1,3 +1,36 @@
+function updateGiscus(path) {
+  const iframe = document.querySelector('iframe.giscus-frame')
+  if (iframe) {
+    iframe?.contentWindow?.postMessage(
+      { giscus: { setConfig: { term: path } } },
+      'https://giscus.app',
+    );
+  }
+}
+function addHistoryEvent() {
+  const _historyWrap = function(type) {
+    const orig = history[type];
+    const e = new Event(type);
+    return function() {
+      const rv = orig.apply(this, arguments);
+      e.arguments = arguments;
+      window.dispatchEvent(e);
+      return rv;
+    };
+  };
+  history.pushState = _historyWrap('pushState');
+  history.replaceState = _historyWrap('replaceState');
+
+  window.addEventListener('pushState', function(e) {
+    console.log('change pushState', e);
+    updateGiscus(e.arguments[2])
+  });
+  window.addEventListener('replaceState', function(e) {
+    console.log('change replaceState', e);
+    updateGiscus(e.arguments[2])
+  });
+}
+
 function addGiscus () {
   const script = document.createElement('script')
   // use local file
@@ -42,6 +75,7 @@ function addGiscus () {
     console.log('Error occurred while loading script');
   };
   document.querySelector('.page').appendChild(script)
+  addHistoryEvent()
 }
 export default ({
   Vue, // VuePress 正在使用的 Vue 构造函数
@@ -89,10 +123,7 @@ export default ({
       }
     }
   }
-  // setTimeout(() => {    
-  //   addGiscus()
-  // }, 3000)
-  // 选择一个要监听的节点
+
   const targetNode = document.body
 
   // 创建一个新的 MutationObserver
