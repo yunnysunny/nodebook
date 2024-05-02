@@ -7,6 +7,9 @@ function updateGiscus(path) {
     );
   }
 }
+function getPath(pathWithHash) {
+  return pathWithHash.split('#')[0]
+}
 function addHistoryEvent() {
   const _historyWrap = function(type) {
     const orig = history[type];
@@ -23,11 +26,11 @@ function addHistoryEvent() {
 
   window.addEventListener('pushState', function(e) {
     console.log('change pushState', e);
-    updateGiscus(e.arguments[2])
+    updateGiscus(getPath(e.arguments[2]))
   });
   window.addEventListener('replaceState', function(e) {
     console.log('change replaceState', e);
-    updateGiscus(e.arguments[2])
+    updateGiscus(getPath(e.arguments[2]))
   });
 }
 
