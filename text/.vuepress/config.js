@@ -1,6 +1,6 @@
 const toc = require('./toc')
-const base = process.env.CI ? '/nodebook/' : '/'
-const baseUrl = 'https://blog.whyun.com/nodebook'
+const base = process.env.CI === 'github' ? '/nodebook/' : '/'
+const baseUrl = 'https://node.whyun.com'
 module.exports = {
   title: 'nodebook',
   description: 'Node 基础教程',

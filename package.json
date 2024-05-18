@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "date": "node update-time.js",
     "docs:dev": "vuepress dev text",
     "dev": "npm run docs:dev",
     "docs:build": "vuepress build text",
@@ -13,6 +14,7 @@
   "repository": "git@github.com:yunnysunny/nodebook.git",
   "author": "yunnysunny <yunnysunny@gmail.com>",
   "license": "MIT",
+  "packageManager": "yarn@1.22.21",
   "devDependencies": {
     "@vuepress/plugin-active-header-links": "^1.9.10",
     "@vuepress/plugin-back-to-top": "^1.9.10",
@@ -21,6 +23,7 @@
     "cross-env": "^7.0.3",
     "eslint": "^8.56.0",
     "markdown-it-disable-url-encode": "^1.0.1",
+    "simple-git": "^3.24.0",
     "vuepress": "^1.9.10",
     "vuepress-plugin-autometa": "^0.1.13",
     "vuepress-plugin-go-top": "^1.0.4",

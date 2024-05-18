@@ -8,6 +8,10 @@ module.exports = {
     'node': true,
     es6: true,
   },
+  languageOptions: {
+    // Your language options
+    ecmaVersion: 2015,
+  },
   globals: {
     // Your global variables (setting to false means it's not allowed to be reassigned)
     //
