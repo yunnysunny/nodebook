@@ -294,6 +294,16 @@ packages:
 **代码 4.6.1**
 
 pnpm 没有自己专有的 npm 仓库地址设置，而是借用了 npm 的仓库地址，所以你可以直接复用 **命令 4.2.3** 和 **代码 4.3.1** 两种方式来设置 pnpm 仓库地址。
+如果想更改 pnpm 下载文件的存放位置，可以使用如下命令：
+```
+pnpm config set store-dir d:\.pnpm-store
+```
+**命令 4.6.1**
+同时需要留意的是，pnpm 全局安装命令前必须得设置 `global-dir` 属性，否则会提示 global-dir 不存在，不让安装。具体设置命令如下：
+```
+pnpm config set global-dir D:\pnpm
+```
+**命令 4.6.2**
 ### 4.7 发布自己的包到 npmjs
 
 刚才演示了这么命令都是安装别人的包，现在我们自己开发一个包。首先你要注册一个npmjs的账号（注册地址：https://www.npmjs.com/signup ）。注册完成后，通过`npm adduser`命令来将注册的账号绑定到本地机器上，运行完改命令后会让你输入 npmjs 的注册账号和密码。  

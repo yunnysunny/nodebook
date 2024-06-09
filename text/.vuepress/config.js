@@ -67,6 +67,9 @@ module.exports = {
     '@vuepress/active-header-links': {},
     '@vuepress/back-to-top': {},
     '@vuepress/nprogress': {},
+    'vuepress-plugin-code-copy': {
+      align: 'bottom',
+    },
     // 'vuepress-plugin-nuggets-style-copy': {},
     '@whyun/vuepress-plugin-pdf-export': {
       puppeteerLaunchOptions: {
