@@ -145,6 +145,101 @@ exports.collectDuration = function (duration) {
 
 **代码 14.2.2.4 对于仪表盘、直方图、摘要的示例代码**
 
+### 14.3 指标可视化
+指标写入 Prometheus 后，我们还需要使用 grafana 将其做可视化。Prometheus 主动来应用服务中抓取指标数据， grafana 也会定时从 Prometheus 中抓取指标数据来绘制报表。
+
+![](images/data_flow_prometheus.drawio.png)
+**图 14.3.1 指标采集数据流图**
+**代码 14.2.2.1** 是一个简单的指标收集代码，但是它没有考虑到生产环境使用时会部署若干个容器节点，为了更便捷观测某一个服务的运行状态，我们更倾向通过集群名称或者部署服务名称来对节点进行筛选。为了这么做，我们首先改造一下 **代码 14.2.2.1** ，因为我们要引入一个 `lable` 的概念。 为了方便数据做聚类统计，Prometheus 支持对每条采集数据中添加如果标签（`label`）。我们这里正是利用这个特性，对我们的数据添加上服务名称和命名空间（这里模拟 k8s 的命名空间概念）标签：
+
+```javascript
+const client = require('prom-client');
+const { commonLabels } = require('./config');  
+
+const collectDefaultMetrics = client.collectDefaultMetrics;
+collectDefaultMetrics({
+    labels: commonLabels,
+});
+```
+**代码14.3.1 添加了 lables 属性的采集数据**
+为了快速搭建一个 Prometheus 的数据采集环境，这里准备了一份 docker-compose 文件
+```yaml
+version: "3"
+services:
+  alertmanager:
+    restart: always
+    image: prom/alertmanager
+    network_mode: host
+    volumes:
+      - ./alertmanager:/etc/alertmanager
+  prometheus:
+    restart: always
+    user: root
+    privileged: true
+    image: bitnami/prometheus
+    container_name: prometheus-dev
+    network_mode: host
+    volumes:
+      - ./prometheus:/opt/bitnami/prometheus/conf
+    depends_on:
+      - alertmanager
+  grafna:
+    restart: always
+    image: grafana/grafana
+    user: root
+    volumes:
+      - ./grafana-persistence:/var/lib/grafana
+    network_mode: host
+    environment:
+       GF_SECURITY_ADMIN_PASSWORD: "secret"
+    depends_on:
+      - prometheus
+```
+**代码 14.3.2 docker-compose.yml**
+上面配置文件中，我们设置了一个卷映射 `./prometheus:/opt/bitnami/prometheus/conf` ，这是为了方便我们修改配置文件用，因为镜像 `bitnami/prometheus` 默认将配置文件放置到了 `/opt/bitnami/prometheus/conf` 目录下，我们在本机 `prometheus` 文件夹下放一个 `prometheus.yml` 文件即可被 Prometheus 读取到，这个配置文件的内容如下：
+```yaml
+# my global config
+global:
+  scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+      - alertmanager:9094
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'prometheus'
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+
+    static_configs:
+    - targets: ['localhost:9090']
+  - job_name: 'nodejs'
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+
+    static_configs:
+    - targets: ['你node进程所在的ip:3001']
+```
+**代码 14.3.3 prometheus/prometheus.yml**
+>注意最后一行，你需要正确填写你的 node 进程所在的 IP，在某些环境下，这个 IP 可以用 `host.docker.internal` 替代。
+
+在 docker-compose.yml 所在目录中，通过命令 `docker compose up -d` 可以快速启动一个运行环境。在浏览器中打开地址 http://localhost:9090/targets 可以用来查看 Prometheus 抓取数据成功与否。 
+
+![](images/prometheus_targets.png)
+**图 14.3.2 Prometheus 的 targets 列表**
+正常情况下，每行 targets 记录的 Error 列应该是空的。
+接着打开 http://localhost:3000/login ，输入用户名密码 `admin` `secret` 即可进入。然后依次选择左侧菜单 **Connection** -> **Data Source** ，然后点击按钮 **Add Data Source**，接着会提供一系列的数据源供给选择，我们选择 Promethues 即可。最后是 Prometheus 的连接配置，我们在 `Prometheus server URL` 栏填入 `http://localhost:9090` ，然后点击 **Save & test** 按钮，正常情况下会提示 `✔ Successfully queried the Prometheus API.` 。
+然后我们来添加一个面板将指标数据呈现出来，重新回到左侧菜单，选择 Dashboards ，然后点击按钮 Create Dashboard ，显示的操作方式中选择 Import a dashboard：
+![](images/import-dashboard.png)
+**图 14.3.3 选择导入面板**
 ### 示例代码
 
 本章节示例代码可以从这里找到 https://github.com/yunnysunny/nodebook-sample/tree/master/chapter14
