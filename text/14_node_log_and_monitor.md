@@ -246,6 +246,18 @@ scrape_configs:
 ![](images/import-dashboard.png)
 **图 14.3.3 选择导入面板**
 
+在展示的 Find and import dashboards for common applications at [grafana.com/dashboards](https://grafana.com/grafana/dashboards/) 输入框中写入 11159，并点击 **Load** 按钮。
+![](images/input_imported_dashoboard_id.png)
+**图 14.3.4 输入面板 id**
+
+`1159` 是 grafana.com 上公开的模板 id，具体说明可以参见 [NodeJS Application Dashboard | Grafana Labs](https://grafana.com/grafana/dashboards/11159-nodejs-application-dashboard/)，我们将使用这个模板来对 **代码 14.2.2.1** 采集的数据做图标展示。最后我们需要绑定一下面板关联的数据源，在下拉框 prometheus 输入框中选择我们刚才创建的数据源：
+![](images/bind_grafana_data_source.png)
+**图 14.3.5 绑定数据源**
+
+点击上图的 Import 按钮后，我们就初步完成了报表展示了，会长成这个样子：
+![](images/dashboard_grafana_init.png)
+**图 14.3.6 配置初始化完成后展示的面板**
+
 ### 示例代码
 
 本章节示例代码可以从这里找到 https://github.com/yunnysunny/nodebook-sample/tree/master/chapter14
