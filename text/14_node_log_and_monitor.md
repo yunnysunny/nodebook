@@ -150,6 +150,7 @@ exports.collectDuration = function (duration) {
 
 ![](images/data_flow_prometheus.drawio.png)
 **图 14.3.1 指标采集数据流图**
+
 **代码 14.2.2.1** 是一个简单的指标收集代码，但是它没有考虑到生产环境使用时会部署若干个容器节点，为了更便捷观测某一个服务的运行状态，我们更倾向通过集群名称或者部署服务名称来对节点进行筛选。为了这么做，我们首先改造一下 **代码 14.2.2.1** ，因为我们要引入一个 `lable` 的概念。 为了方便数据做聚类统计，Prometheus 支持对每条采集数据中添加如果标签（`label`）。我们这里正是利用这个特性，对我们的数据添加上服务名称和命名空间（这里模拟 k8s 的命名空间概念）标签：
 
 ```javascript
@@ -162,6 +163,7 @@ collectDefaultMetrics({
 });
 ```
 **代码14.3.1 添加了 lables 属性的采集数据**
+
 为了快速搭建一个 Prometheus 的数据采集环境，这里准备了一份 docker-compose 文件
 ```yaml
 version: "3"
@@ -196,6 +198,7 @@ services:
       - prometheus
 ```
 **代码 14.3.2 docker-compose.yml**
+
 上面配置文件中，我们设置了一个卷映射 `./prometheus:/opt/bitnami/prometheus/conf` ，这是为了方便我们修改配置文件用，因为镜像 `bitnami/prometheus` 默认将配置文件放置到了 `/opt/bitnami/prometheus/conf` 目录下，我们在本机 `prometheus` 文件夹下放一个 `prometheus.yml` 文件即可被 Prometheus 读取到，这个配置文件的内容如下：
 ```yaml
 # my global config
@@ -229,17 +232,20 @@ scrape_configs:
     - targets: ['你node进程所在的ip:3001']
 ```
 **代码 14.3.3 prometheus/prometheus.yml**
+
 >注意最后一行，你需要正确填写你的 node 进程所在的 IP，在某些环境下，这个 IP 可以用 `host.docker.internal` 替代。
 
 在 docker-compose.yml 所在目录中，通过命令 `docker compose up -d` 可以快速启动一个运行环境。在浏览器中打开地址 http://localhost:9090/targets 可以用来查看 Prometheus 抓取数据成功与否。 
 
 ![](images/prometheus_targets.png)
 **图 14.3.2 Prometheus 的 targets 列表**
+
 正常情况下，每行 targets 记录的 Error 列应该是空的。
 接着打开 http://localhost:3000/login ，输入用户名密码 `admin` `secret` 即可进入。然后依次选择左侧菜单 **Connection** -> **Data Source** ，然后点击按钮 **Add Data Source**，接着会提供一系列的数据源供给选择，我们选择 Promethues 即可。最后是 Prometheus 的连接配置，我们在 `Prometheus server URL` 栏填入 `http://localhost:9090` ，然后点击 **Save & test** 按钮，正常情况下会提示 `✔ Successfully queried the Prometheus API.` 。
 然后我们来添加一个面板将指标数据呈现出来，重新回到左侧菜单，选择 Dashboards ，然后点击按钮 Create Dashboard ，显示的操作方式中选择 Import a dashboard：
 ![](images/import-dashboard.png)
 **图 14.3.3 选择导入面板**
+
 ### 示例代码
 
 本章节示例代码可以从这里找到 https://github.com/yunnysunny/nodebook-sample/tree/master/chapter14
