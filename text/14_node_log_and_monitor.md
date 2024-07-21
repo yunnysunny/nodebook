@@ -149,7 +149,7 @@ exports.collectDuration = function (duration) {
 指标写入 Prometheus 后，我们还需要使用 grafana 将其做可视化。Prometheus 主动来应用服务中抓取指标数据， grafana 也会定时从 Prometheus 中抓取指标数据来绘制报表。
 
 ![](images/data_flow_prometheus.drawio.png)
-**图 14.3.1 指标采集数据流图**
+**图 14.3.0 指标采集数据流图**
 
 **代码 14.2.2.1** 是一个简单的指标收集代码，但是它没有考虑到生产环境使用时会部署若干个容器节点，为了更便捷观测某一个服务的运行状态，我们更倾向通过集群名称或者部署服务名称来对节点进行筛选。为了这么做，我们首先改造一下 **代码 14.2.2.1** ，因为我们要引入一个 `lable` 的概念。 为了方便数据做聚类统计，Prometheus 支持对每条采集数据中添加如果标签（`label`）。我们这里正是利用这个特性，对我们的数据添加上服务名称和命名空间（这里模拟 k8s 的命名空间概念）标签：
 
@@ -229,19 +229,37 @@ scrape_configs:
     # scheme defaults to 'http'.
 
     static_configs:
-    - targets: ['你node进程所在的ip:3001']
+    - targets: ['你node进程所在的ip1:3001', '你node进程所在的ip2:端口2']
 ```
 **代码 14.3.3 prometheus/prometheus.yml**
 
 >注意最后一行，你需要正确填写你的 node 进程所在的 IP，在某些环境下，这个 IP 可以用 `host.docker.internal` 替代。
 
-在 docker-compose.yml 所在目录中，通过命令 `docker compose up -d` 可以快速启动一个运行环境。在浏览器中打开地址 http://localhost:9090/targets 可以用来查看 Prometheus 抓取数据成功与否。 
+在 docker-compose.yml 所在目录中，通过命令 `docker compose up -d` 可以快速启动一个运行环境。在浏览器中打开地址 http://localhost:9090/ ，然后在输入框中输入 `nodejs_version_info`，然后回车。 
 
-![](images/prometheus_targets.png)
-**图 14.3.2 Prometheus 的 targets 列表**
+![](images/show_metric.png)
 
-正常情况下，每行 targets 记录的 Error 列应该是空的。
+**图 14.3.1**
+
+执行输出的结构格式会是这样的：
+
+nodejs_version_info{instance="127.0.0.1:3001", job="nodejs", major="20", minor="9", namespace="default", patch="0", serverName="chapter14", version="v20.9.0"} 1
+
+**输出 14.3.1**
+
+其中 instance job major 等类键值对的数据，在 Promethues 中称之为 Lable，最后面那个 1 是当前这条 metric 记录的值。
+
+
+>如果输入 node_version_info 表达式后回车没有出现任何值，你可以通过打开 http://localhost:9090/targets 连接来看一下被收集的 Endpoint 有没有 Error 信息打印出来。
+>![](images/prometheus_targets.png)
+>正常情况下，每行 targets 记录的 Error 列应该是空的。
+
 接着打开 http://localhost:3000/login ，输入用户名密码 `admin` `secret` 即可进入。然后依次选择左侧菜单 **Connection** -> **Data Source** ，然后点击按钮 **Add Data Source**，接着会提供一系列的数据源供给选择，我们选择 Promethues 即可。最后是 Prometheus 的连接配置，我们在 `Prometheus server URL` 栏填入 `http://localhost:9090` ，然后点击 **Save & test** 按钮，正常情况下会提示 `✔ Successfully queried the Prometheus API.` 。
+
+![](images/prometheus_data_source.png)
+
+**图 14.3.2 添加 prometheus 数据源**
+
 然后我们来添加一个面板将指标数据呈现出来，重新回到左侧菜单，选择 Dashboards ，然后点击按钮 Create Dashboard ，显示的操作方式中选择 Import a dashboard：
 ![](images/import-dashboard.png)
 **图 14.3.3 选择导入面板**
@@ -257,6 +275,70 @@ scrape_configs:
 点击上图的 Import 按钮后，我们就初步完成了报表展示了，会长成这个样子：
 ![](images/dashboard_grafana_init.png)
 **图 14.3.6 配置初始化完成后展示的面板**
+
+目前我们仅仅演示了一个服务，正常生产环境的服务数可不止一个，有可能有十几个、几十个，甚至更多，而我们在从上图中的 Instance 下拉框中进行筛选是一个很困难的事情。还记得我们改造过的 **代码14.3.1** 不，现在它能派上用场了。
+
+**代码14.3.1** 中引用了来自文件 config.js 的 commonLabels 常量，这个常量的定义如下：
+
+```javascript
+const { name } = require('./package.json');
+exports.commonLabels = {
+    serverName: name,
+    namespace: 'default',
+};
+
+exports.commonLabelNames = Object.keys(exports.commonLabels);
+```
+
+**代码 14.3.4 config.js**
+
+通过上述代码可以看出 commonLabels 常量有 `serverName` 和 `namespace` 两个属性，分别代表启用服务的名称和所在命名空间（可以理解为 k8s 系统中的命名空间的概念），另外从**输出 14.3.1** 中也能看到这两个 Lable 的具体值。我们的目标就是在 **图 14.3.6** 中再增加两个筛选框，分别为 `namespace` 和 `serverName`，保证选中指定 `namespace` 时能够级联筛选出其下的 `serverName`，选中 `serverName` 时能够筛选出级联的 `instance` 实例。
+
+点击 **图 14.3.6** 上部中间位置的 ⚙ 图标，进入设置界面，点击 **Variables** 选项卡，界面中会呈现出来当前的 instance 变量的定义，
+
+![](images/grafana_variables.png)
+
+**图 14.3.7**
+
+现在我们要添加一个 `namespace` 变量，点击 **New variable** 按钮。
+
+![](images/namespace_variable.png)
+
+**图 14.3.8 添加 namespace 变量**
+
+表单项中 name 输入框我们输入 namespace ，这样我们就新建了一个变量名字，叫 namespace；Lable 输入框填入的 namespace 值，将会导致在 **图 14.3.6 ** 中新增一个下拉框，且标记为 namespace，这里你也可以将其改为任何字符，比如说说改成中文名字 `集群`。
+
+Query options 区域是这里配置的核心区域，首先在 Data source 区域选择好之前创建好的 Promethues 数据源。下面的 Query 表单中，Query type 选择 Label values，代表我们将从 Prometheus 数据中的 label 属性中提取数据；Labels 选择 namespace ，代表我们使用数据中 label 名字为 namespace 的值进行提取；Metric 选择 node_version_info ，代表我们只从 node_version_info 中提取 label 名字为 namespace 的值。
+
+回到 Variables 选项卡再创建一个 `serverName` 变量，这次我们所有的操作都跟 `namespace` 类似，唯独下图中红框中标出来的内容：
+
+![](images/filter_label_variable.png)
+
+**图 14.3.9 筛选 Lable 值**
+
+我们增加一个 `namespace = $namespace` 的表达式，就能够实现在指定 `namespace` 值下筛选 `serverName` Label 值的能力。对于这个表单时来说等号前面代表名字为 `namespace` 的 Prometheus Label，等号后面的代表前面我们定义的 `namespace` 变量。
+
+最后我们要修改一下原来的 instance 变量的，将其的 Label filters 改为 `serverName = $serverName` 。然后回到 Variables 选项卡，拖动调整一下三个变量的顺序，保证 namespace 第一位、serverName 第二位、instance 第三位。
+
+![](images/variables_ordered.png)
+
+**图 14.3.10 调整顺序后的变量**
+
+上图中 namespace 和 serverName 上面标识了 ⚠️，代表当前变量没有被其他变量引用，但是我们刚才通过设置过滤表达式，已经将所有变量关联起来了，这属于误报，你可以通过点击变量列表左下角按钮 **Show dependencies**，即可查看依赖关系，正常情况下你看到的依赖关系如下图所示：
+
+![](images/variables_deps.png)
+
+**图 14.3.11 变量依赖关系**
+
+如果你看到的依赖关系没有形成上述依赖链的形式，代表上述的配置中哪个地方是有问题的，需要重新检查一遍。
+
+最后，还有一件最重要的事情，你上面做的所有操作都只是临时操作，如果你不点击顶部右上侧的 **<svg xmlns="http://www.w3.org/2000/svg" data-name="Layer 1" viewBox="0 0 24 24" aria-hidden="true" width="16" height="16" class="css-74awvt-Icon"><path d="M18,7h1V8a1,1,0,0,0,2,0V7h1a1,1,0,0,0,0-2H21V4a1,1,0,0,0-2,0V5H18a1,1,0,0,0,0,2Zm2,9a3,3,0,0,0-1.73.56l-2.45-1.45A3.74,3.74,0,0,0,16,14a4,4,0,0,0-3-3.86V7.82a3,3,0,1,0-2,0v2.32A4,4,0,0,0,8,14a3.74,3.74,0,0,0,.18,1.11L5.73,16.56A3,3,0,0,0,4,16a3,3,0,1,0,3,3,3,3,0,0,0-.12-.8l2.3-1.37a4,4,0,0,0,5.64,0l2.3,1.37A3,3,0,1,0,20,16ZM4,20a1,1,0,1,1,1-1A1,1,0,0,1,4,20ZM12,4a1,1,0,1,1-1,1A1,1,0,0,1,12,4Zm0,12a2,2,0,1,1,2-2A2,2,0,0,1,12,16Zm8,4a1,1,0,1,1,1-1A1,1,0,0,1,20,20Z"></path></svg>Save dashboard** 按钮话，所有你做的一切都将是无用功。点击保存按钮后，还是提示你写入这次更改变动的说明信息，方便你以后查阅的时候使用。
+
+重新回调面板，我们最终就能看到一个可供级联筛选的三个下拉框了：
+
+![](images/variables_selectors.png)
+
+**图 14.3.12 级联下拉框**
 
 ### 示例代码
 
