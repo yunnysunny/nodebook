@@ -1,5 +1,5 @@
 FROM yunnysunny/gitbook:latest  AS build-stage
-RUN npm install svgexport -g
+
 WORKDIR /opt
 COPY . /opt
 RUN gitbook pdf .
