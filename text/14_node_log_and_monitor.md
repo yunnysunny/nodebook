@@ -6,10 +6,321 @@
 
 ### 14.1 收集日志
 
-日志收集还是比较容易实现的，拿使用 Express 的情况做一个介绍，在其中添加一个中间件，然后把请求头信息、请求参数、响应码、响应正文等数据收集起来，可以发送到消息队列然后转存到日志分析服务中，或者可以直接发送到数据库中。
+日志收集代码在 Node 中还是比较容易实现的，拿使用 Express 的情况做一个介绍，在其中添加一个中间件，然后把请求头信息、请求参数、响应码、响应正文等数据收集起来，可以发送到消息队列然后转存到日志分析服务中，或者可以直接发送到数据库中。
 
-> 可以参考笔者的项目 [@yunnysunny/request-logging](https://github.com/yunnysunny/request-log) 。
+以下以笔者的项目 [@yunnysunny/request-logging](https://github.com/yunnysunny/request-log) 为例进行讲解 。
 
+```javascript
+const requestLog = require('@yunnysunny/request-logging').default;
+const express = require('express');
+const path = require('path');
+const bodyParser = require('body-parser');
+const http = require('http');
+const {
+    slogger,
+    port,
+    kafkaSchedule,
+} = require('./config');
+const { setTimeout } = require('timers/promises');
+
+const app = express();
+app.enable('trust proxy');
+
+app.set('port', port);
+app.use(requestLog({
+    onReqFinished: (data) => {
+        kafkaSchedule.addData(data);
+    },
+}));
+
+app.use(bodyParser.json({ limit: '1mb' }));
+app.use(bodyParser.urlencoded({
+    extended: false,
+    limit: '1mb'
+}));
+
+app.use(express.static(path.join(__dirname, 'public')));
+const codes = [1, 2, 3];
+app.use('/', async (req, res) => {
+    const duration = Math.random() * 1000;
+    await setTimeout(duration);
+    const resCode = duration > 500 ? codes[Math.floor(Math.random() * 3)] : 0;
+    res.set('res-code', '' + resCode);
+    res.send('hello world');
+});
+
+// catch 404 and forward to error handler
+app.use(function (req, res, next) {
+    const err = new Error('Not Found:' + req.path);
+    (err).status = 404;
+    next(err);
+});
+
+// error handlers
+app.use(function (err, req, res, next) {
+    const status = err.status;
+    if (status === 404) {
+        return res.status(404).send(err.message || '未知异常');
+    }
+    res.status(status || 500);
+    slogger.error('发现应用未捕获异常', err);
+    res.send({
+        msg: err.message || '未知异常',
+        code: 0xffff
+    });
+});
+
+const server = http.createServer(app);
+
+server.listen(port);
+server.on('error', (err) => {
+    slogger.error('发现应用启动异常', err);
+});
+function onListening () {
+    const addr = server.address();
+    const bind = typeof addr === 'string'
+        ? 'pipe ' + addr
+        : 'port ' + addr.port;
+    slogger.info('Listening on ' + bind);
+}
+server.on('listening', onListening);
+
+setInterval(() => {
+    const path = ['/a', '/b', '/c'][Math.floor(Math.random() * 3)];
+    const options = {
+        port,
+        host: '127.0.0.1',
+        method: 'GET',
+        path,
+    };
+
+    const req = http.request(options, (res) => {
+        res.on('data', (chunk) => {
+            // console.log(`BODY: ${chunk}`);
+        });
+    });
+    req.end();
+}, 1000);
+```
+
+**代码 14.1.1**
+
+在 17 行中引入了 `@yunnysunny/request-logging` 包，它会将请求数据做收集，并将收集的数据发送到 kafka 中。kafka 在日志采集和大数据领域广泛采用，它支持将数据批量写入，常用的 kafkajs 提供了批量写入的 API，但是不支持定时批量写入功能，我们在上述代码中的对象 kafkaSchedule 变量初始化自 [queue-schedule](https://www.npmjs.com/package/queue-schedule) 库，它提封装了定时批量写入功能。
+
+> kafka 服务可以选择本地搭建，具体参见 **代码 14.1.1.1** 。
+
+为了方便后续的数据分析，这里将收集到的数据字段列到下面的表格中：
+
+**表 14.1.1 请求日志字段说明**
+
+| 名称                 | 类型          | 描述                                                                                        |
+| ------------------ | ----------- | ----------------------------------------------------------------------------------------- |
+| req_id             | String      | 日志的唯一 ID                                                                                  |
+| domain             | String      | 请求域名                                                                                      |
+| original_url       | String      | 请求原始链接，包含 query string 内容                                                                 |
+| path               | String      | 请求路径，不包含 query string 内容                                                                  |
+| router             | String      | 请求对应的 Express 路由                                                                          |
+| user_agent         | String      | 请求者的 UA 信息                                                                                |
+| custom_headers     | Object      | 你希望收集的特定 HTTP 请求头                                                                         |
+| custom_envs        | Object      | 你希望收集的特定服务器环境变量                                                                           |
+| method             | String      | HTTP 请求的 method                                                                           |
+| ip                 | String      | 请求者的 IP                                                                                   |
+| server_id          | String      | 服务器的 IP 地址                                                                                |
+| server_host        | String      | 服务器的hostname                                                                              |
+| duration           | Number      | 请求耗时，单位为毫秒                                                                                |
+| pid                | Number      | 服务器的进程 ID                                                                                 |
+| req_seq            | Number      | 内部请求 ID，是一个自增数字                                                                           |
+| content_length_req | Number      | 请求头中的 content-length 值                                                                    |
+| content_length     | Number      | 响应头中的 content-length 值                                                                    |
+| status_code        | Number      | HTTP 响应的状态码                                                                               |
+| res_code           | Number      | 请求响应返回的逻辑 code 值，从响应头`res-code`中读取 或者从 `res.locals._res_code` 中读取。                        |
+| res_data           | String\|any | 请求响应正文，包内部默认转成 JSON 字符串，从 `res.locals._res_data` 中读取原始数据。                                 |
+| req_time           | Number      | 请求开始处理的时间戳                                                                                |
+| req_time_string    | String      | 请求开始处理的时间戳对应的时间字符串，符合 [ISO 8601 Extended Format](https://en.wikipedia.org/wiki/ISO_8601). |
+| req_data           | String\|any | 请求正文，包内部默认转成 JSON 字符串                                                                     |
+| referer            | String      | 请求头的 referer 值                                                                            |
+| session            | Object      | 请求会话对象，代码编写者要避免其内部单个属性拥有多个类型的情况，否则会导致 ES 写入失败                                             |
+| aborted            | Boolean     | 请求是否被取消，在响应体发送前请求者 socket 句柄关闭时，此值为 `true`                                                |
+
+#### 14.1.1 使用 ksqldb
+
+将日志采集到 kafka 后，我们可以使用 ksqldb 来快捷查询日志数据。这里给出一个 docker-compose 文件，用来快速启动一个 ksqldb 环境：
+
+```dockercompose
+services:
+  kafka:
+    image: yunnysunny/kafka
+    container_name: kafka
+    hostname: kafka
+    ports:
+      - "9092:9092"
+      - "9999:9999"
+    networks:
+      - my_network
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      # JMX_PORT: 9999
+      KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
+  ksqldb-server:
+    image: confluentinc/ksqldb-server:0.28.2
+    hostname: ksqldb-server
+    container_name: ksqldb-server
+    user: root
+    depends_on:
+      - kafka
+    ports:
+      - "8088:8088"
+    networks:
+      - my_network
+    environment:
+      KSQL_BOOTSTRAP_SERVERS: kafka:9092
+      KSQL_LISTENERS: http://0.0.0.0:8088/
+      # KSQL_KSQL_SERVICE_ID: ksql_service_1_
+      KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    depends_on:
+      - ksqldb-server
+      - kafka
+    ports:
+      - 8090:8080
+    networks:
+      - my_network
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_KSQLDBSERVER: http://ksqldb-server:8088
+      DYNAMIC_CONFIG_ENABLED: true # not necessary for sasl auth, added for tests
+#    volumes:
+#      - ~/kui/config.yml:/etc/kafkaui/dynamic_config.yaml
+networks:
+  my_network:
+    driver: bridge
+```
+
+**代码 14.1.1.1 kafka 本地环境搭建 dockerfile 文件**
+
+> 这里 confluentinc/ksqldb-server 镜像用了 0.28.2 版本，笔者曾经尝试过官方文档中的 0.29.0 版本，发现无法正常启动。
+> 为了让 docker compose 中的 ksqldb-server 正确的连接到 kafka 容器中，kafka 容器在启动的时候设置环境变量 KAFKA_ADVERTISED_LISTENERS 的值为 `kafka:9092`，这就导致你在 Node 程序中连接到 kafka broker 后，其会返回集群的连接地址为 `kafka:9092`，为了保证你的电脑能够识别这个地址，你需要在操作系统的 hosts 文件中添加一条记录 `127.0.0.1 kafka`，否则无法正常和 kafka 服务进行通信。
+
+ksqldb 的端口号，改写成了 8090，因为很多人电脑上 8080 端口号被占用了。为了方便数据演示，我们安装了 kafka ui 这个工具，它支持显示 ksql 查询结果。
+
+点击 kafka ui 的 KSQL DB 菜单，然后点击 Execute KSQL Request 按钮，即可发现一个 KSQL 的输入文本框。
+
+![](images/create_ksql_stream.png)
+图 14.1.1.1 kafkaui 中创建
+
+在上图的文本框中输入以下语句
+
+```ksqldb
+CREATE STREAM req_log (
+  req_id STRING,
+  domain STRING,
+  original_url STRING,
+  path STRING,
+  router STRING,
+  user_agent STRING,
+  custom_headers MAP<STRING, STRING>, 
+  custom_envs MAP<STRING, STRING>,
+  method STRING,
+  ip STRING,
+  server_id STRING,
+  server_host STRING,
+  duration BIGINT,
+  pid BIGINT,
+  req_seq BIGINT,
+  content_length_req BIGINT,
+  content_length BIGINT,
+  status_code INT,
+  res_code INT,
+  res_data STRING,
+  req_time BIGINT,
+  req_time_string STRING,
+  req_data STRING,
+  referer STRING,
+  session MAP<STRING, STRING>,
+  aborted BOOLEAN
+) WITH (
+  kafka_topic='req-log',
+  value_format='JSON'
+);
+```
+
+**代码 14.1.1.2 创建流语句**
+
+执行完成后，清空文本框，重新输入 `select * from req_log;` 并执行，就能查询到 kafka 中的数据了
+
+![](images/ksql_result_full.png)
+
+像我们正常使用 sql 一样，你也可以使用查询条件对于结果进行过滤，比如说你输入，
+
+```sql
+ select path, res_code, req_time_string from req_log where res_code <> 0;
+```
+
+**代码 14.1.1.3**
+
+就能展示所有 res_code 不能 0 的请求日志，并只返回 path res_code req_time_string 三个字段。
+
+我们相对 res_code 进行聚合分析，可以使用如下语句：
+
+```sql
+SELECT COUNT(*) AS sum, path, res_code
+FROM req_log 
+WHERE res_code <> 0 
+GROUP BY path, res_code 
+EMIT CHANGES;
+```
+
+**代码 14.1.1.4**
+
+注意上述代码有一个变化就是结尾加了 `EMIT CHANGES` 关键字，这是由于 ksql 默认使用 pull 的模式来查询数据，可以查询存入 kafka 的所有历史数据，pull 模式查询完成后就退出查询进程。但是如果你想做聚合分析时，其只能支持 push 模式，在 push 模式下你只能收到新增的数据，查询过程中会一直卡住，等待新数据的到来。所以由于 push 机制的限制，你没法对历史数据做聚合分析。
+
+#### 14.1.2 使用 ELK
+
+KSQL 虽然能对日志进行查询和分析，但是功能过于简单，业内最著名的日志分析工具，非 **E**(lasticSearch)**L**(ogstash)**K**(ibana) 莫属。
+
+ElasticSearch，简称 ES， 基于 [Lucene](https://lucene.apache.org/) 开发，是一个搜索和数据分析引擎；Kibana 用来对 ES 数据进行可视化查询和报表展示；Logstash 是一个日志数据转换工具，可以支持从 kafka 、本地文件、HTTP、TCP、UDP、ES、sqlite、s3、标准输入等数据源采集数据，并将其转发到 kafka、ES、s3、http、TCP、UDP、zabbix、标准输出、mongodb、syslog 等目标。
+
+我们在上一节中已经将日志收集到了 kafka，下面将讲述如何将 kafka 中的数据转存到 ES 中，并通过 Kibana 进行数据分析。
+
+首先需要用 Logstash 工具，将 kafka 的数据导入到 ES 中。为了演示方便，直接从[官网](https://www.elastic.co/cn/downloads/logstash)下载最新版本到本地。解压缩下载得到的压缩包后，进入解压目录，在 config 文件夹下新建一个 kafka.conf 的文件，贴入如下内容：
+
+```shell
+input {
+  kafka{
+    bootstrap_servers => ["127.0.0.1:9092"]
+    group_id => "es-cloud-next"
+    auto_offset_reset => "earliest" #从最新的偏移量开始消费
+    consumer_threads => 2
+    topics => ["req-log"] #数组类型，可配置多个topic
+  }
+}
+filter {
+    json {
+        source => "message"
+        remove_field => "message"
+    }
+}
+output {
+  elasticsearch { 
+    action => "index"
+    cloud_id => "" 
+    api_key => "" 
+    index => "nodejs-demo-%{+YYYY-MM-dd}"
+    codec => "json"
+  }
+}
+```
+
+**代码 14.1.2.1 config/kafka.conf**
+
+整个配置文件分为 `input` `filter` `output` 三个部分：`input` 用来配置 kafka 连接信息，`filter` 用来做一些数据格式转化，output 用来指定输出目标的配置。这里将从 kafka 中读取到的数据序列化成 json，因为 logstash 会将读取到的数据挂载到 message 字段上，所以要指定一下 `source` 参数为 `message`，同时我们在解析完 json 后，就将 message 字段删除掉，读者可以自行选择是否保留这个原始的 `message` 字段，防止出现 json 解析失败后无法得知原始消息的问题。
+
+最下面的 elasticsearch 的配置中的 `cloud_id` `api_key` 字段，我们先留空。鉴于 ES 使用了全文索引等特性，运行起来比较耗费机器资源，使用笔记本来运行的话比较吃力，所以这里我们演示的时候会用到云厂商的 ES 服务。[Elastic Cloud](https://www.elastic.co/cn/cloud) 提供了 14 天的试用时间，且其 ES 版本为最新的 8.x 版本，所以笔者选择了这个官方版本的服务进行讲解。如果想使用永久免费的服务，可以选择 [Bonsai](https://bonsai.io/pricing)提供的服务，它可以允许最多存储 3 万条数据，对于新手练习来说也够用。
 ### 14.2 采集监控指标
 
 对于监控指标的采集，一般采用的是 [Prometheus](https://prometheus.io/) ，它需要定时请求应用程序自己提供 HTTP 接口来拉取监控指标数据。
@@ -144,12 +455,14 @@ exports.collectDuration = function (duration) {
 ```
 
 **代码 14.2.2.4 对于仪表盘、直方图、摘要的示例代码**
-
+：
 ### 14.3 指标可视化
 指标写入 Prometheus 后，我们还需要使用 grafana 将其做可视化。Prometheus 主动来应用服务中抓取指标数据， grafana 也会定时从 Prometheus 中抓取指标数据来绘制报表。
 
 ![](images/data_flow_prometheus.drawio.png)
 **图 14.3.0 指标采集数据流图**
+
+#### 14.3.1 默认指标收集
 
 **代码 14.2.2.1** 是一个简单的指标收集代码，但是它没有考虑到生产环境使用时会部署若干个容器节点，为了更便捷观测某一个服务的运行状态，我们更倾向通过集群名称或者部署服务名称来对节点进行筛选。为了这么做，我们首先改造一下 **代码 14.2.2.1** ，因为我们要引入一个 `lable` 的概念。 为了方便数据做聚类统计，Prometheus 支持对每条采集数据中添加如果标签（`label`）。我们这里正是利用这个特性，对我们的数据添加上服务名称和命名空间（这里模拟 k8s 的命名空间概念）标签：
 
@@ -162,7 +475,7 @@ collectDefaultMetrics({
     labels: commonLabels,
 });
 ```
-**代码14.3.1 添加了 lables 属性的采集数据**
+**代码14.3.1.1 添加了 lables 属性的采集数据**
 
 为了快速搭建一个 Prometheus 的数据采集环境，这里准备了一份 docker-compose 文件
 ```yaml
@@ -197,7 +510,7 @@ services:
     depends_on:
       - prometheus
 ```
-**代码 14.3.2 docker-compose.yml**
+**代码 14.3.1.1 docker-compose.yml**
 
 上面配置文件中，我们设置了一个卷映射 `./prometheus:/opt/bitnami/prometheus/conf` ，这是为了方便我们修改配置文件用，因为镜像 `bitnami/prometheus` 默认将配置文件放置到了 `/opt/bitnami/prometheus/conf` 目录下，我们在本机 `prometheus` 文件夹下放一个 `prometheus.yml` 文件即可被 Prometheus 读取到，这个配置文件的内容如下：
 ```yaml
@@ -231,7 +544,7 @@ scrape_configs:
     static_configs:
     - targets: ['你node进程所在的ip1:3001', '你node进程所在的ip2:端口2']
 ```
-**代码 14.3.3 prometheus/prometheus.yml**
+**代码 14.3.1.2 prometheus/prometheus.yml**
 
 >注意最后一行，你需要正确填写你的 node 进程所在的 IP，在某些环境下，这个 IP 可以用 `host.docker.internal` 替代。
 
@@ -239,13 +552,13 @@ scrape_configs:
 
 ![](images/show_metric.png)
 
-**图 14.3.1**
+**图 14.3.1.1**
 
 执行输出的结构格式会是这样的：
 
 nodejs_version_info{instance="127.0.0.1:3001", job="nodejs", major="20", minor="9", namespace="default", patch="0", serverName="chapter14", version="v20.9.0"} 1
 
-**输出 14.3.1**
+**输出 14.3.1.1**
 
 其中 instance job major 等类键值对的数据，在 Promethues 中称之为 Lable，最后面那个 1 是当前这条 metric 记录的值。
 
@@ -258,27 +571,27 @@ nodejs_version_info{instance="127.0.0.1:3001", job="nodejs", major="20", minor="
 
 ![](images/prometheus_data_source.png)
 
-**图 14.3.2 添加 prometheus 数据源**
+**图 14.3.1.2 添加 prometheus 数据源**
 
 然后我们来添加一个面板将指标数据呈现出来，重新回到左侧菜单，选择 Dashboards ，然后点击按钮 Create Dashboard ，显示的操作方式中选择 Import a dashboard：
 ![](images/import-dashboard.png)
-**图 14.3.3 选择导入面板**
+**图 14.3.1.3 选择导入面板**
 
 在展示的 Find and import dashboards for common applications at [grafana.com/dashboards](https://grafana.com/grafana/dashboards/) 输入框中写入 11159，并点击 **Load** 按钮。
 ![](images/input_imported_dashoboard_id.png)
-**图 14.3.4 输入面板 id**
+**图 14.3.1.4 输入面板 id**
 
 `1159` 是 grafana.com 上公开的模板 id，具体说明可以参见 [NodeJS Application Dashboard | Grafana Labs](https://grafana.com/grafana/dashboards/11159-nodejs-application-dashboard/)，我们将使用这个模板来对 **代码 14.2.2.1** 采集的数据做图标展示。最后我们需要绑定一下面板关联的数据源，在下拉框 prometheus 输入框中选择我们刚才创建的数据源：
 ![](images/bind_grafana_data_source.png)
-**图 14.3.5 绑定数据源**
+**图 14.3.1.5 绑定数据源**
 
 点击上图的 Import 按钮后，我们就初步完成了报表展示了，会长成这个样子：
 ![](images/dashboard_grafana_init.png)
-**图 14.3.6 配置初始化完成后展示的面板**
+**图 14.3.1.6 配置初始化完成后展示的面板**
 
-目前我们仅仅演示了一个服务，正常生产环境的服务数可不止一个，有可能有十几个、几十个，甚至更多，而我们在从上图中的 Instance 下拉框中进行筛选是一个很困难的事情。还记得我们改造过的 **代码14.3.1** 不，现在它能派上用场了。
+目前我们仅仅演示了一个服务，正常生产环境的服务数可不止一个，有可能有十几个、几十个，甚至更多，而我们在从上图中的 Instance 下拉框中进行筛选是一个很困难的事情。还记得我们改造过的 **代码14.3.1.1** 不，现在它能派上用场了。
 
-**代码14.3.1** 中引用了来自文件 config.js 的 commonLabels 常量，这个常量的定义如下：
+**代码14.3.1.1** 中引用了来自文件 config.js 的 commonLabels 常量，这个常量的定义如下：
 
 ```javascript
 const { name } = require('./package.json');
@@ -290,23 +603,23 @@ exports.commonLabels = {
 exports.commonLabelNames = Object.keys(exports.commonLabels);
 ```
 
-**代码 14.3.4 config.js**
+**代码 14.3.1.3 config.js**
 
-通过上述代码可以看出 commonLabels 常量有 `serverName` 和 `namespace` 两个属性，分别代表启用服务的名称和所在命名空间（可以理解为 k8s 系统中的命名空间的概念），另外从**输出 14.3.1** 中也能看到这两个 Lable 的具体值。我们的目标就是在 **图 14.3.6** 中再增加两个筛选框，分别为 `namespace` 和 `serverName`，保证选中指定 `namespace` 时能够级联筛选出其下的 `serverName`，选中 `serverName` 时能够筛选出级联的 `instance` 实例。
+通过上述代码可以看出 commonLabels 常量有 `serverName` 和 `namespace` 两个属性，分别代表启用服务的名称和所在命名空间（可以理解为 k8s 系统中的命名空间的概念），另外从**输出 14.3.1.1** 中也能看到这两个 Lable 的具体值。我们的目标就是在 **图 14.3.1.6** 中再增加两个筛选框，分别为 `namespace` 和 `serverName`，保证选中指定 `namespace` 时能够级联筛选出其下的 `serverName`，选中 `serverName` 时能够筛选出级联的 `instance` 实例。
 
-点击 **图 14.3.6** 上部中间位置的 ⚙ 图标，进入设置界面，点击 **Variables** 选项卡，界面中会呈现出来当前的 instance 变量的定义，
+点击 **图 14.3.1.6** 上部中间位置的 ⚙ 图标，进入设置界面，点击 **Variables** 选项卡，界面中会呈现出来当前的 instance 变量的定义，
 
 ![](images/grafana_variables.png)
 
-**图 14.3.7**
+**图 14.3.1.7**
 
 现在我们要添加一个 `namespace` 变量，点击 **New variable** 按钮。
 
 ![](images/namespace_variable.png)
 
-**图 14.3.8 添加 namespace 变量**
+**图 14.3.1.8 添加 namespace 变量**
 
-表单项中 name 输入框我们输入 namespace ，这样我们就新建了一个变量名字，叫 namespace；Lable 输入框填入的 namespace 值，将会导致在 **图 14.3.6 ** 中新增一个下拉框，且标记为 namespace，这里你也可以将其改为任何字符，比如说说改成中文名字 `集群`。
+表单项中 name 输入框我们输入 namespace ，这样我们就新建了一个变量名字，叫 namespace；Lable 输入框填入的 namespace 值，将会导致在 **图 14.3.1.6 ** 中新增一个下拉框，且标记为 namespace，这里你也可以将其改为任何字符，比如说说改成中文名字 `集群`。
 
 Query options 区域是这里配置的核心区域，首先在 Data source 区域选择好之前创建好的 Promethues 数据源。下面的 Query 表单中，Query type 选择 Label values，代表我们将从 Prometheus 数据中的 label 属性中提取数据；Labels 选择 namespace ，代表我们使用数据中 label 名字为 namespace 的值进行提取；Metric 选择 node_version_info ，代表我们只从 node_version_info 中提取 label 名字为 namespace 的值。
 
@@ -314,7 +627,7 @@ Query options 区域是这里配置的核心区域，首先在 Data source 区�
 
 ![](images/filter_label_variable.png)
 
-**图 14.3.9 筛选 Lable 值**
+**图 14.3.1.9 筛选 Lable 值**
 
 我们增加一个 `namespace = $namespace` 的表达式，就能够实现在指定 `namespace` 值下筛选 `serverName` Label 值的能力。对于这个表单时来说等号前面代表名字为 `namespace` 的 Prometheus Label，等号后面的代表前面我们定义的 `namespace` 变量。
 
@@ -322,13 +635,13 @@ Query options 区域是这里配置的核心区域，首先在 Data source 区�
 
 ![](images/variables_ordered.png)
 
-**图 14.3.10 调整顺序后的变量**
+**图 14.3.1.10 调整顺序后的变量**
 
 上图中 namespace 和 serverName 上面标识了 ⚠️，代表当前变量没有被其他变量引用，但是我们刚才通过设置过滤表达式，已经将所有变量关联起来了，这属于误报，你可以通过点击变量列表左下角按钮 **Show dependencies**，即可查看依赖关系，正常情况下你看到的依赖关系如下图所示：
 
 ![](images/variables_deps.png)
 
-**图 14.3.11 变量依赖关系**
+**图 14.3.1.11 变量依赖关系**
 
 如果你看到的依赖关系没有形成上述依赖链的形式，代表上述的配置中哪个地方是有问题的，需要重新检查一遍。
 
@@ -338,7 +651,42 @@ Query options 区域是这里配置的核心区域，首先在 Data source 区�
 
 ![](images/variables_selectors.png)
 
-**图 14.3.12 级联下拉框**
+**图 14.3.1.12 级联下拉框**
+
+#### 14.3.2 收集自定义指标
+
+**代码 14.2.2.3** 和 **代码 14.2.2.4** 中演示调用 prom-client 来生成指标数据的函数，而下面代码就是来调用这些这封装函数的代码
+
+```javascript
+const SAMPLES = [20, 50, 80, 80, 100, 100, 100, 120, 120, 140, 160];
+const SAMPLES_LEN = SAMPLES.length;
+http.createServer((req, res) => {
+    const duration = SAMPLES[Math.floor(Math.random() * SAMPLES_LEN)];
+    const begin = Date.now();
+    setTimeout(function () {
+        const url = req.url;
+        console.log('url', url);
+        const path = url.split('?')[0];
+        addReqCount(path);
+        collectDuration(path, Date.now() - begin);
+        if (req.url === '/metrics') {
+            client.register.metrics().then(function (str) {
+                res.end(str);
+            }).catch(function (err) {
+                res.end(err);
+            });
+            return;
+        }
+        res.end(JSON.stringify({
+            url,
+            method: req.method,
+        }));
+    }, duration);
+}).listen(port, '0.0.0.0');
+```
+
+**代码 14.3.2.1 http请求指标采集**
+
 
 ### 示例代码
 
