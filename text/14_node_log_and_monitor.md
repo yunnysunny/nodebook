@@ -320,7 +320,38 @@ output {
 
 整个配置文件分为 `input` `filter` `output` 三个部分：`input` 用来配置 kafka 连接信息，`filter` 用来做一些数据格式转化，output 用来指定输出目标的配置。这里将从 kafka 中读取到的数据序列化成 json，因为 logstash 会将读取到的数据挂载到 message 字段上，所以要指定一下 `source` 参数为 `message`，同时我们在解析完 json 后，就将 message 字段删除掉，读者可以自行选择是否保留这个原始的 `message` 字段，防止出现 json 解析失败后无法得知原始消息的问题。
 
-最下面的 elasticsearch 的配置中的 `cloud_id` `api_key` 字段，我们先留空。鉴于 ES 使用了全文索引等特性，运行起来比较耗费机器资源，使用笔记本来运行的话比较吃力，所以这里我们演示的时候会用到云厂商的 ES 服务。[Elastic Cloud](https://www.elastic.co/cn/cloud) 提供了 14 天的试用时间，且其 ES 版本为最新的 8.x 版本，所以笔者选择了这个官方版本的服务进行讲解。如果想使用永久免费的服务，可以选择 [Bonsai](https://bonsai.io/pricing)提供的服务，它可以允许最多存储 3 万条数据，对于新手练习来说也够用。
+最下面的 elasticsearch 的配置中的 `cloud_id` `api_key` 字段，我们先留空。鉴于 ES 使用了全文索引等特性，运行起来比较耗费机器资源，使用笔记本来运行的话比较吃力，所以这里我们演示的时候会用到云厂商的 ES 服务。[Elastic Cloud](https://www.elastic.co/cn/cloud) 提供了 14 天的试用时间，且其 ES 版本为最新的 8.x 版本，所以笔者选择了这个官方版本的服务进行讲解。
+
+>如果想使用永久免费的服务，可以选择 [Bonsai](https://bonsai.io/pricing)提供的服务，它可以允许最多存储 3 万条数据，对于新手练习来说也够用。
+
+使用任意邮箱注册 Elastic Cloud 后，会提示你创建一个部署
+
+![](images/create_es_cloud_deployment.png)
+
+**图 14.2.1.1 创建 ES 部署**
+
+点击按钮 Create deployment 后，会跳转到 Kibana 界面，在其中选择 Search 标签页，然后选择 Connect to the Elasticsearch API 按钮，在弹出的窗口中，点击 API key 选项卡，然后输入 API key 的名字，点击 Create API key 按钮，会弹出创建 key 的配置界面。
+
+![](images/es_cloud_create_api_key.png)
+
+**图 14.2.1.2 生成 API key**
+
+在 key 的配置界面中记得把下拉框选择成 logstash，否则默认生成密钥不能给 logstash 使用：
+
+![](images/es_cloud_api_key_format.png)
+
+**图 14.2.1.3 选择 Logstash 密钥类型**
+
+`cloud_id` 参数从 **Endpoint** 选项卡中可以查看到：
+
+![](images/es_cloud_id.png)
+
+**图 14.2.1.4 cloud_id 参数获取**
+
+至此 cloud_id 和 api_key 两个参数就都拥有了，运行 `bin/logstash -f config/kafka.conf` 即可将 kafka 中的数据消费到 ES 中。
+
+##### 14.1.2.1 kibana 简单数据查询
+
 ### 14.2 采集监控指标
 
 对于监控指标的采集，一般采用的是 [Prometheus](https://prometheus.io/) ，它需要定时请求应用程序自己提供 HTTP 接口来拉取监控指标数据。
