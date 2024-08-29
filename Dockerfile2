@@ -1,0 +1,16 @@
+FROM yunnysunny/pandoc-pdf:latest  AS build-stage
+RUN apt-get update && \
+apt-get install fonts-droid -y && \
+fc-cache -fv && \
+apt-get clean && \
+rm /var/lib/apt/lists/* -rf
+
+COPY . /data
+RUN pandoc --metadata-file=metadata.yaml *.md \
+-o /data/gen.pdf --pdf-engine=weasyprint \
+--table-of-contents --toc-depth=4
+RUN ls -lh /data/gen.pdf
+
+FROM scratch AS export-stage
+COPY --from=build-stage /data/gen.pdf /
+

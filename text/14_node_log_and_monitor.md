@@ -350,7 +350,29 @@ output {
 
 至此 cloud_id 和 api_key 两个参数就都拥有了，运行 `bin/logstash -f config/kafka.conf` 即可将 kafka 中的数据消费到 ES 中。
 
+运行成功后，我们通过 kibana 左侧菜单中的 Stack Management -> Index Management ，可以找到我们新建的 ES 索引
+
+![](images/es_index.png)
+
+**图 14.2.1.5 es 索引列表查看**
 ##### 14.1.2.1 kibana 简单数据查询
+
+为了让 kibana 中能查询到 ES 索引中的数据，我们需要在左侧菜单中一次点开 Stack Management -> Data View ，在打开界面中点击按钮 Create data view，
+
+![](images/kibana_data_view.png)
+
+**图 14.1.2.1.1 创建 kibana data view**
+
+Index pattern 选项中我们使用 * 通配符进行索引，是由于我们的 ES 所以是按照日期生成的，使用 * 后可以匹配到所有以 nodejs-demo- 开头的索引。Timestamp field 默认值 @timestamp 是指单条记录写入 ES 的时间，这里可填写的字段只要是符合  [ISO 8601 Extended Format](https://en.wikipedia.org/wiki/ISO_8601) 格式即可，而我们日志中 req_time_string 在代码中之所以要格式化成 ISO 8601 格式，就要用在这个地方做时间索引，这样在 kibana 中数据就可以精确的使用请求开始时间进行排序，更利于我们统计 RPS（每秒请求数）。
+
+点击按钮 Save data view to Kibana 之后，通过点击左侧菜单的 Discover ，然后再下图中 ② 号位置下拉选择我们之前创建的 nodej-demo，就可以从 kibana 中看到 ES 的数据了。
+
+![](images/kibana_discover.png)
+
+**图 14.1.2.1.2 kibana 数据表展示**
+
+在③号位置可以看到，在单位时间内的并发量，柱状图越高代表并发量越大。其上面显示为 Auto interval 的区域可以调整单位时间的颗粒度，展开后会发现里面有毫秒、秒、分钟、小时、天、星期、月、年等单位。⑥号位可以调整当前数据的时间段，kibana 支持按照秒、分钟、小时、天、年等粒度来划分时间段，也支持指定开始、截至的时间点来划分时间段。柱状图下面显示的数据详情，Documents 中 显示数字代表当前时间段内有 883 条数据，数据使用分页展示，④号可以调整分页大小，⑤号位可以切换页码。
+
 
 ### 14.2 采集监控指标
 
