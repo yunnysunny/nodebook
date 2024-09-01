@@ -426,13 +426,39 @@ method: GET AND (router: /a OR router: /b)
 
 输入完第一行后，点击选择 AND 按钮，继续添加第二行。注意这里我们筛选的字段后面有一个 .keyword 后缀，拿第一行举例，你在点击开第一列的时候，会弹出 method 和 method.keyword 两个选项。两者的区别是 method 会做部分匹配，也就是说筛选值可以是当前字段值的子字符串；但是使用 method.keyword 就会做严格匹配，你的筛选值必须得和字段值完全相同才行，同时如果你选择了 .keyword 的格式后，kibana 会自动列出来部分可选值，这对于可以枚举的字段值来说筛选起来比较方便。
 
+由于我们一条记录中包含的字段比较多，为了显示更多的记录，kibana 默认只显示前面几个字段，一般我们筛选完数据后更关心跟筛选字段相关联的几个字段，这时候你可以在左侧搜索到你关心的字段名，然后点击 ＋ 号。
+
+![](images/kibana_select_field_to_show.png)
+
+**图 14.1.2.1.3 kibana 选择展示特定字段**
+
+这里我们选择 router 和 res_code 两个字段，着重进行展示，可以得到表格视图的展示效果：
+
+![](images/kibana_fields_show.png)
+
+**图 14.1.2.1.4 kibana 选择字段后展示表格视图**
+
+鼠标悬浮在每个字段名上面后，会出现 ┇ 的图标，点击这个图标之后，弹出菜单中可以选择删除此字段：
+
+![](images/kibana_field_context_menu.png)
+
+**图 14.1.2.1.5 kibana 数据条件弹出菜单**
+
  ⑧ 号位还可以多次点击添加多个筛选条件，各个筛选条件之间是 AND 的关系，所以也可以将 **图 14.1.2.1.2** 中的筛选条件拆成两条。
 
 ![](images/context_on_kibana_filter.png)
 
-**图 14.1.2.1.2 kibana 数据条件弹出菜单**
+**图 14.1.2.1.6 kibana 数据条件弹出菜单**
 
-拆成多条有一个好处，在任何一个刷线条件上单机，就会弹出菜单来对当前条件进行反向求值（Exclude results）、临时禁用（Temporarily disable）或者删除（Delete）等操作。
+拆成多条有一个好处，在任何一个刷线条件上单击，就会弹出菜单来对当前条件进行反向求值（Exclude results）、临时禁用（Temporarily disable）或者删除（Delete）等操作。
+
+点击 ⑨ 号位位置会在弹出的对话框中选择 Copy link 按钮，会将当前地址栏对应的地址生成一个短链接拷贝到剪贴板中。
+
+![](images/kibana_copy_link.png)
+
+**图 14.1.2.1.7 kibana 拷贝链接**
+
+最后是 ⑩ 号位位置，如果你想将当前查询的筛选条件
 ### 14.2 采集监控指标
 
 对于监控指标的采集，一般采用的是 [Prometheus](https://prometheus.io/) ，它需要定时请求应用程序自己提供 HTTP 接口来拉取监控指标数据。
