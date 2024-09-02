@@ -458,7 +458,13 @@ method: GET AND (router: /a OR router: /b)
 
 **图 14.1.2.1.7 kibana 拷贝链接**
 
-最后是 ⑩ 号位位置，如果你想将当前查询的筛选条件
+如果你想将当前查询的筛选条件和展示的字段列表保存起来，可以点击 ⑩ 号位位置，在弹出的对话框中输入 Title 字段，然后点击 Save 按钮即可。推荐使用英文填写 Title ，防止出现兼容性问题。
+
+![](images/kibana_save_query.png)
+
+**图 14.1.2.1.8 kibana 保存查询**
+
+
 ### 14.2 采集监控指标
 
 对于监控指标的采集，一般采用的是 [Prometheus](https://prometheus.io/) ，它需要定时请求应用程序自己提供 HTTP 接口来拉取监控指标数据。
