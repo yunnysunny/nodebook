@@ -444,6 +444,10 @@ method: GET AND (router: /a OR router: /b)
 
 **图 14.1.2.1.5 kibana 数据条件弹出菜单**
 
+通过上述弹出菜单还可以看出，我们可以对当前操作的字段进行排序，你可以选择从低到高（Sort Low-High）、从高到低（Sort High-Low）两种排序方向。不过当你选择一种进行排序后，出来的结果依然是乱序的，这是由于 kibana 默认会优先按照首列的 Time 字段从高到低进行排序，你需要在 Time 字段上点击 ┇ 的图标，然后在弹出菜单中再点击一下 Sort High-Low 菜单，就可以取消对于 Time 字段的默认排序，这时候就会选择刚才操作的字段进行排序了。 
+
+> ES 写入的字符串类型的字段，默认不支持排序，弹出的菜单中会将排序相关的两个菜单项置灰。如果你想让字符串字段可排序，需要修改 ES 索引的 mapping 设置，不过字符串排序的需求一般是低优先级的，读者可以自行查阅修改方法。
+
  ⑧ 号位还可以多次点击添加多个筛选条件，各个筛选条件之间是 AND 的关系，所以也可以将 **图 14.1.2.1.2** 中的筛选条件拆成两条。
 
 ![](images/context_on_kibana_filter.png)
@@ -463,6 +467,28 @@ method: GET AND (router: /a OR router: /b)
 ![](images/kibana_save_query.png)
 
 **图 14.1.2.1.8 kibana 保存查询**
+
+##### 14.1.2.1 kibana 报表制作
+
+kibana 中报表的制作算是其一大特色功能，你可以通过折线图、柱状图、饼图等图标快速了解日志对应服务的各种状态。
+
+展开左侧菜单，选择 Visualize Library 菜单，在打开的界面中选择 Create new visualization 按钮，在弹出的对话框中，我们选择 Aggregation base 类型，虽然官方推荐选择 Lens 类型，但是 Lens 可选择的图标类型没有 Aggregation base 丰富，所以我们这里使用 Aggregation base 进行讲解。
+
+![](images/kibana_visualization_type.png)
+
+**图 14.1.2.1.1 选择可视化类型**
+
+点击 Aggregation based 类型之后，在弹出的界面中我们可以看到支持的 12 种可视化图标：
+
+![](images/kibana_visualize_graph.png)
+
+**图 14.1.2.1.2 kibana 支持的可视化图标**
+
+之前讲过要熟悉 **表 14.1.1** 中各个字段的含义，因为接下来我们制作的图标依赖于表中定义的各个字段。首先我们来展示一下单位时间内各个路由请求总数，我们选择的是 Horizontal bar 图表。点击上图中的 Horizontal bar 后，会让我们选择数据源，这里我们选择之前创建的 nodejs-demo 即可。接下来在打开的界面中，我们设置一下 X 轴的数据，选择好时间区间，点击一下右下角的 Update 按钮即可展示数据：
+
+![](images/req_count_among_routers.png)
+
+**图 14.1.2.1.3 单位时间内请求次数最多的 5 个路由总数统计**
 
 
 ### 14.2 采集监控指标
