@@ -299,11 +299,13 @@ pnpm 没有自己专有的 npm 仓库地址设置，而是借用了 npm 的仓�
 pnpm config set store-dir d:\.pnpm-store
 ```
 **命令 4.6.1**
+
 同时需要留意的是，pnpm 全局安装命令前必须得设置 `global-bin-dir` 属性，否则会提示 global-dir 不存在，不让安装。具体设置命令如下：
 ```
 pnpm config set global-bin-dir D:\pnpm
 ```
 **命令 4.6.2**
+
 当然设置完这条命令后，并不能保证安装的全局可执行的包可以通过命令行直接调用，你还需要将 `D:\pnpm` 添加到环境变量 `PATH` 中去。
 ### 4.7 发布自己的包到 npmjs
 
