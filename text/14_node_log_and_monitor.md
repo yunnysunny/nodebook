@@ -627,13 +627,14 @@ http.createServer((req, res) => {
 
 ```javascript
 const client = require('prom-client');
+const { commonLabels, commonLabelNames } = require('../config');
 const counter = new client.Counter({
     name: 'req_count',
     help: 'http request count',
+    labelNames: ['path', 'status', ...commonLabelNames],
 });
-exports.addReqCount = function () {
-    counter.inc(); // Increment by 1
-    console.log('add one');
+exports.addReqCount = function (path, status) {
+    counter.inc({ ...commonLabels, path, status }); // Increment by 1
 };
 ```
 
@@ -770,32 +771,34 @@ nodejs_version_info{instance="127.0.0.1:3001", job="nodejs", major="20", minor="
 
 其中 instance job major 等类键值对的数据，在 Promethues 中称之为 Lable，最后面那个 1 是当前这条 metric 记录的值。
 
+如果输入 node_version_info 表达式后回车没有出现任何值，你可以通过打开 http://localhost:9090/targets 连接来看一下被收集的 Endpoint 有没有 Error 信息打印出来。  
+![](images/prometheus_targets.png)
 
->如果输入 node_version_info 表达式后回车没有出现任何值，你可以通过打开 http://localhost:9090/targets 连接来看一下被收集的 Endpoint 有没有 Error 信息打印出来。
->![](images/prometheus_targets.png)
->正常情况下，每行 targets 记录的 Error 列应该是空的。
+**图 14.3.1.2**
+
+正常情况下，每行 targets 记录的 Error 列应该是空的。
 
 接着打开 http://localhost:3000/login ，输入用户名密码 `admin` `secret` 即可进入。然后依次选择左侧菜单 **Connection** -> **Data Source** ，然后点击按钮 **Add Data Source**，接着会提供一系列的数据源供给选择，我们选择 Promethues 即可。最后是 Prometheus 的连接配置，我们在 `Prometheus server URL` 栏填入 `http://localhost:9090` ，然后点击 **Save & test** 按钮，正常情况下会提示 `✔ Successfully queried the Prometheus API.` 。
 
 ![](images/prometheus_data_source.png)
 
-**图 14.3.1.2 添加 prometheus 数据源**
+**图 14.3.1.3 添加 prometheus 数据源**
 
 然后我们来添加一个面板将指标数据呈现出来，重新回到左侧菜单，选择 Dashboards ，然后点击按钮 Create Dashboard ，显示的操作方式中选择 Import a dashboard：
 ![](images/import-dashboard.png)
-**图 14.3.1.3 选择导入面板**
+**图 14.3.1.4 选择导入面板**
 
 在展示的 Find and import dashboards for common applications at [grafana.com/dashboards](https://grafana.com/grafana/dashboards/) 输入框中写入 11159，并点击 **Load** 按钮。
 ![](images/input_imported_dashoboard_id.png)
-**图 14.3.1.4 输入面板 id**
+**图 14.3.1.5 输入面板 id**
 
 `1159` 是 grafana.com 上公开的模板 id，具体说明可以参见 [NodeJS Application Dashboard | Grafana Labs](https://grafana.com/grafana/dashboards/11159-nodejs-application-dashboard/)，我们将使用这个模板来对 **代码 14.2.2.1** 采集的数据做图标展示。最后我们需要绑定一下面板关联的数据源，在下拉框 prometheus 输入框中选择我们刚才创建的数据源：
 ![](images/bind_grafana_data_source.png)
-**图 14.3.1.5 绑定数据源**
+**图 14.3.1.6 绑定数据源**
 
 点击上图的 Import 按钮后，我们就初步完成了报表展示了，会长成这个样子：
 ![](images/dashboard_grafana_init.png)
-**图 14.3.1.6 配置初始化完成后展示的面板**
+**图 14.3.1.7 配置初始化完成后展示的面板**
 
 目前我们仅仅演示了一个服务，正常生产环境的服务数可不止一个，有可能有十几个、几十个，甚至更多，而我们在从上图中的 Instance 下拉框中进行筛选是一个很困难的事情。还记得我们改造过的 **代码14.3.1.1** 不，现在它能派上用场了。
 
@@ -819,15 +822,15 @@ exports.commonLabelNames = Object.keys(exports.commonLabels);
 
 ![](images/grafana_variables.png)
 
-**图 14.3.1.7**
+**图 14.3.1.8**
 
 现在我们要添加一个 `namespace` 变量，点击 **New variable** 按钮。
 
 ![](images/namespace_variable.png)
 
-**图 14.3.1.8 添加 namespace 变量**
+**图 14.3.1.9 添加 namespace 变量**
 
-表单项中 name 输入框我们输入 namespace ，这样我们就新建了一个变量名字，叫 namespace；Lable 输入框填入的 namespace 值，将会导致在 **图 14.3.1.6 ** 中新增一个下拉框，且标记为 namespace，这里你也可以将其改为任何字符，比如说说改成中文名字 `集群`。
+表单项中 name 输入框我们输入 namespace ，这样我们就新建了一个变量名字，叫 namespace；Lable 输入框填入的 namespace 值，将会导致在 **图 14.3.1.6 **  中新增一个下拉框，且标记为 namespace，这里你也可以将其改为任何字符，比如说说改成中文名字 `集群`。
 
 Query options 区域是这里配置的核心区域，首先在 Data source 区域选择好之前创建好的 Promethues 数据源。下面的 Query 表单中，Query type 选择 Label values，代表我们将从 Prometheus 数据中的 label 属性中提取数据；Labels 选择 namespace ，代表我们使用数据中 label 名字为 namespace 的值进行提取；Metric 选择 node_version_info ，代表我们只从 node_version_info 中提取 label 名字为 namespace 的值。
 
@@ -835,7 +838,7 @@ Query options 区域是这里配置的核心区域，首先在 Data source 区�
 
 ![](images/filter_label_variable.png)
 
-**图 14.3.1.9 筛选 Lable 值**
+**图 14.3.1.10 筛选 Lable 值**
 
 我们增加一个 `namespace = $namespace` 的表达式，就能够实现在指定 `namespace` 值下筛选 `serverName` Label 值的能力。对于这个表单时来说等号前面代表名字为 `namespace` 的 Prometheus Label，等号后面的代表前面我们定义的 `namespace` 变量。
 
@@ -843,13 +846,13 @@ Query options 区域是这里配置的核心区域，首先在 Data source 区�
 
 ![](images/variables_ordered.png)
 
-**图 14.3.1.10 调整顺序后的变量**
+**图 14.3.1.11 调整顺序后的变量**
 
 上图中 namespace 和 serverName 上面标识了 ⚠️，代表当前变量没有被其他变量引用，但是我们刚才通过设置过滤表达式，已经将所有变量关联起来了，这属于误报，你可以通过点击变量列表左下角按钮 **Show dependencies**，即可查看依赖关系，正常情况下你看到的依赖关系如下图所示：
 
 ![](images/variables_deps.png)
 
-**图 14.3.1.11 变量依赖关系**
+**图 14.3.1.12 变量依赖关系**
 
 如果你看到的依赖关系没有形成上述依赖链的形式，代表上述的配置中哪个地方是有问题的，需要重新检查一遍。
 
@@ -859,7 +862,7 @@ Query options 区域是这里配置的核心区域，首先在 Data source 区�
 
 ![](images/variables_selectors.png)
 
-**图 14.3.1.12 级联下拉框**
+**图 14.3.1.13 级联下拉框**
 
 #### 14.3.2 收集自定义指标
 
@@ -868,23 +871,19 @@ Query options 区域是这里配置的核心区域，首先在 Data source 区�
 ```javascript
 const SAMPLES = [20, 50, 80, 80, 100, 100, 100, 120, 120, 140, 160];
 const SAMPLES_LEN = SAMPLES.length;
+const STATUS = [200, 200, 200, 200, 304, 488, 510, 511];
+const STATUS_LEN = STATUS.length;
 http.createServer((req, res) => {
     const duration = SAMPLES[Math.floor(Math.random() * SAMPLES_LEN)];
     const begin = Date.now();
     setTimeout(function () {
-        const url = req.url;
-        console.log('url', url);
+        const url = req.url;rr
+        console.log('url', url, req.headers['user-agent']);
         const path = url.split('?')[0];
-        addReqCount(path);
+
+        res.statusCode = STATUS[Math.floor(Math.random() * STATUS_LEN)];
+        addReqCount(path, res.statusCode);
         collectDuration(path, Date.now() - begin);
-        if (req.url === '/metrics') {
-            client.register.metrics().then(function (str) {
-                res.end(str);
-            }).catch(function (err) {
-                res.end(err);
-            });
-            return;
-        }
         res.end(JSON.stringify({
             url,
             method: req.method,
@@ -895,7 +894,45 @@ http.createServer((req, res) => {
 
 **代码 14.3.2.1 http请求指标采集**
 
+其中 `addReqCount` 函数的定义参见 **代码 14.2.2.3**，`collectDuration` 函数的定义参见 **代码 14.2.2.4** 。
 
+要想制作自定义 grafana 图标，我们得首先了解 Prometheus 的基本概念。我们点击 **图 14.3.1.2** 中 nodejs 对应的 endpoint 链接，打开的页面中会包含类似于如下内容输出：
+
+```
+# HELP req_count http request count
+# TYPE req_count counter
+req_count{serverName="chapter14",namespace="default",path="/c",status="200"} 3
+req_count{serverName="chapter14",namespace="default",path="/c",status="511"} 2
+req_count{serverName="chapter14",namespace="default",path="/a",status="200"} 4
+req_count{serverName="chapter14",namespace="default",path="/a",status="304"} 2
+req_count{serverName="chapter14",namespace="default",path="/c",status="510"} 3
+
+# HELP req_duration request duration
+# TYPE req_duration gauge
+req_duration{serverName="chapter14",namespace="default",path="/c"} 94
+req_duration{serverName="chapter14",namespace="default",path="/a"} 110
+req_duration{serverName="chapter14",namespace="default",path="/b"} 126
+```
+
+**输出 13.3.2.1**
+
+由于上述输出全都是一些离散的点，理解起来有些难度，我们将其转成平面图形来进行分析：
+
+![](images/prometheus_time_series.drawio.png)
+
+**图 14.3.2.1 Prometheus 基本数据结构图示**
+
+我们在 **代码 14.3.1.2** 中会看到里面有一个 `scrape_interval` 参数，设定的值是 15s，代表  Prometheus 默认会每隔 15s，去 **图 14.3.1.2** 中定义的各个 endpoint 上抓取数据。如果给 **输出 13.3.2.1** 绘制一张示意图的话，那么这里面两个相邻点的时间间隔应该为 15s。
+
+我们用绿色框标识的几个点，是位于 `[t1,t4]` 时间段内的 `req_duration` 指标的一个数据集，这个数据集被称为 **范围向量（Range Vector）** 。
+
+我们抽取范围向量中某一个时间点的数据集，就像我们在上图红色框中框选的那样，我们抽取 t2 时间点上的 `req_duration` 指标的数据集，这个数据集被称为 **瞬时向量（Instant Vector）**。
+
+如果我们将数据集范围继续缩小，只取其中一个点，也就是在瞬时向量中添加 lable 属性来精确筛选出一个点，这个点被称之为 **标量（Scalar）**。
+
+ grafana 使用 promql 来绘制图表，我们在 **图 14.3.1.7** 中看到的各个图标，都是基于 promql 语句查询绘制的界面。最简单的 promql 就是直接写指标名字（例如 `req_count`） ，它对应的数据是这个指标最新的瞬时向量的内容。
+
+需要注意，我们 grafana 只支持瞬时向量和标量，不支持范围向量，但是这并不代表范围向量是没有用的。
 ### 示例代码
 
 本章节示例代码可以从这里找到 https://github.com/yunnysunny/nodebook-sample/tree/master/chapter14
