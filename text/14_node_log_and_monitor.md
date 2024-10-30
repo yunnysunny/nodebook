@@ -932,7 +932,9 @@ req_duration{serverName="chapter14",namespace="default",path="/b"} 126
 
  grafana 使用 promql 来绘制图表，我们在 **图 14.3.1.7** 中看到的各个图标，都是基于 promql 语句查询绘制的界面。最简单的 promql 就是直接写指标名字（例如 `req_count`） ，它对应的数据是这个指标最新的瞬时向量的内容。
 
-需要注意，我们 grafana 只支持瞬时向量和标量，不支持范围向量，但是这并不代表范围向量是没有用的。
+需要注意，我们 grafana 只支持瞬时向量和标量，不支持范围向量，但是这并不代表范围向量是没有用的。对于计数器类型的指标来说，grafana 也不支持，这时候你可以使用 Prometheus 内置函数将计数器先转化成范围向量，然后再对范围向量内的数值做运算转成一个瞬时向量，比如说 rate 函数就是将范围向量转成瞬时向量的常用操作。
+
+
 ### 示例代码
 
 本章节示例代码可以从这里找到 https://github.com/yunnysunny/nodebook-sample/tree/master/chapter14
