@@ -48,7 +48,7 @@ module.exports = {
       }
     ],
 	  sidebarDepth: 3,
-    logo: 'https://excalidraw.com/apple-touch-icon.png',
+    logo: '/images/logo.webp',
     nav: [
       { text: '首页', link: '/' },
       { text: 'github', link: 'https://github.com/yunnysunny/nodebook' },
