@@ -81,7 +81,7 @@ server.listen(port, hostname, () => {
 
 直接运行 `node example.js`，然后我们打开 chrome ，输入网址 http://localhost:3000 ，就会在网页上看到 `Hello world`。OK，我们回头看一下代码，关键部分在于 `createServer` 的回调函数上，这里有两个参数 `req` 和 `res`，这两个变量也是 [stream](https://nodejs.org/dist/latest-v6.x/docs/api/stream.html) 类型，前者是**readable stream(可读流)**，后者是**writeable stream(可写流)**，从字面意思上推测出前者是用来读取数据的，而后者是用来写入数据的。大家还有没有记得我们在**代码 3.2.4**中函数`fs.createReadStream` 也返回一个 readable stream。接下来就是一个见证奇迹的时刻， stream 类上有一个成员函数叫做 `pipe`，就像它的名字 **管道** 一样，他可以将两个流通过管子连接起来：
 
-![pipe原理示意图](images/pipe.png)
+![pipe原理示意图](images/stream_pipe.png)
 
 **图 3.3.1 pipe原理**  
 
@@ -135,6 +135,9 @@ node 的 stream API 是 node 的核心，HTTP 和 TCP 的各种 API ，都是基
 
 `Writable` 内部维持一个计数器，代表有多少条数据还未写入完成，通过 [write](https://nodejs.org/dist/latest-v12.x/docs/api/stream.html#stream_writable_write_chunk_encoding_callback) 函数添加数据，此时计数器加一（假设我们此时只写一条数据），其内部调用 [`_write`](https://nodejs.org/dist/latest-v12.x/docs/api/stream.html#stream_writable_write_chunk_encoding_callback_1) 来实现实际的写操作，在 `_write` 实际写完之后在其回调函数中计数器减一。每次调用 `write` 时，如果计数器的值小于 `highWaterMark`，就返回 `true`，这样你可以安心的写；如果为 `false` 就代表当前待写入的数据超标了，如果再写入就有可能会导致内存中的数据越积越多，最终雪崩。这种将主动权放给调用者的行为是和 `Readable` 是如出一辙的。
 
+`highWaterMark` 默认以字节为单位，但是在以下两种情况下，它的单位会发生改变：流对象的构造函数支持传入 `objectMode` 参数，默认为 `false`，如果设置为 `true`，则 `highWaterMark` 的单位变成对象个数；流对象的构造函数支持传入 `defaultEncoding` 参数，对于可读流来说默认为 `null`（此时 `highWaterMark` 的单位为字节），对于可写流来说默认为 `utf-8`（此时如果写入的数据中含有中文等字符，则写入的元素个数算 1 个，而不是 3 个）。 不过如果同时设置 `objectMode` 为 `true` 和 自定义的 `defaultEncoding` 参数时，`defaultEncoding` 参数将会被忽略。
+
+流对象，还支持通过调用 `setDefaultEncoding` 来在使用过程中修改编码方式，这个时候会使读写流的计数方式动态发生更改，也算是一个比较隐蔽的坑。
 ### 3.4.2 创建自定义读写流
 
 #### 3.4.2.1 自定义可读流
@@ -180,17 +183,17 @@ process.on('uncaughtException', (err) => {
 });
 ```
 
-**代码 3.4.2.1.1**
+**代码 3.4.2.1.1 chapter3/stream/read_simple.js**
 
-上述代码中创建了一个简单的可读流。可读流提供了两种读取模式，flow 模式和 no-flow 模式，可读流有一个 `readableFlowing` 属性，默认为 `null`。从上述代码的输出中也可以发现，在没有做任何函数调用的情况下，可读流的 `readableFlowing` 为 `null`。
+上述代码中创建了一个简单的可读流。可读流提供了两种读取模式，flow 模式和 no-flow 模式，可读流有一个 `readableFlowing` 属性，默认为 `null`。从上述代码的输出中也可以发现，在没有做任何函数调用的情况下，可读流的 `readableFlowing` 为 `null`。我们将 reader 对象的 highWaterMark 值设置为 4，所以在下面的 for 循环中 i 为 4 的时候，就打印 `达到highWater值了，最好不要再 push 了` 的警告。可读流的 push 函数可以接受一个特殊值，就是 null 值，调用 push(null) 后，整个流就处于结束状态，不允许调用者再次调用 push 函数，否则会直接抛出 error 事件。
 
-如果给可读流对象增加 `data` 事件监听、调用函数 `resume` / `pipe` ，将会使用可读流进入 flow 模式，此时 `readableFlowing` 会被置为 true。调用 `pause` / `unpipe` 函数会将可读流切换到 no-flow 模式，并且将 `readableFlowing` 置为 false，这个时候必须手动调用函数 `resume` / `pipe` 才能将其切换回 flow 模式，如果在这种情况下添加 `data` 事件是无法切换为 flow 模式的。
+> Node 中对于对象的 error 事件一定要添加事件监听回调函数，否则从对象中抛出的 error 事件，会外溢到进程级别的 uncaughtException 事件，而一旦触发 uncaughtException 事件，进程默认就会退出。
 
-将流置为 no-flow 还有一种方式就是添加 `readable` 事件监听。注意，如果你同时给可读流添加了 `readable` 和 `data` 的事件，则 `readable` 的优先级高于 `data`，流将回进入 no-flow 模式。当你将 `readable` 事件移出，只保留 `data` 事件时，则回到 flow 模式。同时需要注意到，添加了 `readable` 事件后，调用 `pause` `resume` 这两个函数是没有意义的。
+如果给可读流对象增加 `data` 事件监听、调用函数 `resume` / `pipe` ，将会使用可读流进入 flow 模式，此时 `readableFlowing` 会被置为 true。调用 `pause` / `unpipe` 函数或者添加 `readable` 事件监听会将可读流切换到 no-flow 模式，并且将 `readableFlowing` 置为 false，这个时候必须手动调用函数 `resume` / `pipe` 才能将其切换回 flow 模式，如果在这种情况下添加 `data` 事件是无法切换为 flow 模式的。
+
+注意，如果你同时给可读流添加了 `readable` 和 `data` 的事件，则 `readable` 的优先级高于 `data`，流将回进入 no-flow 模式。当你将 `readable` 事件移出，只保留 `data` 事件时，则回到 flow 模式。同时需要注意到，添加了 `readable` 事件后，调用 `pause` `resume` 这两个函数是没有意义的。
 
 在可读流的使用过程中，你应该尽量选择一种读取模式，以此降低自己代码的复杂度。Node 中通过调用可读流不同函数来隐式的修改其工作模式的方式，确实是一种比较让人艰涩难懂的设计。
-
-
 #### 3.4.2.2 自定义可写流
 
 ```javascript
@@ -220,21 +223,45 @@ writer.on('error',function(err) {
 });
 ```
 
-**代码 2.4.2.2.1**
+**代码 3.4.2.2.1**
 
 这里为了更快的观察可写流内置缓冲区被写满的现象，这里将 `highWaterMark` 的值设置为 3，这样在 15 行循环到 2 的时候写操作就会返回 false。正常情况下 write 函数返回 false 的时候，就需要停下写入，等待 `drain` 事件触发后再写入，上面的程序明显是一个不规范的写法。
 
 `_write` 函数是供给内部调用使用的，在自己来实现可写流的子类时，这个函数是必须要实现的。`_write` 内部通过 `callback` 函数来标记写入完成。这个回调函数调用之前，认为数据是没有写入成功的。
 
-### 3.4.4 可写流的缓冲区
-
 为了防止可写写流写入的速度过快，可写流提供了两个函数 `cork` 和 `uncork`，调用 `cork` 后会把要写入的数据缓存起来，直到调用函数 `uncork` 后才会一股脑将缓存的数据做真正的写入。
 
-### 3.4.5 highWaterMark 的计算单位
+#### 3.4.2.2 让流 “流动” 起来
 
-`highWaterMark` 默认以字节为单位，但是在以下两种情况下，它的单位会发生改变：流对象的构造函数支持传入 `objectMode` 参数，默认为 `false`，如果设置为 `true`，则 `highWaterMark` 的单位变成对象个数；流对象的构造函数支持传入 `defaultEncoding` 参数，对于可读流来说默认为 `null`（此时 `highWaterMark` 的单位为字节），对于可写流来说默认为 `utf-8`（此时如果写入的数据中含有中文等字符，则写入的元素个数算 1 个，而不是 3 个）。 不过如果同时设置 `objectMode` 为 `true` 和 自定义的 `defaultEncoding` 参数时，`defaultEncoding` 参数将会被忽略。
+我们选择用流，往往想借助其 “流动” 特性来简化我们的代码调用逻辑。这个实现 “流动” 特性的关键技术点，就是使用 `pipe` 函数。我们在 **代码3.3.2** 17 行中看到了 pipe 函数的简单使用，pipe 函数会将一个可读流的数据传输到可写流中，就像我们在 **图 3.3.1** 中演示的效果一样，看上去数据“流动”起来了。不过你可能之前看如如下类似代码：
 
-流对象，还支持通过调用 `setDefaultEncoding` 来在使用过程中修改编码方式，这个时候会使读写流的计数方式动态发生更改，也算是一个比较隐蔽的坑。
+```javascript
+const fs = require('fs');
+const zlib = require('zlib');
+const crypto = require('crypto');
+
+// 输入和输出文件路径
+const inputFilePath = 'input.txt';
+const outputFilePath = 'output.txt.gz';
+
+// 创建读取文件流
+const readStream = fs.createReadStream(inputFilePath);
+
+// 创建压缩流
+const gzipStream = zlib.createGzip();
+
+// 创建写入文件流
+const writeStream = fs.createWriteStream(outputFilePath);
+
+// 多次 `pipe` 操作: 读取 -> 压缩 -> 写入
+readStream
+    .pipe(gzipStream)    // 第一次 pipe，压缩数据
+    .pipe(writeStream)   // 第二次 pipe，将结果写入文件
+```
+
+**代码 3.4.2.2.1**
+
+前面讲我们只能将可读流 pipe 到可写流里面，但是这个中间 gzipStream 是什么鬼，从 readStream 角度看它是可写流，从 writeStream 的角度看它又是可读流，解开其神秘面纱的关键就是
 
 ## 3.5 TCP
 

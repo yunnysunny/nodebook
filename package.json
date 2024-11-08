@@ -26,6 +26,7 @@
     "simple-git": "^3.24.0",
     "vuepress": "^1.9.10",
     "vuepress-plugin-autometa": "^0.1.13",
+    "vuepress-plugin-clean-urls": "^1.1.2",
     "vuepress-plugin-code-copy": "^1.0.6",
     "vuepress-plugin-go-top": "^1.0.4",
     "vuepress-plugin-sitemap": "^2.3.1"

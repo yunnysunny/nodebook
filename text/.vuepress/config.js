@@ -20,6 +20,13 @@ module.exports = {
         async: 'async',
         defer: 'defer'
       }
+    ],
+    [
+      'meta', // baidu meta 标签
+      {
+        name: 'baidu-site-verification',
+        content: 'codeva-8JR4taecPh'
+      }
     ]
 
   ],
@@ -28,7 +35,7 @@ module.exports = {
     externalLinks: { target: '_blank', rel: 'nofollow noopener noreferrer' },
     extendMarkdown: md => {
       md.use(require('markdown-it-disable-url-encode'));
-    }
+    },
   },
   themeConfig: {
     sidebar: [
@@ -89,6 +96,11 @@ module.exports = {
         }
         return 0
       }
+    },
+    'vuepress-plugin-clean-urls': {
+      normalSuffix: '/',
+      indexSuffix: '/',
+      // notFoundPath: '/404.html'
     }
   }
 
