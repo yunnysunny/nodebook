@@ -134,7 +134,7 @@ pm2 命令还有好多命令行参数，如果单纯手敲的话就太麻烦了�
       "NODE_ENV": "development",
     },
     env_production : {
-       "NODE_ENV": "production"
+      "NODE_ENV": "production"
     }
   }]
 }
@@ -249,102 +249,66 @@ $ pm2 unstartup systemv
 
 有了docker，大家就可以本地开发代码，然后开发完成之后直接打一个包扔到服务器上运行，这个包就是我们所说的容器，它跟宿主机无关，不管运行在何种宿主机上，它的内部环境都是一致。所以说有了docker，我们再也不用担心在本地跑的好好的，结果一到服务器就出错的问题了。
 
->  当然如果你们服务器使用了Docker 技术的话，9.3小节的内容就没有必要使用了。因为在 Docker 上是没法设置开机服务的。
+>  当然如果你们服务器使用了Docker 技术的话，9.3小节的内容就没有必要使用了。因为在 docker 上是不用设置开机服务的。同时我们也不用使用 PM2 技术来进行重启，docker 中会监听 1 号进程的运行情况，一旦这个进程退出整个容器也就处于退出状态，如果你在启动 docker 的时候加了 `--restart=always` 参数，那么容器随后也会被 docker 守护程序再启动起来。
 
-pm2 提供了生成 Dockerfile 的功能，不过生成的文件实用性不是很强，我需要稍加改造了一下。另外为了方便的演示docker使用，专门在 oschina 新建一个[代码仓库](http://git.oschina.net/nodebook/chapter8)用于第8章代码。下面演示一下dockerfile的编写，具体流程是在docker构建的时候，使用 git clone 从仓库中拿去代码，然后安装所需的依赖。构建完成之后，每次启动这个docker容器的使用使用 pm2 命令启动当前应用。dockerfile的示例代码如下：
+为了能够运行 docker 容器，我们需要现有一个镜像，这个镜像通过 Dockerfile 文件来声明构建过程。一个简单的 Nodejs 的 Dockerfile 的格式可以是这样的：
 
 ```dockerfile
-FROM mhart/alpine-node:latest
-
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
-RUN apk update && apk add git && apk add openssh-client && rm -rf /var/cache/apk/*
-
-#创建应用目录
-RUN mkdir -p /var/app
-RUN mkdir -p /var/log/app
-#将git clone用的sshkey的私钥拷贝到.ssh目录下
-COPY deploy_key /root/.ssh/id_rsa
-RUN chmod 600 ~/.ssh/id_rsa
-#将当前git服务器域名添加到可信列表
-RUN  ssh-keyscan -p 22 -t rsa git.oschina.net >> /root/.ssh/known_hosts
-
-WORKDIR /var/app
-
-#clone代码
-RUN git clone git@git.oschina.net:nodebook/chapter9.git .
-#拷贝配置文件
-COPY config.production.json config.json
-COPY process.production.json process.json
-
-#安装cnpm
-RUN npm install -g cnpm --registry=https://registry.npmmirror.com
-#安装pm2
-RUN cnpm install pm2 -g
-RUN cnpm install
-
-#向外暴露当前应用的端口
-EXPOSE 8100:8100
-
-## 设置环境变量
-ENV NODE_ENV=production
-# 启动命令
-CMD ["pm2-docker", "process.json"]
+FROM node
+WORKDIR /app
+COPY . .
+RUN npm install
+CMD ["node", "app.js"]
 ```
 
-**代码 9.4.1 Dockerfile示例**
+**代码 9.4.1 chapter9/simple/Dockerfile**
 
-其中 `From` 代表使用的基础镜像，[alpine](https://alpinelinux.org/) 是一个非常轻量级的 linux 发行版本，所以基于其制作的 docker 镜像非常小，特别利于安装。这里的 [alpine-node](https://hub.docker.com/r/mhart/alpine-node/) 在 alpine 操作系统上集成了 node ，单纯 pull 安装的话也非常小。然后 RUN 和 COPY 两个命令是在构建的时候执行命令和拷贝文件，注意 COPY 命令仅仅只能拷贝当前执行docker 命令的目录下的文件，也就是说拷贝的时候不能使用相对路径，比如说你要执行 `COPY xxx/yyy /tmp/yyy` 或者 `COPY ../zzz /tmp/zzz` 都是不允许的。为了正确的 clone git 服务器上的代码，我们还需要配置一下 部署密钥。
-谈到部署密钥的概念，这里还要多说几句。我们一般从git服务器上clone下来代码后，会对代码进行编写，然后 push 你编写后的新代码。但是服务器上显然是不适合在其上面进行直接改动代码的场所，所以就有了部署密钥的概念，使用部署密钥你可以做 clone 和 pull 操作，但是你不能做 push 操作。
+通过 `docker build . -t app:simple` 可以创建 app:simple 这个镜像；然后通过 `docker run app:simple` 即可运行这个镜像，运行后输出 `Example app listening on port 3000`。
 
-```shell
-$ ssh-keygen -f deploy_key -C "somebody@somesite.com"
-Generating public/private rsa key pair.
-Enter passphrase (empty for no passphrase):
-Enter same passphrase again:
-Your identification has been saved in deploy_key.
-Your public key has been saved in deploy_key.pub.
-The key fingerprint is:
-SHA256:S3JbyWc68K43kifBwYcJJxlIFlDlXz9MJDGI6gEhFKw somebody@somesite.com
-The key's randomart image is:
-+---[RSA 2048]----+
-|+o+==+o+ .+..    |
-| o....= o  +     |
-|.  . ..= o. .    |
-|E   o  .=o.=     |
-|   . ...So+ *    |
-|    .  +o* + .   |
-|        oo+      |
-|        +.+.     |
-|        .*..     |
-+----[SHA256]-----+
+> 为了演示简单，这里的 app.js 只是一个 Express 的 helloworld 程序:
+
+```javascript
+const express = require('express');
+const app = express();
+const port = 3000;
+
+app.get('/', (req, res) => {
+    res.send('Hello World!');
+});
+
+app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`);
+});
 ```
 
-**命令9.4.1 生成密钥对**
+**代码 9.4.2 chapter9/simple/app.js**
 
-我们在第8章项目代码根目录下新建一个 deploy 文件夹，进入这个文件夹然后运行 **命令 9.4.1**，一路回车即可。然后我们就得到了 **代码 9.4.1** 中的 `deploy_key`了。生成完了之后去 git.oschina.com 上配置一下公钥（也就是我们生成的 `deploy_key.pub` 文件）,在项目页（在这里是 http://git.oschina.net/nodebook/chapter8 ）上点击 `管理` 导航链接（），在打开的页面中点击 `部署公钥管理`，然后选择 `添加公钥`，用记事本打开刚才生成的 deploy_key.pub 文件，全选复制，然后贴到输入框中：
+这么简单使用，看上去是没啥问题的，但是打包出来的镜像个头是比较大的，同时会影响打包和部署的时间。我们可以将 代码 9.4.1 中的 `FROM node` 换成 `FROM node:slim` 。之前我们使用的 FROM node 其实是 FROM node:latest 的缩写，它制作的时候使用的基础镜像包含了额外的一些软件包，但是我们平常用不到，但是 node:slim 这个版本基于一个精简版本的基础镜像制作而成，制作出来的体积会大大减少。我们复制代码 9.4.1，然后重命名为 slim.Dockerfile 文件，将第一行改为 FROM node:slim 。接着运行 `podman build . -f slim.Dockerfile -t app:slim` 即可打出来我们需要的更见轻量的镜像了。
 
-![添加部署公钥](images/add_deploy_public_key.png)
-**图 9.4.1 添加部署公钥**
+不过平常我们在开发过程中会安装很多开发依赖，这些开发依赖根本不需要被打包出来的程序所使用，所以代码 9.4.1 中可以优化为 npm install --omit=dev ，这样就只会将生产依赖打包到镜像中，如果开发依赖的包有很多的话，可能又会减轻很多体积。
 
-最后要注意一下 `EXPOSE` 命令，他代表 docker 及向宿主机暴露的端口号，如果不暴露端口的话，在宿主机上没法访问我们应用监听的端口。
-我们运行 `docker build -t someone/chapter8 .`  其中 `-t` 参数指定当前镜像的 tag 名称， `someone` 是指你在 [docker hub](https://hub.docker.com/) 网站上注册的用户，build 成功后你可以通过 `docker push someone/chapter8` 将构建后的结构 push 到 docker hub 网站上去，然后在服务器上运行 `docker pull someone/chapter8` 来拿取你当初 push 的仓库。当然你可以直接将 Dockerfile 拿到你的服务器上执行 build 命令，这时候 -t 参数可以随便指定，甚至不写。
+还有一个需要注意的，npm 等包管理工具，在安装过程中同时还会写入磁盘缓存方便加快后续安装，但是我们的镜像打出来后就不会再重复运行安装了，这些缓存是很没有必要的。这时候我们可以利用 dockerfile 的构建阶段来做出来一个“两段式”的结构：
 
-> 鉴于国内的网络环境问题，在做 build 的时候，pull 基础镜像很有可能会失败，这时候你就只能求助于国内的 docker 镜像站了，比如说 [daocloud](https://www.daocloud.io/mirror#accelerator-doc)。
-
-build 命令运行完成之后，运行 `docker images` 会输出：
-
-```shell
-REPOSITORY          TAG       IMAGE ID       CREATED         VIRTUAL SIZE
-someone/chapter8    latest    2a1a00cc1b41   4 minutes ago   147.7 MB
+```dockerfile
+FROM node AS build
+WORKDIR /app
+COPY .npmrc .
+COPY ./package-lock.json .
+COPY ./package.json .
+RUN npm install --omit=dev
+FROM node:slim AS app
+WORKDIR /app
+COPY --from=build /app/node_modules ./node_modules
+COPY . .
+CMD ["node", "app.js"]
 ```
 
-最后我们通过 `docker run -d --name chapter8 someone/chapter8` 即可生成一个 docker 容器。其中 `-d` 参数代表在后台运行， `--name` 指定当前 docker 容器的名称， `someone/chapter8` 说明我们使用刚才 build 的镜像来生成容器。 通过 `docker ps` 命令的输出，我们可以查看生成的 docker 容器：
+**代码 9.4.3 chapter9/simple/two-stages.Dockerfile**
 
-```shell
-CONTAINER ID        IMAGE               COMMAND                CREATED             STATUS              PORTS               NAMES
-fb0d726a86dc        someone/chapter8    "pm2-docker process.   4 seconds ago       Up 4 seconds        8100/tcp            chapter8
-```
+这里的构建分为 build 和 app 两个阶段，在 build 阶段我们把 .npmrc package-lock.json packge.json 三个文件拷贝到镜像中，用来安装生产依赖包。之所以要单独放一个 .npmrc 文件，是想通过修改 npm 的镜像源来加快 npm 的安装过程，否则使用官方源在国内安装是十分缓慢的。
+
+
 
 ### 9.5 代码
 
-本章代码9.1、9.2小节代码和第8章存储在相同位置：https://github.com/yunnysunny/nodebook-sample/tree/master/chapter8 ， 9.4章节代码为演示方便专门做了一个仓库，位于：http://git.oschina.net/nodebook/chapter8 。
+参见 https://github.com/yunnysunny/nodebook-sample/tree/master/chapter9 。
