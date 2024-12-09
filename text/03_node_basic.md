@@ -197,7 +197,44 @@ process.on('uncaughtException', (err) => {
 
 注意，如果你同时给可读流添加了 `readable` 和 `data` 的事件，则 `readable` 的优先级高于 `data`，流将回进入 no-flow 模式。当你将 `readable` 事件移出，只保留 `data` 事件时，则回到 flow 模式。同时需要注意到，添加了 `readable` 事件后，调用 `pause` `resume` 这两个函数是没有意义的。
 
-在可读流的使用过程中，你应该尽量选择一种读取模式，以此降低自己代码的复杂度。Node 中通过调用可读流不同函数来隐式的修改其工作模式的方式，确实是一种比较让人艰涩难懂的设计。
+在可读流的使用过程中，你应该尽量选择一种读取模式，以此降低自己代码的复杂度。Node 中通过调用可读流不同函数来隐式的修改其工作模式的方式，确实是一种比较让人艰涩难懂的设计。比如说下述代码：
+
+```javascript
+const { Readable } = require('stream');
+
+class MyReadable extends Readable {
+    _read () {
+        console.log('_read has been called');
+    }
+}
+
+const reader = new MyReadable();
+const initSize = 6;
+for (let i = 0; i < initSize; i++) {
+    reader.push(Buffer.from([i & 0xff]));
+}
+reader.on('readable', function () {
+    console.log('get data');
+});
+
+//
+reader.on('data', (chunk) => {
+    console.log('流模式2', reader.readableFlowing);
+    console.log('data event', chunk);
+});
+
+console.log('流模式', reader.readableFlowing);
+```
+
+**代码 3.4.2.1.1 chapter3/stream/readable_event_emit_one.js**
+
+我们同时添加了 readable 和 data 事件，readable 的优先级高，所以程序中 readableFlowing 属性为 false。data 事件中也接收不到任何事件回调。
+
+但是我们一旦将第 15 行稍作改动，改成 `console.log('get data', reader.read());` ，你就会发现不但 readable 事件中读取数据了，`data` 事件中也能读取出数据了。而上述这种诡异的行为，也在官方文档中的犄角旮旯中得到了[官方解释](https://nodejs.org/api/stream.html#event-readable)。
+
+> If both `'readable'` and [`'data'`](https://nodejs.org/api/stream.html#event-data) are used at the same time, `'readable'` takes precedence in controlling the flow, i.e. `'data'` will be emitted only when [`stream.read()`](https://nodejs.org/api/stream.html#readablereadsize) is called.
+
+翻译一下就是两个事件都监听时，在 `readable` 中触发 `read()` 调用时，会级联触发 `data` 事件。我相信没有几个开发者会逐字逐句的阅读官方文档，所以编写流相关的代码，大家还是尽量简洁。
 #### 3.4.2.2 自定义可写流
 
 ```javascript
