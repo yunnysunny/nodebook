@@ -48,7 +48,7 @@ module.exports = {
       }
     ],
 	  sidebarDepth: 3,
-    logo: '/images/logo.webp',
+    logo: '/images/logo.png',
     nav: [
       { text: '首页', link: '/' },
       { text: 'github', link: 'https://github.com/yunnysunny/nodebook' },
