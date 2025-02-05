@@ -593,7 +593,7 @@ kibana 中报表的制作算是其一大特色功能，你可以通过折线图�
 
 #### 14.2.2 指标采集代码
 
-讲述玩 Prometheus 中的数据结构后，就可以编写代码了。首先 `prom-client` 根据 Prometheus [官方推荐](https://prometheus.io/docs/instrumenting/writing_clientlibs/#standard-and-runtime-collectors)已经内置了若干指标，可以通过如下代码进行收集：
+讲述完 Prometheus 中的数据结构后，就可以编写代码了。首先 `prom-client` 根据 Prometheus [官方推荐](https://prometheus.io/docs/instrumenting/writing_clientlibs/#standard-and-runtime-collectors)已经内置了若干指标，可以通过如下代码进行收集：
 
 ```javascript
 const client = require('prom-client');
@@ -603,7 +603,7 @@ collectDefaultMetrics();
 
 **代码 14.2.2.1**
 
-里面包含 CPU 时间、堆大小、进程文件句柄数、Event Loop 暂停时间、libuv 句柄数、GC 耗时等信息。
+上述代码运行时，会收集包含 CPU 时间、堆大小、进程文件句柄数、Event Loop 暂停时间、libuv 句柄数等信息。
 
 和其他语言的驱动不同，prom-client 没有和任何 http 框架集成，你需要手动将其包裹在一个 http 路由中：
 
@@ -611,6 +611,7 @@ collectDefaultMetrics();
 http.createServer((req, res) => {
     if (req.url === '/metrics') {
         client.register.metrics().then(function (str) {
+            res.setHeader('Content-Type', client.register.contentType);
             res.end(str);
         }).catch(function (err) {
             res.end(err);
@@ -623,7 +624,7 @@ http.createServer((req, res) => {
 
 **代码 14.2.2.2**
 
-如果想收集自定义指标，使用起来也比较简单。现在拿 http 请求场景举例，请求计数，由于其只能增加，所以只能使用计数器数据结构；请求的处理时长，由于是上下波动的，所以可以使用仪表盘来上报，也可以指定若干桶数值将其上报为直方图结构，与其类似，指定百分位数就可上报为摘要结构。两者的示例代码如下：
+如果想收集自定义指标，使用起来也比较简单。现在拿 http 请求场景举例，请求计数由于其只能增加，所以只能使用计数器数据结构；请求的处理时长，由于是上下波动的，所以可以使用仪表盘来上报，也可以指定若干桶数值将其上报为直方图结构，与其类似，指定百分位数就可上报为摘要结构。两者的示例代码如下：
 
 ```javascript
 const client = require('prom-client');
@@ -688,7 +689,6 @@ collectDefaultMetrics({
 
 为了快速搭建一个 Prometheus 的数据采集环境，这里准备了一份 docker-compose 文件
 ```yaml
-version: "3"
 services:
   alertmanager:
     restart: always
@@ -788,7 +788,7 @@ nodejs_version_info{instance="127.0.0.1:3001", job="nodejs", major="20", minor="
 ![](images/import-dashboard.png)
 **图 14.3.1.4 选择导入面板**
 
-在展示的 Find and import dashboards for common applications at [grafana.com/dashboards](https://grafana.com/grafana/dashboards/) 输入框中写入 11159，并点击 **Load** 按钮。
+在展示的 **Find and import dashboards for common applications at [grafana.com/dashboards](https://grafana.com/grafana/dashboards/)** 输入框中写入 11159，并点击 **Load** 按钮。
 ![](images/input_imported_dashoboard_id.png)
 **图 14.3.1.5 输入面板 id**
 
@@ -800,9 +800,9 @@ nodejs_version_info{instance="127.0.0.1:3001", job="nodejs", major="20", minor="
 ![](images/dashboard_grafana_init.png)
 **图 14.3.1.7 配置初始化完成后展示的面板**
 
-目前我们仅仅演示了一个服务，正常生产环境的服务数可不止一个，有可能有十几个、几十个，甚至更多，而我们在从上图中的 Instance 下拉框中进行筛选是一个很困难的事情。还记得我们改造过的 **代码14.3.1.1** 不，现在它能派上用场了。
+目前我们仅仅演示了一个服务，正常生产环境的服务数可不止一个，有可能有十几个、几十个，甚至更多，而我们在从上图中的 **Instance** 下拉框中进行筛选是一个很困难的事情。还记得我们改造过的 **代码14.3.1.1** 不，现在它能派上用场了。
 
-**代码14.3.1.1** 中引用了来自文件 config.js 的 commonLabels 常量，这个常量的定义如下：
+**代码14.3.1.1** 中引用了来自文件 `config.js` 的 `commonLabels` 常量，这个常量的定义如下：
 
 ```javascript
 const { name } = require('./package.json');
@@ -816,9 +816,9 @@ exports.commonLabelNames = Object.keys(exports.commonLabels);
 
 **代码 14.3.1.3 config.js**
 
-通过上述代码可以看出 commonLabels 常量有 `serverName` 和 `namespace` 两个属性，分别代表启用服务的名称和所在命名空间（可以理解为 k8s 系统中的命名空间的概念），另外从**输出 14.3.1.1** 中也能看到这两个 Lable 的具体值。我们的目标就是在 **图 14.3.1.6** 中再增加两个筛选框，分别为 `namespace` 和 `serverName`，保证选中指定 `namespace` 时能够级联筛选出其下的 `serverName`，选中 `serverName` 时能够筛选出级联的 `instance` 实例。
+通过上述代码可以看出 `commonLabels` 常量有 `serverName` 和 `namespace` 两个属性，分别代表启用服务的名称和所在命名空间（可以理解为 k8s 系统中的命名空间的概念），另外从**输出 14.3.1.1** 中也能看到这两个 Lable 的具体值。我们的目标就是在 **图 14.3.1.6** 中再增加两个筛选框，分别为 `namespace` 和 `serverName`，保证选中指定 `namespace` 时能够级联筛选出其下的 `serverName`，选中 `serverName` 时能够筛选出级联的 `instance` 实例。
 
-点击 **图 14.3.1.6** 上部中间位置的 ⚙ 图标，进入设置界面，点击 **Variables** 选项卡，界面中会呈现出来当前的 instance 变量的定义，
+点击 **图 14.3.1.6** 上部中间位置的 **Edit** 按钮，进入设置模式，然后点击 **Settings** 按钮，即可打开设置界面。点击 **Variables** 选项卡，界面中会呈现出来当前的 instance 变量的定义，
 
 ![](images/grafana_variables.png)
 
@@ -832,17 +832,19 @@ exports.commonLabelNames = Object.keys(exports.commonLabels);
 
 表单项中 name 输入框我们输入 namespace ，这样我们就新建了一个变量名字，叫 namespace；Lable 输入框填入的 namespace 值，将会导致在 **图 14.3.1.6 **  中新增一个下拉框，且标记为 namespace，这里你也可以将其改为任何字符，比如说说改成中文名字 `集群`。
 
-Query options 区域是这里配置的核心区域，首先在 Data source 区域选择好之前创建好的 Promethues 数据源。下面的 Query 表单中，Query type 选择 Label values，代表我们将从 Prometheus 数据中的 label 属性中提取数据；Labels 选择 namespace ，代表我们使用数据中 label 名字为 namespace 的值进行提取；Metric 选择 node_version_info ，代表我们只从 node_version_info 中提取 label 名字为 namespace 的值。
+**Query options** 区域是这里配置的核心区域，首先在 **Data source** 区域选择好之前创建好的 Promethues 数据源。下面的 **Query** 表单中，**Query type** 选择 `Label values`，代表我们将从 Prometheus 数据中的 label 属性中提取数据；**Labels** 选择 `namespace` ，代表我们使用数据中 label 名字为 `namespace` 的值进行提取；**Metric** 选择 `node_version_info` ，代表我们只从 `node_version_info` 中提取 label 名字为 `namespace` 的值。
 
-回到 Variables 选项卡再创建一个 `serverName` 变量，这次我们所有的操作都跟 `namespace` 类似，唯独下图中红框中标出来的内容：
+回到 **Variables** 选项卡再创建一个 `serverName` 变量，这次我们所有的操作都跟 `namespace` 类似，唯独下图中红框中标出来的内容：
 
 ![](images/filter_label_variable.png)
 
 **图 14.3.1.10 筛选 Lable 值**
 
-我们增加一个 `namespace = $namespace` 的表达式，就能够实现在指定 `namespace` 值下筛选 `serverName` Label 值的能力。对于这个表单时来说等号前面代表名字为 `namespace` 的 Prometheus Label，等号后面的代表前面我们定义的 `namespace` 变量。
+我们增加一个 `namespace =~ $namespace` 的表达式，就能够实现在指定 `namespace` 值下筛选 `serverName` Label 值的能力。对于这个表达式来说 =~ 前面代表名字为 `namespace` 的 Prometheus Label，等号后面的代表前面我们定义的 `namespace` 变量的值。
 
-最后我们要修改一下原来的 instance 变量的，将其的 Label filters 改为 `serverName = $serverName` 。然后回到 Variables 选项卡，拖动调整一下三个变量的顺序，保证 namespace 第一位、serverName 第二位、instance 第三位。
+> 注意这里我们在 lable 筛选的时候用了 `=~` ，而不是常用的 `=`，这个后面会讲到。
+
+最后我们要修改一下原来的 instance 变量的，添加两个的 Label filters ，分别为 `serverName =~ $serverName` 和 `namespace =~ $namespace`。然后回到 Variables 选项卡，拖动调整一下三个变量的顺序，保证 namespace 第一位、serverName 第二位、instance 第三位。
 
 ![](images/variables_ordered.png)
 
@@ -1005,7 +1007,7 @@ rate=(22-10)/(4*60)​=0.05 请求/秒
 
 **图 14.3.2.3 填写可视化所需的表达式**
 
-注意这里我们在 lable 筛选的时候用了 `=~` ，而不是常用的 `=` ，这是由于 `$instance` 这个变量值的特殊性导致的。为了方便用户在 **图 14.3.1.13** 中的区域中能够实现多选的效果，grafana 将 `$instance` 做成了一个正则格式的字符串，所以 `$instance` 不会出现 `127.0.0.1:3000` 这种格式的值，而是会转化成 `[127\.0\.0\.1:3000]` 这种格式。
+注意这里我们在 lable 筛选的时候用了 `=~` ，而不是常用的 `=` ，这是由于 grafana 中变量值的特殊性导致的。为了方便用户在 **图 14.3.1.13** 中的区域中能够实现多选的效果，grafana 将定义的变量，比如说 `$instance` 做成了一个正则格式的字符串，所以 `$instance` 不会出现 `127.0.0.1:3000` 这种格式的值，而是会转化成 `[127\.0\.0\.1:3000]` 这种格式。
 
 需要注意，我们 grafana 只支持瞬时向量和标量，不支持范围向量，但是这并不代表范围向量是没有用的。对于计数器类型的指标来说，grafana 也不支持，这时候你可以使用 Prometheus 内置函数将计数器先转化成范围向量，然后再对范围向量内的数值做运算转成一个瞬时向量，比如说 rate 函数就是将范围向量转成瞬时向量的常用操作。
 

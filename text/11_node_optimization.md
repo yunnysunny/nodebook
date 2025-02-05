@@ -63,13 +63,13 @@ Debugger attached
 
 **图 11.1.2**
 
-或者你在开发面板中选择 `Remote Devices`：
+或者你直接在浏览器地址栏中输入 `chrome://inspect/#devices` ，可以打开一个面板界面，里面的 **Remote Target** 列表中会列出来所有已经可以被调试的 Node 进程，你可以通过点击 **Open dedicated DevTools for Node** 来弹出 **图 11.1.2** 界面。
 
-![](images/remote_device.png)
+![](images/remote_devices.png)
 
 **图 11.1.3**
 
-然后在弹出的 Tab 页中找到 `Add Address` 按钮，点击然后输入Node 应用部署的 ip 和 inspect 端口号（即启动node程序的 `inspect` 参数），甚至可以监听任意远程电脑的 Node 应用（如**图 11.1.4**所示），添加成功后，同样可以触发开发面板上出现**图 11.1.1**中的 Node 小图标。
+点击 `Discover network targets` 后面的 **Configure** 按钮，点击然后输入Node 应用部署的 ip 和 inspect 端口号（即启动node程序的 `inspect` 参数），甚至可以监听任意远程电脑的 Node 应用（如**图 11.1.4**所示），添加成功后，同样可以触发开发面板上出现**图 11.1.1**中的 Node 小图标。
 
 ![](images/add_remote_address.png)
 
