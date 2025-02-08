@@ -216,7 +216,7 @@ ksqldb 的端口号，改写成了 8090，因为很多人电脑上 8080 端口�
 
 在上图的文本框中输入以下语句
 
-```ksqldb
+```sql
 CREATE STREAM req_log (
   req_id STRING,
   domain STRING,
@@ -376,7 +376,7 @@ Index pattern 选项中我们使用 * 通配符进行索引，是由于我们的
 
 如果想检索数据可以在⑦号位中输入 [KQL](https://www.elastic.co/guide/en/kibana/current/kuery-query.html) 表达式，举几个例子，我们前面收集的日志中有 method 这个字段，那么我们搜 method 为 GET 的日志，可以用以下表达式，输入⑦号位后回车即可展现查询结果：
 
-```kql
+```sql
 method: GET
 ```
 
@@ -384,7 +384,7 @@ method: GET
 
 如果想查 method 为 GET，并且 router 为 /a 的日志，可以用 AND 关键字连接两个查询表达式：
 
-```kql
+```sql
 method: GET AND router: /a
 ```
 
@@ -392,7 +392,7 @@ method: GET AND router: /a
 
 如果想查 user_agent 字段中包含 Windows NT 10.0; Win64; x64 字符串的日志，你需要使用下面的表达式：
 
-```kql
+```sql
 user_agent: "Windows NT 10.0; Win64; x64"
 ```
 
@@ -402,7 +402,7 @@ user_agent: "Windows NT 10.0; Win64; x64"
 
 还有一点需要注意，如果你查询的字符串中包含如下字符 `\():<>"*` ，那么你需要使用 \ 字符进行转义，或者使用引号将查询字符串包裹起来。比如说我们查询 referer 字段为 http://localhost 的时候，可以写成以下两种方式：
 
-```kql
+```sql
 referer: http\://localhost
 referer: "http://localhost"
 ```
@@ -411,7 +411,7 @@ referer: "http://localhost"
 
 如果我们查询的逻辑比较负责，可以使用小括号来更改逻辑判断的优先级，比如说我们想查询 method 为 GET ，且 router 为 /a 或者 /b 的日志，可以写成如下表达式：
 
-```kql
+```sql
 method: GET AND (router: /a OR router: /b)
 ```
 

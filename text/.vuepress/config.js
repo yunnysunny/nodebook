@@ -36,6 +36,10 @@ module.exports = {
     extendMarkdown: md => {
       md.use(require('markdown-it-disable-url-encode'));
     },
+    headers: {
+      // 用到哪一级就提取哪一级
+      level: [2, 3, 4, 5, 6],
+    },
   },
   themeConfig: {
     sidebar: [
@@ -43,11 +47,11 @@ module.exports = {
         title: '基础教程',   // 必要的
         // path: '/',      // 可选的, 标题的跳转链接，应为绝对路径且必须存在
         collapsable: false, // 可选的, 默认值是 true,
-        sidebarDepth: 3,    // 可选的, 默认值是 1
+        sidebarDepth: 4,    // 可选的, 默认值是 1
         children: toc
       }
     ],
-	  sidebarDepth: 3,
+	  sidebarDepth: 4,
     logo: '/images/logo.png',
     nav: [
       { text: '首页', link: '/' },
