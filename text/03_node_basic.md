@@ -302,7 +302,7 @@ readStream
 
 **代码 3.4.2.2.1**
 
-前面讲我们只能将可读流 pipe 到可写流里面，但是这个中间 gzipStream 是什么鬼，从 readStream 角度看它是可写流，从 writeStream 的角度看它又是可读流，解开其神秘面纱的关键就是 `Transform`。它支持以可写流的身份接收从别处写入的数据，经过其加工后，再放置到内置的可写流中。
+前面讲我们只能将可读流 pipe 到可写流里面，但是这个中间 `gzipStream` 是什么鬼，从 `readStream` 角度看它是可写流，从 `writeStream` 的角度看它又是可读流，解开其神秘面纱的关键就是 `Transform`。它支持以可写流的身份接收从别处写入的数据，经过其加工后，再放置到内置的可写流中。
 
 下面是一个我们自己构建的自定义 Transform 类
 
@@ -366,7 +366,7 @@ outputStream.on('finish', function () {
 
 **代码 3.4.2.2.2 chapter3/stream/transform_simple.js**
 
-上述代码中我们通过可读流 inputStream 来采集数据的数字， myTransfrom 转化的函数中将采集到的数字筛选出偶数来，最终可写流 outputStream 拿到最终转化的数字。
+上述代码中我们通过可读流 `inputStream` 来采集数据的数字， `myTransfrom` 转化的函数中将采集到的数字筛选出偶数来，最终可写流 `outputStream` 拿到最终转化的数字。
 #### 3.4.2.3 身兼两职的流
 
 Transform 流其实内部继承自 [`Duplex`](https://nodejs.org/api/stream.html#class-streamduplex) ，Duplex 内部同时拥有可读流和可写流，但是跟 Transform 不同的是，Duplex 其内部读写的数据是分别存储在两个缓冲区中，两者没有关联关系，相互独立。Node API 中的 [net.Socket](https://nodejs.org/dist/latest-v12.x/docs/api/net.html#net_class_net_socket) 类就是继承自 [stream.Duplex](https://nodejs.org/dist/latest-v12.x/docs/api/stream.html#stream_class_stream_duplex) 类，由于 TCP 双向通信的特性，既能收也能发，且在操作系统层面收发使用的是不同的缓冲区，所以使用 Duplex  类是特别贴合的。为了演示 Duplex 类的使用，我们还是举一个菜鸟驿站的例子，驿站既可以收快递，也可以往外寄快递，和 TCP 的例子类似，他们收上来的快递和要寄出的快递肯定不是同一个（这里不讨论拒收等特殊情况）。那我们可以使用下面的代码来演示：
@@ -406,7 +406,284 @@ console.log(postHouse.postingLetters);
 
 **代码 3.4.2.2.2 chapter3/stream/duplex_post_house.js**
 
-通过上述代码可以看到我们构建出来的驿站类 PostHouse，既可以接收快递，也可以寄出快递，但是两者的数据是不共享的，没有相互干扰。
+通过上述代码可以看到我们构建出来的驿站类 `PostHouse`，既可以接收快递，也可以寄出快递，但是两者的数据是不共享的，没有相互干扰。
+
+### 3.4.3 新时代的流
+
+从 Node 7.6 开始 async/await 语法正式稳定可用，由于其消除了异步回调地狱，渐渐被大家采纳。但是在一些 async/await 风格的代码中使用流时很容易犯一些低级错误。
+
+```javascript
+const { DataStream } = require('./data-stream');
+const { readDataDelay } = require('./data-source');
+
+exports.getStream = async function () {
+    const stream = new DataStream();
+    let hasMore = true;
+    const readFun = readDataDelay(1000);
+    let begin = 0;
+    const size = 1;
+    while (hasMore) {
+        const data = await readFun(begin, size);
+        if (data.length === 0) {
+            hasMore = false;
+        } else {
+            stream.push(...data);
+            begin += size;
+        }
+    }
+    stream.push(null);
+    return stream;
+};
+```
+
+**代码 3.4.3.1 chapter3/stream-next/blocked-read.js**
+
+上面代码语法是完全正确的，调用时也能拿到数据，但是却有严重的逻辑问题，while 循环中全都需要做异步等待，等待所有数据取完了之后才会返回代码中的 stream 对象，导致调用方拿到 stream 对象时，所有的数据读取过程都做完了。我们使用流肯定是想边读取数据，边处理，上述代码跟直接返回一个最终数组的效果是一样的。
+
+可能你会想到，既然 async/await 这条道路走不通了，那么干脆走回 ES5 callback 那套流程吧，于是写出如下代码：
+
+```javascript
+const { readDataDelay } = require('./data-source');
+const { DataStream } = require('./data-stream');
+
+function readData (begin, size, callback) {
+    readDataDelay(1000)(begin, size).then(data => {
+        callback(null, data);
+    }).catch(err => {
+        callback(err);
+    });
+}
+
+exports.getStream = function () {
+    const stream = new DataStream();
+    let begin = 0;
+    const size = 1;
+    function read () {
+        readData(begin, size, (err, data) => {
+            if (data.length === 0) {
+                stream.push(null);
+                return;
+            }
+            if (err) {
+                stream.emit('error', err);
+            } else {
+                stream.push(...data);
+                begin += size;
+                read();
+            }
+        });
+    }
+    read();
+    return stream;
+};
+```
+
+**代码 3.4.3.2 chapter3/stream-next/callback-read.js**
+
+上述代码抛弃了 async/await 语法，一夜回到解放前，从逻辑上看是没有毛病的，但是我们设计 async/await 这种语法本来是为了消灭回调函数，但是用完高级语法后却不能正常做事了，是不是 node 本身的语法设计有槽点呢？其实不然，如何想从上述代码中消灭回调的方式还是有的，在 async/await 语法出现之前 node 就已经出台了 Generator 函数的语法，下面是对其使用的例子：
+
+```javascript
+const { readDataDelay } = require('./data-source');
+
+exports.getData = async function * () {
+    let begin = 0;
+    const size = 1;
+    const readFun = readDataDelay(1000);
+    let hasMore = true;
+    while (hasMore) {
+        const data = await readFun(begin, size);
+        if (data.length === 0) {
+            hasMore = false;
+        } else {
+            yield * data;
+            begin += size;
+        }
+    }
+};
+```
+
+**代码 3.4.3.3 chapter3/stream-next/generator-read.js**
+
+上述的代码，就比前两者简单明了多了。对于 Generator 函数 的调用会在后面统一给出例子。
+
+除了 Generator 函数，从 16.5 版本开始，Node 正式适配了 Web Stream API 标准，从此之后你可以在新写的代码抛弃掉诘屈聱牙的老式 stream 代码，换成新版的 Web Stream 风格，下面给出具体的例子：
+
+```javascript
+// 创建自定义ReadableStream
+const { readDataDelay } = require('./data-source');
+const { ReadableStream } = require('stream/web');
+const readFun = readDataDelay(1000);
+const customStream = new ReadableStream({
+    // 存储当前状态和数据
+    start (controller) {
+        // 初始化数据
+        this.start = 0;
+        this.size = 1; //
+    },
+
+    // 读取数据的方法
+    async pull (controller) {
+        // 模拟异步数据生成（如从API、文件等获取数据）
+        const data = await readFun(this.start, this.size);
+
+        this.start += this.size;
+
+        // 检查是否还有数据要发送
+        if (data.length > 0) {
+            // 发送数据
+			data.forEach(item => controller.enqueue(item));
+        } else {
+            // 没有更多数据，结束流
+            controller.close();
+        }
+    },
+
+    // 处理取消的方法（可选）
+    cancel (reason) {
+        console.log('流被取消:', reason);
+    }
+});
+exports.webStream = customStream;
+```
+
+**代码 3.4.3.4 chapter3/stream-next/web-stream-read.js**
+
+看到上述代码，可能你会感觉虽然有差异，但是跟老版本的 stream 代码的编写流程差不太多，哪个 `start` 函数可以类比 `Readable` 中的构造函数，`pull` 函数可以类比 `_read`，`cancel` 可以类比 `_destory` 。我们在学习新鲜事物的时候，确实可以通过类比法，来加快自己的学习进度。但是需要注意的是，`pull` 这个函数跟 `Readable` 中的 `_read` 是大有不同的，前者是支持返回 Promise 对象的，而后者的返回值是 void，这代表着你在后者写一些异步操作的时候要特别留心 `_read` 函数体内同时有多个任务在执行时的状态，我们再给出一个错误示例：
+
+```javascript
+const { Readable } = require('stream');
+const { readDataDelay } = require('./data-source');
+const readFun = readDataDelay(1000);
+class LegacyStream extends Readable {
+    constructor (options) {
+        super({ ...options, objectMode: true });
+        this.start = 0;
+        this.size = 1;
+    }
+
+    /**
+     * 这个函数是有 bug 的，如果两个请求同时调用，
+     * 通一个 start 会同时被两个请求使用，导致重复数据读取错乱
+     */
+    _read () {
+        const size = this.size;
+        readFun(this.start, size).then(data => {
+            if (data.length > 0) {
+                this.push(...data);
+                this.start += size;
+            } else {
+                this.push(null);
+            }
+        }).catch(err => {
+            this.emit('error', err);
+        });
+    }
+}
+
+exports.LegacyStream = LegacyStream;
+```
+
+**代码 3.4.3.5 chapter3/stream-next/legacy-stream-read.js**
+
+假设同时有两个` _read()` 调用，则调用流程如下：
+```
+调用1: this.start = 0 → 读取 [0,1)
+调用2: this.start = 0 → 也读取 [0,1)（因为此时调用1的 this.start 还未更新）
+```
+
+上述调用流程意味者会有重复数据被读出。我们需要将其修正：
+
+```javascript
+_read(size) {
+	// 关键：用局部变量保存当前读取位置，避免并发修改
+	const currentStart = this.start;
+	const readSize = this.size;
+
+	readFun(currentStart, readSize)
+		.then(data => {
+			if (data.length > 0) {
+				// 推送数据前，先更新起始位置（确保下次读取正确）
+				this.start = currentStart + readSize;
+				this.push(...data);
+			} else {
+				// 数据读取完毕，结束流
+				this.push(null);
+			}
+		})
+		.catch(err => {
+			this.emit('error', err);
+		});
+}
+```
+
+**代码 3.4.3.6 修正后的 `_read` 函数**
+
+虽然说用传统 stream 也能实现我们的需求，但是代码编写的难度大，稍有不慎就会出现漏洞。很想对比上述所有实现方式来说，Generator 函数版本是最简单明了的，Web Stream 版本次之。下面是**代码 3.4.3.1** **代码 3.4.3.2** **代码 3.4.3.3** **代码 3.4.3.4** 的测试：
+
+```javascript
+const { getStream: getStreamBlocked } = require('./blocked-read');
+const { getStream: getStreamCallback } = require('./callback-read');
+const { getData } = require('./generator-read');
+const { webStream } = require('./web-stream-read');
+
+async function main () {
+    console.log(new Date(), 'begin blocked');
+    const streamBlocked = await getStreamBlocked();
+    for await (const data of streamBlocked) {
+        console.log(new Date(), data);
+    }
+    console.log(new Date(), 'end blocked');
+
+    console.log(new Date(), 'begin callback');
+    const streamCallback = await getStreamCallback();
+    for await (const data of streamCallback) {
+        console.log(new Date(), data);
+    }
+    console.log(new Date(), 'end callback');
+
+    console.log(new Date(), 'begin generator');
+    const streamGenerate = getData();
+    for await (const data of streamGenerate) {
+        console.log(new Date(), data);
+    }
+    console.log(new Date(), 'end generator');
+
+    console.log(new Date(), 'begin web stream');
+    for await (const data of webStream) {
+        console.log(new Date(), data);
+    }
+    console.log(new Date(), 'end web stream');
+}
+
+main().catch(console.error);
+```
+
+**代码 3.4.3.7 chapter3/stream-next/do-read.js**
+
+你会发现上述代码所有的数据遍历操作都用的 for...of 循环，这是由于从 Node 10 开始，传统的 stream 也和 Generator 函数一样实现了 **Async Iteration（异步迭代器）**。运行完成后，输出的内容如下：
+
+```
+2025-07-19T08:12:18.759Z begin blocked
+2025-07-19T08:12:22.803Z { id: 1, name: 'John Doe', email: 'john.doe@example.com' }
+2025-07-19T08:12:22.804Z { id: 2, name: 'Jane Doe', email: 'jane.doe@example.com' }
+2025-07-19T08:12:22.804Z { id: 3, name: 'Jim Doe', email: 'jim.doe@example.com' }
+2025-07-19T08:12:22.805Z end blocked
+2025-07-19T08:12:22.806Z begin callback
+2025-07-19T08:12:23.821Z { id: 1, name: 'John Doe', email: 'john.doe@example.com' }
+2025-07-19T08:12:24.827Z { id: 2, name: 'Jane Doe', email: 'jane.doe@example.com' }
+2025-07-19T08:12:25.838Z { id: 3, name: 'Jim Doe', email: 'jim.doe@example.com' }
+2025-07-19T08:12:26.838Z end callback
+2025-07-19T08:12:26.839Z begin generator
+2025-07-19T08:12:27.852Z { id: 1, name: 'John Doe', email: 'john.doe@example.com' }
+2025-07-19T08:12:28.860Z { id: 2, name: 'Jane Doe', email: 'jane.doe@example.com' }
+2025-07-19T08:12:29.877Z { id: 3, name: 'Jim Doe', email: 'jim.doe@example.com' }
+2025-07-19T08:12:30.891Z end generator
+2025-07-19T08:12:30.892Z begin web stream
+2025-07-19T08:12:30.898Z { id: 1, name: 'John Doe', email: 'john.doe@example.com' }
+2025-07-19T08:12:31.902Z { id: 2, name: 'Jane Doe', email: 'jane.doe@example.com' }
+2025-07-19T08:12:32.918Z { id: 3, name: 'Jim Doe', email: 'jim.doe@example.com' }
+2025-07-19T08:12:33.944Z end web stream
+```
 ## 3.5 总结
 
 我们用两个小节讲述了 Node 中如何处理静态资源和动态请求，看完这些之后，如果你是一个初学者，可能会因此打退堂鼓，这也太麻烦了，如果通过这种方式来处理数据，跟 php java 之类的比起来毫无优势可言嘛。大家不要着急，Node 社区已经给大家准备了各种优秀的 Web 开发框架，比如说 [Express](https://expressjs.com/)、[Koa](https://koajs.com/)，绝对让你爱不释手。你可以从本书的第 6 章中学习到 express 基本知识。
