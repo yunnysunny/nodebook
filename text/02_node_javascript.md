@@ -361,7 +361,7 @@ main()
 对于**代码 2.4.1.2**， 可以使用下面代码进行简化：
 
 ```javascript
-const {setTimeout} = require('timers/promises');
+const { setTimeout } = require('timers/promises');
 
 async function doTask(num) {
     await setTimeout(100);
