@@ -363,12 +363,12 @@ main()
 ```javascript
 const {setTimeout} = require('timers/promises');
 
+async function doTask(num) {
+    await setTimeout(100);
+    return num;
+}
 async function main() {
-    const result = [];
-    await setTimeout(100);
-    result.push(1);
-    await setTimeout(100);
-    result.push(2);
+    const result = await Promise.all([doTask(1), doTask(2)]);
     console.log(result);
 }
 main();
