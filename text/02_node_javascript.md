@@ -174,17 +174,72 @@ person.showInfo();
 
 由于 javascript 长期函数式编程思想盛行，因为我们一般不会在一个网页中呈现过多的 UI 组件，所以它的代码处理流程一般都是线性的。比如说我们在前端使用 javascript 的流程是这样的：加载网页->请求数据->渲染 UI 组件->触发事件监听，后端的流程是这样的：接收请求->数据库操作->返回处理结果。当然你会说，不对，我们处理的流程可比这复杂多了，当然随着单页应用（SPA,Single Page Application）的兴起，前端 js 的处理逻辑会越来越复杂。比如说有一天，你的经理可能会给你分配一个在线 photoshop 的需求，这时候面向对象就派上用场了，你可能需要一个抽象类来描述组件的基本属性和功能，同时派生出若干继承自这个抽象类的具体组件类，比如说矩形类、三角形类、圆形类。我想面对这么复杂需求的时候，开发者肯定会选择 ES6 来实现，更不用说如今流行 mvvm 框架都是采用 ES6 来开发。
 
-上面啰嗦了这么多，其实是为了我自己开脱，我实在不想讲 ES5 中的原型链的知识点，为了搞清楚如何依赖原型链来实现继承，好多人都已经吐血了，这里就略过了，如果出现想用面向对象的场景，还是用 ES6 吧。
+ES6 的类语法和其他很多语言是相似的，和原型链操作比起来可读性也更好，所以现在原型链操作已经很少被使用了。
 
-### 2.3 回调嵌套
+## 2.3 闭包
+
+很多编程语言都有闭包的特性，有的是天生就有闭包特性（Python Ruby Go 等），有的是随着语言自身的发展吸纳了闭包这个特性（PHP Java 等），JavaScript 属于前者。
+
+JavaScript 中对于函数的返回值，其类型可以是前面提到的基本数据类型、对象，也可以是一个函数。
+
+```javascript
+function add2Total() {
+	var total = 0;
+	return function(num) {
+		total += num;
+		return total;
+	}
+}
+```
+
+**代码 2.3.1**
+
+下面通过一个例子来讲述闭包的原理，首先看代码：
+
+```javascript
+var addFun = add2Total();
+console.log(addFun(3));
+console.log(addFun(1));
+var addFun2 = add2Total()
+console.log(addFun(3));
+```
+
+**代码 2.3.2**
+
+上述代码中一共有三行打印，打印的结果将会是：
+
+```
+3
+4
+3
+```
+
+每次调用 `add2Total` 时将会创建一个闭包，`total` 变量位于闭包内部，它的内存随着闭包创建而被生成， 而我们调用 `add2Total` 得到的 `addFun` 变量就是这个闭包中的内部函数，它保持了对 total 变量的引用。在 `add2Total` 执行结束后，`total` 变量也并不会被销毁，而是被 `addFun` “闭住”了。
+
+所以我们才会看到上述输出结果，对其调用步骤进行输出的话，会是如下流程：
+
+1. 第一次执行 `add2Total()` 时，创建了一个新的作用域，其中定义了变量 `total = 0`。    
+2. 返回的函数 `function(num)` 是一个闭包，它可以访问 `add2Total` 中的变量 `total`。    
+3. 当我们执行 `addFun(3)` 时：    
+    - 访问的是第一个闭包内的 `total`（初始为 0），        
+    - 计算 `total += 3`，结果为 `3`，返回 `3`。        
+4. 接下来执行 `addFun(1)`：    
+    - 仍然在原来的闭包作用域中，`total` 已经是 `3`，        
+    - 执行 `total += 1`，结果为 `4`，返回 `4`。        
+5. 然后我们再次执行 `add2Total()`，创建了一个**全新的闭包**，也就是说，这时的 `total` 又从 `0` 开始。    
+6.  `addFun2(3)` 执行时，对应的是新的作用域中的 `total`，所以返回值是 `3`
+
+### 2.4 异步回调
 
 由于在 javascript 中存在大量的异步操作，函数调用完成之后，不能立马拿到执行结果，必须在回调函数中得到执行结果，如果你在一个函数中要接连做好几次这样的异步处理，是不是画面应该是这样的：
 
 ![代码深层次嵌套](images/callback_nested.gif)
 
-**图 2.3.1 代码深层次嵌套的即视感**
+**图 2.4.1 代码深层次嵌套的即视感**
 
-正是由于考虑到这种问题，所以 ES6 在设计的时候增加 Promise 类，不过这东西在批量处理异步回调时候依然让人不爽，大家可以参考 [A quick guide to JavaScript Promises](https://www.twilio.com/blog/2016/10/guide-to-javascript-promises.html)。我这里给大家介绍的是一个第三方回调流程控制库 [async](https://caolan.github.io/async/docs.html) (我这算不算开倒车？另外注意不要和 ES7 中的 [async](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function) 关键字相混淆)。
+### 2.4.1 旧时代的异步
+
+正是由于考虑到这种问题，所以 ES6 在设计的时候增加 Promise 类，不过这东西在批量处理异步回调时候依然让人不爽，大家可以参考 [A quick guide to JavaScript Promises](https://www.twilio.com/blog/2016/10/guide-to-javascript-promises.html)。在 ES5 语法时代，一版使用第三方库来进行异步回调管理，使用最频繁的就是回调流程控制库 [async](https://caolan.github.io/async/docs.html) (这的 `async` 是库的名字)。
 
 我们在处理异步任务的时候，大体上分为两种情况，一种是串行操作，即处理完一个任务之后才能接着处理下一个任务；一种是并行操作，即各个任务都是独立运行的，大家一起运行，没有前后依赖关系。
 
@@ -214,7 +269,7 @@ async.waterfall([
 });
 ```
 
-**代码 2.3.1 async waterfall方法示例**
+**代码 2.4.1.1 async waterfall方法示例**
 
 [waterfall](https://caolan.github.io/async/docs.html#waterfall) 函数接受两个参数，第一个参数是 Array 类型，用来指明各个需要异步执行的任务，数组的第一个元素为：
 
@@ -269,7 +324,7 @@ function(err, results) {
 });
 ```
 
-**代码 2.3.2 async parallel 函数示例**
+**代码 2.4.1.2 async parallel 函数示例**
 
 和 `waterfall` 类似，只要其中有一个任务在 callback 的时候传递了一个 error 对象，就会导致整个 parallel 函数立马结束。
 
@@ -277,6 +332,51 @@ function(err, results) {
 >
 > 本章部分代码：https://github.com/yunnysunny/nodebook-sample/tree/master/chapter2
 
-### 2.4 参考文献
+### 2.4.2 新时代的异步
+
+2017 年 6 月 **ECMAScript 2017（ES8）** 规范正式发布，正式将 async/await 语法引入了 JavaScript，Node 在 7.6 版本中也正式对其进行支持。由于它简洁的语法，更高的可读性，async/await 迅速成为 JavaScript 异步编程的主流方案，至今仍是处理异步操作（如网络请求、文件 I/O 等）的首选语法。
+
+对于 **代码 2.4.1.1** 可以简化为下述代码：
+
+```javascript
+const {setTimeout} = require('timers/promises');
+
+async function main() {
+    let num = 0;
+    await setTimeout(100);
+    num = 2+3;
+    await setTimeout(100);
+    num -= 1;
+    await setTimeout(100);
+    num = num * 2;
+    console.log(num);
+}
+main()
+```
+
+**代码 2.4.2.1 async/await 串行操作示例**
+
+上述代码中，我们使用 `await` 关键字来等待异步操作完成，`await` 关键字会"暂停"当前函数的执行，直到异步操作完成。 这里的暂停并不是说当前函数被暂停了，而是一个语法糖，它背后会等待 await 后面的 Promise 对象 resolve 之后再继续执行后面的代码。
+
+对于**代码 2.4.1.2**， 可以使用下面代码进行简化：
+
+```javascript
+const {setTimeout} = require('timers/promises');
+
+async function main() {
+    const result = [];
+    await setTimeout(100);
+    result.push(1);
+    await setTimeout(100);
+    result.push(2);
+    console.log(result);
+}
+main();
+```
+
+**代码 2.4.2.2 async/await 并行操作示例**
+
+
+### 2.5 参考文献
 - https://www.twilio.com/blog/2016/10/guide-to-javascript-promises.html
 
