@@ -2,7 +2,7 @@
 
 ### 3.1 安装
 
-打开 [Node官网](https://nodejs.org) ,引入眼帘的就是它的下载地址了，windows下提供的是安装程序（下载完之后直接双击安装），linux下提供的是源码包（需要编译安装），详细安装流程这里省略掉，我想这个不会难倒各位好汉。
+打开 [Node官网](https://nodejs.org) ,映入眼帘的就是它的下载地址了，windows下提供的是安装程序（下载完之后直接双击安装），linux下提供的是源码包（需要编译安装），详细安装流程这里省略掉，我想这个不会难倒各位好汉。
 
 ### 3.2 旋风开始
 
@@ -24,7 +24,7 @@ console.log(a.doAdd(1,2));
 
 和普通前端 javascript 不同的是，这里有两个关键字 `exports` 和 `require`。这就牵扯到模块化的概念了，javascript 这门语言设计的初衷是开发一门脚本语言，让美工等从业人员也能快速掌握并做出各种网页特效来，加之当初语言创作者开发这门语言的周期非常之短，所以在 javascript 漫长的发展过程中一直是没有模块这个语言特性的（直到最近 ES6 Module 的出现才打破了这个格局）。
 
->Node 是最近几年才发展起来的语言，前端 js 发展的历史要远远长于他，2000 年以后随着 [Ajax](https://zh.wikipedia.org/wiki/AJAX) 技术越来越流行，js的代码开始和后端代码进行交互，逻辑越来越复杂，也越来越需要以工程化的角度去组织它的代码。模块化就是其中一项亟待解决的问题，期间出现了很多模块化的规范，[CommonJS](https://en.wikipedia.org/wiki/CommonJS) 就是其中的一个解决方案。由于其采用同步的模式加载模块，逐渐被前端所抛弃，但是却特别适合服务器端的架构，服务器端只需要在启动前的时候把所有模块加载到内存，启动完成后所有模块就都可以被调用了。
+>Node 是最近几年才发展起来的 js 运行时，前端 js 发展的历史要远远长于他，2000 年以后随着 [Ajax](https://zh.wikipedia.org/wiki/AJAX) 技术越来越流行，js的代码开始和后端代码进行交互，逻辑越来越复杂，也越来越需要以工程化的角度去组织它的代码。模块化就是其中一项亟待解决的问题，期间出现了很多模块化的规范，[CommonJS](https://en.wikipedia.org/wiki/CommonJS) 就是其中的一个解决方案。由于其采用同步的模式加载模块，逐渐被前端所抛弃，但是却特别适合服务器端的架构，服务器端只需要在启动前的时候把所有模块加载到内存，启动完成后所有模块就都可以被调用了。
 >
 >CommonJs 算是一种规范，但是不是 JavaScript 语言固有的语法，后续 JavaScript 语法出现 ES6 Module 的时候算是真正在语法层面有了模块化的实现。但是 CommonJs 已经占据了先机，所以一般在开源的第三方代码中都是用 CommonJs 规范来进行模块化管理，我们本书也是全部采用 CommonJs 的风格进行代码展示。
 
@@ -57,7 +57,7 @@ module.exports = {
 **代码 3.2.4**
 
 ## 3.3 做一个Apache
-现在我们做个更让人兴奋的栗子，做一个 Apache，当然这里的 Apache 不是武装直升机，而是一个服务器，熟悉php的人对他肯定不会陌生。你在本地安装它之后，然后在其默认的网站目录中放一张图片，我们假设它为a.jpg，然后你就可以通过 http://localhost/a.jpg 来访问它了。下面的内容就是要模拟这个过程。
+现在我们做个更让人兴奋的例子，做一个 Apache，当然这里的 Apache 不是武装直升机，而是一个服务器，熟悉php的人对他肯定不会陌生。你在本地安装它之后，然后在其默认的网站目录中放一张图片，我们假设它为a.jpg，然后你就可以通过 http://localhost/a.jpg 来访问它了。下面的内容就是要模拟这个过程。
 
 要做这个处理，我们首先要搞懂 node 中的 http 包。我们抄一段 node 官网给出的快速搭建 http 服务器的代码吧：
 
@@ -79,13 +79,13 @@ server.listen(port, hostname, () => {
 ```
 **代码 3.3.1 example.js**
 
-直接运行 `node example.js`，然后我们打开 chrome ，输入网址 http://localhost:3000 ，就会在网页上看到 `Hello world`。OK，我们回头看一下代码，关键部分在于 `createServer` 的回调函数上，这里有两个参数 `req` 和 `res`，这两个变量也是 [stream](https://nodejs.org/dist/latest-v6.x/docs/api/stream.html) 类型，前者是**readable stream(可读流)**，后者是**writeable stream(可写流)**，从字面意思上推测出前者是用来读取数据的，而后者是用来写入数据的。大家还有没有记得我们在**代码 3.2.4**中函数`fs.createReadStream` 也返回一个 readable stream。接下来就是一个见证奇迹的时刻， stream 类上有一个成员函数叫做 `pipe`，就像它的名字 **管道** 一样，他可以将两个流通过管子连接起来：
+直接运行 `node example.js`，然后我们打开 chrome ，输入网址 http://localhost:3000 ，就会在网页上看到 `Hello world`。OK，我们回头看一下代码，关键部分在于 `createServer` 的回调函数上，这里有两个参数 `req` 和 `res`，这两个变量也是 [stream](https://nodejs.org/docs/latest/api/stream.html) 类型，前者是**readable stream(可读流)**，后者是**writable stream(可写流)**，从字面意思上推测出前者是用来读取数据的，而后者是用来写入数据的。接下来就是一个见证奇迹的时刻， stream 类上有一个成员函数叫做 `pipe`，就像它的名字 **管道** 一样，他可以将两个流通过管子连接起来：
 
 ![pipe原理示意图](images/stream_pipe.png)
 
 **图 3.3.1 pipe原理**  
 
-有了pipe这个功能，我们就能将 fs.createReadStream 函数得到的可读流转接到res这个可写流上去了。说干就干，我们简单修改一下代码 3.3.1，就可以让其成为一个 Apache：
+有了pipe这个功能，我们就能将 fs.createReadStream 函数得到的可读流转接到res这个可写流上去了。说干就干，我们简单修改一下**代码 3.3.1**，就可以让其成为一个 Apache：
 
 ```javascript
 const http = require('http');
@@ -129,11 +129,11 @@ node 的 stream API 是 node 的核心，HTTP 和 TCP 的各种 API ，都是基
 
 ### 3.4.1 原理分析
 
-首先 stream 的设计初衷是为了“节流”，说的直白些就是内存中待处理的数据量过大，如果处理的速度过慢，就是导致内存中挤压的数据越来越多，最终导致进程不稳定或者内存溢出进而崩溃，而 stream 的存在，就是构建一个缓冲地带。stream 的类（从功能上分为两种 [`Writable`](https://nodejs.org/dist/latest-v12.x/docs/api/stream.html#stream_class_stream_writable) 和 [`Readable`](https://nodejs.org/dist/latest-v12.x/docs/api/stream.html#stream_class_stream_readable) ）在初始化的时候会指定一个 `highWaterMark` 参数，借助此来约定内部使用缓冲区的长度，超过这个参数，就不应该往缓冲区添加数据了。下面对于 `Readable` 和 `Writable` 中的 `highWaterMark` 的使用流程分别进行说明。
+首先 stream 的设计初衷是为了“节流”，说的直白些就是内存中待处理的数据量过大，如果处理的速度过慢，就是导致内存中挤压的数据越来越多，最终导致进程不稳定或者内存溢出进而崩溃，而 stream 的存在，就是构建一个缓冲地带。stream 的类（从功能上分为两种 [`Writable`](https://nodejs.org/docs/latest/api/stream.html#class-streamwritable) 和 [`Readable`](https://nodejs.org/docs/latest/api/stream.html#class-streamreadable) ）在初始化的时候会指定一个 `highWaterMark` 参数，借助此来约定内部使用缓冲区的长度，超过这个参数，就不应该往缓冲区添加数据了。下面对于 `Readable` 和 `Writable` 中的 `highWaterMark` 的使用流程分别进行说明。
 
-`Readable` 通过 [push](https://nodejs.org/dist/latest-v12.x/docs/api/stream.html#stream_readable_push_chunk_encoding) 函数添加数据，数据在其内部存储为一个双向链接的数据结构（具体参见 [BufferList](https://github.com/nodejs/node/blob/master/lib/internal/streams/buffer_list.js) 源码，令人遗憾的是这么方便的数据结构在 Node API 中却没有暴露），如果当前链表中的数据长度达到 `highWaterMark`，`push` 函数就会返回 `false`，不过你依然可以调用 `push` 写入数据。也就是说内部链表的数据长度会大于 `highWaterMark`，Node 内部对于可读流的内存控制完全交给了调用者本身，这个 `highWaterMark` 就是一个警示作用，告诉你现在缓冲区已经满了，你自己看着办吧，如果你不理会，继续往里面写，撑爆了内存是你自己的责任，与我无关。`Readable` 通过 [read](https://nodejs.org/dist/latest-v12.x/docs/api/stream.html#stream_readable_read_size) 函数读取数据，读取的时候可以指定长度，如果指定了长度就从内部链表的队尾移出指定长度的元素交给调用者；如果没有指定长度，就会把所有元素移出交给用户。
+`Readable` 通过 [push](https://nodejs.org/docs/latest/api/stream.html#readablepushchunk-encoding) 函数添加数据，数据在其内部存储为一个双向链接的数据结构（具体参见 [BufferList](https://github.com/nodejs/node/blob/master/lib/internal/streams/buffer_list.js) 源码，令人遗憾的是这么方便的数据结构在 Node API 中却没有暴露），如果当前链表中的数据长度达到 `highWaterMark`，`push` 函数就会返回 `false`，不过你依然可以调用 `push` 写入数据。也就是说内部链表的数据长度会大于 `highWaterMark`，Node 内部对于可读流的内存控制完全交给了调用者本身，这个 `highWaterMark` 就是一个警示作用，告诉你现在缓冲区已经满了，你自己看着办吧，如果你不理会，继续往里面写，撑爆了内存是你自己的责任，与我无关。`Readable` 通过 [read](https://nodejs.org/docs/latest/api/stream.html#readablereadsize) 函数读取数据，读取的时候可以指定长度，如果指定了长度就从内部链表的队尾移出指定长度的元素交给调用者；如果没有指定长度，就会把所有元素移出交给用户。
 
-`Writable` 内部维持一个计数器，代表有多少条数据还未写入完成，通过 [write](https://nodejs.org/dist/latest-v12.x/docs/api/stream.html#stream_writable_write_chunk_encoding_callback) 函数添加数据，此时计数器加一（假设我们此时只写一条数据），其内部调用 [`_write`](https://nodejs.org/dist/latest-v12.x/docs/api/stream.html#stream_writable_write_chunk_encoding_callback_1) 来实现实际的写操作，在 `_write` 实际写完之后在其回调函数中计数器减一。每次调用 `write` 时，如果计数器的值小于 `highWaterMark`，就返回 `true`，这样你可以安心的写；如果为 `false` 就代表当前待写入的数据超标了，如果再写入就有可能会导致内存中的数据越积越多，最终雪崩。这种将主动权放给调用者的行为是和 `Readable` 是如出一辙的。
+`Writable` 内部维持一个计数器，代表有多少条数据还未写入完成，通过 [write](https://nodejs.org/docs/latest/api/stream.html#writablewritechunk-encoding-callback) 函数添加数据，此时计数器加一（假设我们此时只写一条数据），其内部调用 [`_write`](https://nodejs.org/docs/latest/api/stream.html#writable_writechunk-encoding-callback) 来实现实际的写操作，在 `_write` 实际写完之后在其回调函数中计数器减一。每次调用 `write` 时，如果计数器的值小于 `highWaterMark`，就返回 `true`，这样你可以安心的写；如果为 `false` 就代表当前待写入的数据超标了，如果再写入就有可能会导致内存中的数据越积越多，最终雪崩。这种将主动权放给调用者的行为是和 `Readable` 是如出一辙的。
 
 `highWaterMark` 默认以字节为单位，但是在以下两种情况下，它的单位会发生改变：流对象的构造函数支持传入 `objectMode` 参数，默认为 `false`，如果设置为 `true`，则 `highWaterMark` 的单位变成对象个数；流对象的构造函数支持传入 `defaultEncoding` 参数，对于可读流来说默认为 `null`（此时 `highWaterMark` 的单位为字节），对于可写流来说默认为 `utf-8`（此时如果写入的数据中含有中文等字符，则写入的元素个数算 1 个，而不是 3 个）。 不过如果同时设置 `objectMode` 为 `true` 和 自定义的 `defaultEncoding` 参数时，`defaultEncoding` 参数将会被忽略。
 
@@ -226,7 +226,7 @@ reader.on('data', (chunk) => {
 console.log('流模式', reader.readableFlowing);
 ```
 
-**代码 3.4.2.1.1 chapter3/stream/readable_event_emit_one.js**
+**代码 3.4.2.1.2 chapter3/stream/readable_event_emit_one.js**
 
 我们同时添加了 readable 和 data 事件，readable 的优先级高，所以程序中 readableFlowing 属性为 false。data 事件中也接收不到任何事件回调。
 
@@ -272,7 +272,7 @@ writer.on('error',function(err) {
 
 为了防止可写写流写入的速度过快，可写流提供了两个函数 `cork` 和 `uncork`，调用 `cork` 后会把要写入的数据缓存起来，直到调用函数 `uncork` 后才会一股脑将缓存的数据做真正的写入。
 
-#### 3.4.2.2 让流 “流动” 起来
+#### 3.4.2.3 让流 “流动” 起来
 
 我们选择用流，往往想借助其 “流动” 特性来简化我们的代码调用逻辑。这个实现 “流动” 特性的关键技术点，就是使用 `pipe` 函数。我们在 **代码3.3.2** 17 行中看到了 pipe 函数的简单使用，pipe 函数会将一个可读流的数据传输到可写流中，就像我们在 **图 3.3.1** 中演示的效果一样，看上去数据“流动”起来了。不过你可能之前看如如下类似代码：
 
@@ -300,7 +300,7 @@ readStream
     .pipe(writeStream)   // 第二次 pipe，将结果写入文件
 ```
 
-**代码 3.4.2.2.1**
+**代码 3.4.2.3.1**
 
 前面讲我们只能将可读流 pipe 到可写流里面，但是这个中间 `gzipStream` 是什么鬼，从 `readStream` 角度看它是可写流，从 `writeStream` 的角度看它又是可读流，解开其神秘面纱的关键就是 `Transform`。它支持以可写流的身份接收从别处写入的数据，经过其加工后，再放置到内置的可写流中。
 
@@ -364,12 +364,12 @@ outputStream.on('finish', function () {
 });
 ```
 
-**代码 3.4.2.2.2 chapter3/stream/transform_simple.js**
+**代码 3.4.2.3.2 chapter3/stream/transform_simple.js**
 
 上述代码中我们通过可读流 `inputStream` 来采集数据的数字， `myTransfrom` 转化的函数中将采集到的数字筛选出偶数来，最终可写流 `outputStream` 拿到最终转化的数字。
-#### 3.4.2.3 身兼两职的流
+#### 3.4.2.4 身兼两职的流
 
-Transform 流其实内部继承自 [`Duplex`](https://nodejs.org/api/stream.html#class-streamduplex) ，Duplex 内部同时拥有可读流和可写流，但是跟 Transform 不同的是，Duplex 其内部读写的数据是分别存储在两个缓冲区中，两者没有关联关系，相互独立。Node API 中的 [net.Socket](https://nodejs.org/dist/latest-v12.x/docs/api/net.html#net_class_net_socket) 类就是继承自 [stream.Duplex](https://nodejs.org/dist/latest-v12.x/docs/api/stream.html#stream_class_stream_duplex) 类，由于 TCP 双向通信的特性，既能收也能发，且在操作系统层面收发使用的是不同的缓冲区，所以使用 Duplex  类是特别贴合的。为了演示 Duplex 类的使用，我们还是举一个菜鸟驿站的例子，驿站既可以收快递，也可以往外寄快递，和 TCP 的例子类似，他们收上来的快递和要寄出的快递肯定不是同一个（这里不讨论拒收等特殊情况）。那我们可以使用下面的代码来演示：
+Transform 流其实内部继承自 [`Duplex`](https://nodejs.org/api/stream.html#class-streamduplex) ，Duplex 内部同时拥有可读流和可写流，但是跟 Transform 不同的是，Duplex 其内部读写的数据是分别存储在两个缓冲区中，两者没有关联关系，相互独立。Node API 中的 [net.Socket](https://nodejs.org/docs/latest/api/net.html#class-netsocket) 类就是继承自 [stream.Duplex](https://nodejs.org/docs/latest/api/stream.html#class-streamduplex) 类，由于 TCP 双向通信的特性，既能收也能发，且在操作系统层面收发使用的是不同的缓冲区，所以使用 `Duplex` 类是特别贴合的。为了演示 `Duplex` 类的使用，我们还是举一个菜鸟驿站的例子，驿站既可以收快递，也可以往外寄快递，和 TCP 的例子类似，他们收上来的快递和要寄出的快递肯定不是同一个（这里不讨论拒收等特殊情况）。那我们可以使用下面的代码来演示：
 
 ```javascript
 const { Duplex } = require('stream');
@@ -404,7 +404,7 @@ postHouse.write('要寄出的信件x');
 console.log(postHouse.postingLetters);
 ```
 
-**代码 3.4.2.2.2 chapter3/stream/duplex_post_house.js**
+**代码 3.4.2.4.1 chapter3/stream/duplex_post_house.js**
 
 通过上述代码可以看到我们构建出来的驿站类 `PostHouse`，既可以接收快递，也可以寄出快递，但是两者的数据是不共享的，没有相互干扰。
 
@@ -591,7 +591,7 @@ exports.LegacyStream = LegacyStream;
 调用2: this.start = 0 → 也读取 [0,1)（因为此时调用1的 this.start 还未更新）
 ```
 
-上述调用流程意味者会有重复数据被读出。我们需要将其修正：
+上述调用流程意味着会有重复数据被读出。我们需要将其修正：
 
 ```javascript
 _read(size) {
@@ -688,12 +688,12 @@ main().catch(console.error);
 将了这么多新时代的流，那旧时代的流是不是就应该扔到历史的垃圾堆中呢？目前看是不行的，因为现在绝大多数第三方库依然只提供旧版流的 API，深究一下更底层的原因，Node 库中 http 和 tcp 等模块也是在旧版流的基础上实现的，要想完全将旧版实现抹掉目前看不显示。还好我们可以通过转换函数，将新版流转成旧版流。
 
 ```javascript
-Readable.from(aysncIterator);
+Readable.from(asyncIterator);
 ```
 
 **代码 3.4.3.8 将新时代流转成旧时代流**
 
-这个 `aysncIterator` 变量就可以传 Web Stream 或者 Async Iteration 函数的返回值。
+这个 `asyncIterator` 变量就可以传 Web Stream 或者 Async Iteration 函数的返回值。
 ## 3.5 总结
 
 我们用两个小节讲述了 Node 中如何处理静态资源和动态请求，看完这些之后，如果你是一个初学者，可能会因此打退堂鼓，这也太麻烦了，如果通过这种方式来处理数据，跟 php java 之类的比起来毫无优势可言嘛。大家不要着急，Node 社区已经给大家准备了各种优秀的 Web 开发框架，比如说 [Express](https://expressjs.com/)、[Koa](https://koajs.com/)，绝对让你爱不释手。你可以从本书的第 6 章中学习到 express 基本知识。
