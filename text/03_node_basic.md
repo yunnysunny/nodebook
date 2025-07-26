@@ -684,6 +684,16 @@ main().catch(console.error);
 2025-07-19T08:12:32.918Z { id: 3, name: 'Jim Doe', email: 'jim.doe@example.com' }
 2025-07-19T08:12:33.944Z end web stream
 ```
+
+将了这么多新时代的流，那旧时代的流是不是就应该扔到历史的垃圾堆中呢？目前看是不行的，因为现在绝大多数第三方库依然只提供旧版流的 API，深究一下更底层的原因，Node 库中 http 和 tcp 等模块也是在旧版流的基础上实现的，要想完全将旧版实现抹掉目前看不显示。还好我们可以通过转换函数，将新版流转成旧版流。
+
+```javascript
+Readable.from(aysncIterator);
+```
+
+**代码 3.4.3.8 将新时代流转成旧时代流**
+
+这个 `aysncIterator` 变量就可以传 Web Stream 或者 Async Iteration 函数的返回值。
 ## 3.5 总结
 
 我们用两个小节讲述了 Node 中如何处理静态资源和动态请求，看完这些之后，如果你是一个初学者，可能会因此打退堂鼓，这也太麻烦了，如果通过这种方式来处理数据，跟 php java 之类的比起来毫无优势可言嘛。大家不要着急，Node 社区已经给大家准备了各种优秀的 Web 开发框架，比如说 [Express](https://expressjs.com/)、[Koa](https://koajs.com/)，绝对让你爱不释手。你可以从本书的第 6 章中学习到 express 基本知识。
