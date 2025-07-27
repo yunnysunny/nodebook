@@ -2,7 +2,7 @@
 
 ### 3.1 安装
 
-打开 [Node官网](https://nodejs.org) ,映入眼帘的就是它的下载地址了，windows下提供的是安装程序（下载完之后直接双击安装），linux下提供的是源码包（需要编译安装），详细安装流程这里省略掉，我想这个不会难倒各位好汉。
+打开 [Node官网](https://nodejs.org)，映入眼帘的就是它的下载地址了，windows下提供的是安装程序（下载完之后直接双击安装），linux下提供的是源码包（需要编译安装），详细安装流程这里省略掉，我想这个不会难倒各位好汉。
 
 ### 3.2 旋风开始
 
@@ -24,7 +24,7 @@ console.log(a.doAdd(1,2));
 
 和普通前端 javascript 不同的是，这里有两个关键字 `exports` 和 `require`。这就牵扯到模块化的概念了，javascript 这门语言设计的初衷是开发一门脚本语言，让美工等从业人员也能快速掌握并做出各种网页特效来，加之当初语言创作者开发这门语言的周期非常之短，所以在 javascript 漫长的发展过程中一直是没有模块这个语言特性的（直到最近 ES6 Module 的出现才打破了这个格局）。
 
->Node 是最近几年才发展起来的 js 运行时，前端 js 发展的历史要远远长于他，2000 年以后随着 [Ajax](https://zh.wikipedia.org/wiki/AJAX) 技术越来越流行，js的代码开始和后端代码进行交互，逻辑越来越复杂，也越来越需要以工程化的角度去组织它的代码。模块化就是其中一项亟待解决的问题，期间出现了很多模块化的规范，[CommonJS](https://en.wikipedia.org/wiki/CommonJS) 就是其中的一个解决方案。由于其采用同步的模式加载模块，逐渐被前端所抛弃，但是却特别适合服务器端的架构，服务器端只需要在启动前的时候把所有模块加载到内存，启动完成后所有模块就都可以被调用了。
+>Node 是最近几年才发展起来的 js 运行时，前端 js 发展的历史要远远长于它，2000 年以后随着 [Ajax](https://zh.wikipedia.org/wiki/AJAX) 技术越来越流行，js的代码开始和后端代码进行交互，逻辑越来越复杂，也越来越需要以工程化的角度去组织它的代码。模块化就是其中一项亟待解决的问题，期间出现了很多模块化的规范，[CommonJS](https://en.wikipedia.org/wiki/CommonJS) 就是其中的一个解决方案。由于其采用同步的模式加载模块，逐渐被前端所抛弃，但是却特别适合服务器端的架构，服务器端只需要在启动前的时候把所有模块加载到内存，启动完成后所有模块就都可以被调用了。
 >
 >CommonJs 算是一种规范，但是不是 JavaScript 语言固有的语法，后续 JavaScript 语法出现 ES6 Module 的时候算是真正在语法层面有了模块化的实现。但是 CommonJs 已经占据了先机，所以一般在开源的第三方代码中都是用 CommonJs 规范来进行模块化管理，我们本书也是全部采用 CommonJs 的风格进行代码展示。
 
@@ -79,7 +79,7 @@ server.listen(port, hostname, () => {
 ```
 **代码 3.3.1 example.js**
 
-直接运行 `node example.js`，然后我们打开 chrome ，输入网址 http://localhost:3000 ，就会在网页上看到 `Hello world`。OK，我们回头看一下代码，关键部分在于 `createServer` 的回调函数上，这里有两个参数 `req` 和 `res`，这两个变量也是 [stream](https://nodejs.org/docs/latest/api/stream.html) 类型，前者是**readable stream(可读流)**，后者是**writable stream(可写流)**，从字面意思上推测出前者是用来读取数据的，而后者是用来写入数据的。接下来就是一个见证奇迹的时刻， stream 类上有一个成员函数叫做 `pipe`，就像它的名字 **管道** 一样，他可以将两个流通过管子连接起来：
+直接运行 `node example.js`，然后我们打开 chrome，输入网址 http://localhost:3000，就会在网页上看到 `Hello world`。OK，我们回头看一下代码，关键部分在于 `createServer` 的回调函数上，这里有两个参数 `req` 和 `res`，这两个变量也是 [stream](https://nodejs.org/docs/latest/api/stream.html) 类型，前者是**readable stream(可读流)**，后者是**writable stream(可写流)**，从字面意思上推测出前者是用来读取数据的，而后者是用来写入数据的。接下来就是一个见证奇迹的时刻， stream 类上有一个成员函数叫做 `pipe`，就像它的名字 **管道** 一样，它可以将两个流通过管子连接起来：
 
 ![pipe原理示意图](images/stream_pipe.png)
 
@@ -117,9 +117,9 @@ server.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
 });
 ```
-**代码3.3.2 app.js**
+**代码 3.3.2 app.js**
 
-我们仅仅使用了一句`fs.createReadStream(_path).pipe(res);`,就便捷的将文件流输出到HTTP的响应流中了，是不是很强大。OK来看一下效果，运行 `node app.js`，在浏览器中打开 `http://localhost:3000/a.png` 就能看到显示效果。
+我们仅仅使用了一句`fs.createReadStream(_path).pipe(res);`，就便捷地将文件流输出到HTTP的响应流中了，是不是很强大。OK来看一下效果，运行 `node app.js`，在浏览器中打开 `http://localhost:3000/a.png` 就能看到显示效果。
 
 ![最终我们的apache显示效果](images/success.png)  
 **图 3.3.2 最终我们的apache显示效果**
@@ -129,7 +129,7 @@ node 的 stream API 是 node 的核心，HTTP 和 TCP 的各种 API ，都是基
 
 ### 3.4.1 原理分析
 
-首先 stream 的设计初衷是为了“节流”，说的直白些就是内存中待处理的数据量过大，如果处理的速度过慢，就是导致内存中挤压的数据越来越多，最终导致进程不稳定或者内存溢出进而崩溃，而 stream 的存在，就是构建一个缓冲地带。stream 的类（从功能上分为两种 [`Writable`](https://nodejs.org/docs/latest/api/stream.html#class-streamwritable) 和 [`Readable`](https://nodejs.org/docs/latest/api/stream.html#class-streamreadable) ）在初始化的时候会指定一个 `highWaterMark` 参数，借助此来约定内部使用缓冲区的长度，超过这个参数，就不应该往缓冲区添加数据了。下面对于 `Readable` 和 `Writable` 中的 `highWaterMark` 的使用流程分别进行说明。
+首先 stream 的设计初衷是为了“节流”，说的直白些就是内存中待处理的数据量过大，如果处理的速度过慢，就会导致内存中挤压的数据越来越多，最终导致进程不稳定或者内存溢出进而崩溃，而 stream 的存在，就是构建一个缓冲地带。stream 的类（从功能上分为两种 [`Writable`](https://nodejs.org/docs/latest/api/stream.html#class-streamwritable) 和 [`Readable`](https://nodejs.org/docs/latest/api/stream.html#class-streamreadable) ）在初始化的时候会指定一个 `highWaterMark` 参数，借助此来约定内部使用缓冲区的长度，超过这个参数，就不应该往缓冲区添加数据了。下面对于 `Readable` 和 `Writable` 中的 `highWaterMark` 的使用流程分别进行说明。
 
 `Readable` 通过 [push](https://nodejs.org/docs/latest/api/stream.html#readablepushchunk-encoding) 函数添加数据，数据在其内部存储为一个双向链接的数据结构（具体参见 [BufferList](https://github.com/nodejs/node/blob/master/lib/internal/streams/buffer_list.js) 源码，令人遗憾的是这么方便的数据结构在 Node API 中却没有暴露），如果当前链表中的数据长度达到 `highWaterMark`，`push` 函数就会返回 `false`，不过你依然可以调用 `push` 写入数据。也就是说内部链表的数据长度会大于 `highWaterMark`，Node 内部对于可读流的内存控制完全交给了调用者本身，这个 `highWaterMark` 就是一个警示作用，告诉你现在缓冲区已经满了，你自己看着办吧，如果你不理会，继续往里面写，撑爆了内存是你自己的责任，与我无关。`Readable` 通过 [read](https://nodejs.org/docs/latest/api/stream.html#readablereadsize) 函数读取数据，读取的时候可以指定长度，如果指定了长度就从内部链表的队尾移出指定长度的元素交给调用者；如果没有指定长度，就会把所有元素移出交给用户。
 
@@ -195,7 +195,7 @@ process.on('uncaughtException', (err) => {
 
 如果给可读流对象增加 `data` 事件监听、调用函数 `resume` / `pipe` ，将会使用可读流进入 flow 模式，此时 `readableFlowing` 会被置为 true。调用 `pause` / `unpipe` 函数或者添加 `readable` 事件监听会将可读流切换到 no-flow 模式，并且将 `readableFlowing` 置为 false，这个时候必须手动调用函数 `resume` / `pipe` 才能将其切换回 flow 模式，如果在这种情况下添加 `data` 事件是无法切换为 flow 模式的。
 
-注意，如果你同时给可读流添加了 `readable` 和 `data` 的事件，则 `readable` 的优先级高于 `data`，流将回进入 no-flow 模式。当你将 `readable` 事件移出，只保留 `data` 事件时，则回到 flow 模式。同时需要注意到，添加了 `readable` 事件后，调用 `pause` `resume` 这两个函数是没有意义的。
+注意，如果你同时给可读流添加了 `readable` 和 `data` 的事件，则 `readable` 的优先级高于 `data`，流将会进入 no-flow 模式。当你将 `readable` 事件移除，只保留 `data` 事件时，则会回到 flow 模式。同时需要注意到，添加了 `readable` 事件后，调用 `pause` `resume` 这两个函数是没有意义的。
 
 在可读流的使用过程中，你应该尽量选择一种读取模式，以此降低自己代码的复杂度。Node 中通过调用可读流不同函数来隐式的修改其工作模式的方式，确实是一种比较让人艰涩难懂的设计。比如说下述代码：
 
@@ -230,11 +230,11 @@ console.log('流模式', reader.readableFlowing);
 
 我们同时添加了 readable 和 data 事件，readable 的优先级高，所以程序中 readableFlowing 属性为 false。data 事件中也接收不到任何事件回调。
 
-但是我们一旦将第 15 行稍作改动，改成 `console.log('get data', reader.read());` ，你就会发现不但 readable 事件中读取数据了，`data` 事件中也能读取出数据了。而上述这种诡异的行为，也在官方文档中的犄角旮旯中得到了[官方解释](https://nodejs.org/api/stream.html#event-readable)。
+但是我们一旦将第 15 行稍作改动，改成 `console.log('get data', reader.read());`，你就会发现不但 readable 事件中读取到数据了，`data` 事件中也能读取出数据了。而上述这种诡异的行为，也在官方文档中的犄角旮旯中得到了[官方解释](https://nodejs.org/api/stream.html#event-readable)。
 
 > If both `'readable'` and [`'data'`](https://nodejs.org/api/stream.html#event-data) are used at the same time, `'readable'` takes precedence in controlling the flow, i.e. `'data'` will be emitted only when [`stream.read()`](https://nodejs.org/api/stream.html#readablereadsize) is called.
 
-翻译一下就是两个事件都监听时，在 `readable` 中触发 `read()` 调用时，会级联触发 `data` 事件。我相信没有几个开发者会逐字逐句的阅读官方文档，所以编写流相关的代码，大家还是尽量简洁。
+翻译一下就是两个事件都监听时，在 `readable` 中触发 `read()` 调用时，会级联触发 `data` 事件。我相信没有几个开发者会逐字逐句地阅读官方文档，所以编写流相关的代码，大家还是尽量简洁。
 #### 3.4.2.2 自定义可写流
 
 ```javascript
@@ -266,15 +266,15 @@ writer.on('error',function(err) {
 
 **代码 3.4.2.2.1**
 
-这里为了更快的观察可写流内置缓冲区被写满的现象，这里将 `highWaterMark` 的值设置为 3，这样在 15 行循环到 2 的时候写操作就会返回 false。正常情况下 write 函数返回 false 的时候，就需要停下写入，等待 `drain` 事件触发后再写入，上面的程序明显是一个不规范的写法。
+这里为了更快地观察可写流内置缓冲区被写满的现象，这里将 `highWaterMark` 的值设置为 3，这样在 15 行循环到 2 的时候写操作就会返回 false。正常情况下 write 函数返回 false 的时候，就需要停下写入，等待 `drain` 事件触发后再写入，上面的程序明显是一个不规范的写法。
 
 `_write` 函数是供给内部调用使用的，在自己来实现可写流的子类时，这个函数是必须要实现的。`_write` 内部通过 `callback` 函数来标记写入完成。这个回调函数调用之前，认为数据是没有写入成功的。
 
-为了防止可写写流写入的速度过快，可写流提供了两个函数 `cork` 和 `uncork`，调用 `cork` 后会把要写入的数据缓存起来，直到调用函数 `uncork` 后才会一股脑将缓存的数据做真正的写入。
+为了防止可写流写入的速度过快，可写流提供了两个函数 `cork` 和 `uncork`，调用 `cork` 后会把要写入的数据缓存起来，直到调用函数 `uncork` 后才会一股脑将缓存的数据做真正的写入。
 
 #### 3.4.2.3 让流 “流动” 起来
 
-我们选择用流，往往想借助其 “流动” 特性来简化我们的代码调用逻辑。这个实现 “流动” 特性的关键技术点，就是使用 `pipe` 函数。我们在 **代码3.3.2** 17 行中看到了 pipe 函数的简单使用，pipe 函数会将一个可读流的数据传输到可写流中，就像我们在 **图 3.3.1** 中演示的效果一样，看上去数据“流动”起来了。不过你可能之前看如如下类似代码：
+我们选择用流，往往想借助其 “流动” 特性来简化我们的代码调用逻辑。这个实现 “流动” 特性的关键技术点，就是使用 `pipe` 函数。我们在 **代码 3.3.2** 17 行中看到了 pipe 函数的简单使用，pipe 函数会将一个可读流的数据传输到可写流中，就像我们在 **图 3.3.1** 中演示的效果一样，看上去数据“流动”起来了。不过你可能之前看过如下类似代码：
 
 ```javascript
 const fs = require('fs');
@@ -618,7 +618,7 @@ _read(size) {
 
 **代码 3.4.3.6 修正后的 `_read` 函数**
 
-虽然说用传统 stream 也能实现我们的需求，但是代码编写的难度大，稍有不慎就会出现漏洞。很想对比上述所有实现方式来说，Generator 函数版本是最简单明了的，Web Stream 版本次之。下面是**代码 3.4.3.1** **代码 3.4.3.2** **代码 3.4.3.3** **代码 3.4.3.4** 的测试：
+虽然说用传统 stream 也能实现我们的需求，但是代码编写的难度大，稍有不慎就会出现漏洞。相比上述所有实现方式来说，Generator 函数版本是最简单明了的，Web Stream 版本次之。下面是**代码 3.4.3.1** **代码 3.4.3.2** **代码 3.4.3.3** **代码 3.4.3.4** 的测试：
 
 ```javascript
 const { getStream: getStreamBlocked } = require('./blocked-read');
@@ -660,7 +660,7 @@ main().catch(console.error);
 
 **代码 3.4.3.7 chapter3/stream-next/do-read.js**
 
-你会发现上述代码所有的数据遍历操作都用的 for...of 循环，这是由于从 Node 10 开始，传统的 stream 也和 Generator 函数一样实现了 **Async Iteration（异步迭代器）**。运行完成后，输出的内容如下：
+你会发现上述代码所有的数据遍历操作都用的是 for...of 循环，这是由于从 Node 10 开始，传统的 stream 也和 Generator 函数一样实现了 **Async Iteration（异步迭代器）**。运行完成后，输出的内容如下：
 
 ```
 2025-07-19T08:12:18.759Z begin blocked
@@ -685,7 +685,7 @@ main().catch(console.error);
 2025-07-19T08:12:33.944Z end web stream
 ```
 
-将了这么多新时代的流，那旧时代的流是不是就应该扔到历史的垃圾堆中呢？目前看是不行的，因为现在绝大多数第三方库依然只提供旧版流的 API，深究一下更底层的原因，Node 库中 http 和 tcp 等模块也是在旧版流的基础上实现的，要想完全将旧版实现抹掉目前看不显示。还好我们可以通过转换函数，将新版流转成旧版流。
+讲了这么多新时代的流，那旧时代的流是不是就应该扔到历史的垃圾堆中呢？目前看是不行的，因为现在绝大多数第三方库依然只提供旧版流的 API，深究一下更底层的原因，Node 库中 http 和 tcp 等模块也是在旧版流的基础上实现的，要想完全将旧版实现抹掉目前看来并不现实。还好我们可以通过转换函数，将新版流转成旧版流。
 
 ```javascript
 Readable.from(asyncIterator);
