@@ -146,7 +146,7 @@ setInterval(() => {
 
 将日志采集到 kafka 后，我们可以使用 ksqldb 来快捷查询日志数据。这里给出一个 docker-compose 文件，用来快速启动一个 ksqldb 环境：
 
-```dockercompose
+```yaml
 services:
   kafka:
     image: yunnysunny/kafka

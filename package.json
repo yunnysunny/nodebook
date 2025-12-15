@@ -11,10 +11,14 @@
     "pdf": "vuepress export text",
     "preview": "cd output && anywhere 8888"
   },
+  "pnpm": {
+    "overrides": {
+      "chalk": "2.4.2"
+    }
+  },
   "repository": "git@github.com:yunnysunny/nodebook.git",
   "author": "yunnysunny <yunnysunny@gmail.com>",
   "license": "MIT",
-  "packageManager": "yarn@1.22.21",
   "devDependencies": {
     "@vuepress/plugin-active-header-links": "^1.9.10",
     "@vuepress/plugin-back-to-top": "^1.9.10",
@@ -28,7 +32,9 @@
     "vuepress-plugin-autometa": "^0.1.13",
     "vuepress-plugin-clean-urls": "^1.1.2",
     "vuepress-plugin-code-copy": "^1.0.6",
-    "vuepress-plugin-go-top": "^1.0.4",
+    "vuepress-plugin-go-top": "^1.0.4"
+  },
+  "dependencies": {
     "vuepress-plugin-sitemap": "^2.3.1"
   }
 }

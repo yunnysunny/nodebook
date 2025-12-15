@@ -30,6 +30,19 @@ module.exports = {
     ]
 
   ],
+  chainWebpack(config) {
+    // 修改图片规则
+    const imagesRule = config.module.rule('images')
+
+    imagesRule.uses.clear()
+
+    imagesRule
+      .use('file-loader')
+      .loader('file-loader')
+      .options({
+        name: 'assets/img/[name].[ext]' // ❌ 不要 hash
+      })
+  },
   markdown: {
     lineNumbers: true,
     externalLinks: { target: '_blank', rel: 'nofollow noopener noreferrer' },
