@@ -159,7 +159,69 @@ npm config set cache "D:\npm-cache"
 
 我们推荐仅仅在全局安装命令行工具类型的包，因为同一个包在不同项目中很有可能使用不同的版本，所以如果将其安装在全局的话，就没办法使用不同版本了。如果你非要将某一个类库安装到全局的话，那就增加一个 `NODE_PATH` 环境变量，指向我们刚才设置的目录 `D:\npm`。
 
-### 4.3 我只想在某些项目中使用特定 npm 仓库
+### 4.3 npm 包中的预编译二进制文件无法下载
+
+上一小节我们讨论了如何更改 npm 包安装源，但是这种修改只针对 js 代码有效，如果要下载的包中还包含预编译的二进制文件，则需要进行额外的配置。一般来说，这些第三方包都会提供 npmrc 的配置项，来指定预编译二进制文件的下载地址。
+例如，对于 [electron](https://www.npmjs.com/package/electron) 包，你可以在项目根目录创建一个 .npmrc 文件，并添加如下内容：
+
+```
+electron_mirror=https://npmmirror.com/mirrors/electron/
+```
+
+**代码 4.3.1**
+
+这样在安装包时，npm 会优先从淘宝源下载预编译的二进制文件，而不是从官方源下载。不过为了后续其他项目的安装便捷，我们推荐将这个配置直接写入到系统的 ~/.npmrc 文件中。下面给出常见的配置项：
+
+```
+disturl=https://npmmirror.com/mirrors/node
+chromedriver-cdnurl=https://npmmirror.com/mirrors/chromedriver
+couchbase-binary-host-mirror=https://npmmirror.com/mirrors/couchbase/v{version}
+debug-binary-host-mirror=https://npmmirror.com/mirrors/node-inspector
+electron-mirror=https://npmmirror.com/mirrors/electron/
+flow-bin-binary-host-mirror=https://npmmirror.com/mirrors/flow/v
+fse-binary-host-mirror=https://npmmirror.com/mirrors/fsevents
+fuse-bindings-binary-host-mirror=https://npmmirror.com/mirrors/fuse-bindings/v{version}
+git4win-mirror=https://npmmirror.com/mirrors/git-for-windows
+gl-binary-host-mirror=https://npmmirror.com/mirrors/gl/v{version}
+grpc-node-binary-host-mirror=https://npmmirror.com/mirrors
+hackrf-binary-host-mirror=https://npmmirror.com/mirrors/hackrf/v{version}
+leveldown-binary-host-mirror=https://npmmirror.com/mirrors/leveldown/v{version}
+leveldown-hyper-binary-host-mirror=https://npmmirror.com/mirrors/leveldown-hyper/v{version}
+mknod-binary-host-mirror=https://npmmirror.com/mirrors/mknod/v{version}
+node-sqlite3-binary-host-mirror=https://npmmirror.com/mirrors
+node-tk5-binary-host-mirror=https://npmmirror.com/mirrors/node-tk5/v{version}
+nodegit-binary-host-mirror=https://npmmirror.com/mirrors/nodegit/v{version}/
+operadriver-cdnurl=https://npmmirror.com/mirrors/operadriver
+phantomjs-cdnurl=https://npmmirror.com/mirrors/phantomjs
+profiler-binary-host-mirror=https://npmmirror.com/mirrors/node-inspector/
+puppeteer-download-base-url=https://npmmirror.com/mirrors/chrome-for-testing
+python-mirror=https://npmmirror.com/mirrors/python
+rabin-binary-host-mirror=https://npmmirror.com/mirrors/rabin/v{version}
+sass-binary-site=https://npmmirror.com/mirrors/node-sass
+sodium-prebuilt-binary-host-mirror=https://npmmirror.com/mirrors/sodium-prebuilt/v{version}
+sqlite3-binary-site=https://npmmirror.com/mirrors/sqlite3
+utf-8-validate-binary-host-mirror=https://npmmirror.com/mirrors/utf-8-validate/v{version}
+utp-native-binary-host-mirror=https://npmmirror.com/mirrors/utp-native/v{version}
+zmq-prebuilt-binary-host-mirror=https://npmmirror.com/mirrors/zmq-prebuilt/v{version}
+canvas-binary-host-mirror=https://npmmirror.com/mirrors/node-canvas-prebuilt/v{version}
+canvas-prebuilt-binary-host-mirror=https://npmmirror.com/mirrors/node-canvas-prebuilt/v{version}
+swc_binary_site=https://npmmirror.com/mirrors/node-swc
+xprofiler_binary_host_mirror=https://npmmirror.com/mirrors/xprofiler
+```
+
+**代码 4.3.2**
+
+如果不过有一些包的预编译二进制文件的下载地址不是在 npmmirror.com 上，这时候就只能自己上传到一个可访问的服务器上，然后再将地址添加到 .npmrc 上。还有一种特殊情况，部分包修改了预编译二进制的自定义下载地址的读取方式，不再支持通过 .npmrc 文件来配置，这时候只能按照官方文档来手动指定下载地址，比如说新版的 [puppeteer](https://www.npmjs.com/package/puppeteer) 包，你需要使用环境变量来指定自定义下载地址。
+
+```
+PUPPETEER_CHROME_DOWNLOAD_BASE_URL=https://npmmirror.com/mirrors/chrome-for-testing
+```
+
+**代码 4.3.3**
+
+> 为了方便在容器中使用，我专门制作了一个[基础镜像](https://github.com/whyun-docker/node)，包含了上述自定义地址的配置。
+
+### 4.4 我只想在某些项目中使用特定 npm 仓库
 
 上面讲了如何修改 Node 的安装仓库的地址，但是这个修改是全局的，一旦你修改了之后，装所有的包都是用同一个仓库。但是我们在实际开发过程中，公司内部一般都会自己搭建一个 npm 仓库，用来托管私有包并提供对于公开包的反向代理功能。这时候就必须将 npm 仓库地址改成公司库才行。但是这样还会带来其他问题，为了防止代码泄露，公司的私有仓库一般都是部署在内网，有时开发一些类似开源项目的时候还得不得不切换到公开仓库地址。那么有没有项目级别的 npm 配置呢？还真有。
 
@@ -169,100 +231,19 @@ npm config set cache "D:\npm-cache"
 registry="私有仓库地址"
 ```
 
-**代码 4.3.1**
+**代码 4.4.1**
 
 这样你在项目中运行 npm install 时使用的就是私有仓库地址，而在其他地方运行时使用的还是默认仓库地址。
 
-### 4.4 其他一些命令
+### 4.5 其他一些命令
 
 如果你想查看当前全局安装了哪些包，可以使用`npm list -g`命令，运行完成后会打印一个目录树，但是如果安装的包比较多的话，在命令行中会打印不全，所以可以采用重定向的方式将打印结果输出到硬盘，例如`npm list -g > d:\package.txt`。 如果不加`-g`参数就是打印当前目录下 `node_modules` 文件夹下的包结构。
 
 有时候，我们需要将安装好的包删除掉，如果包是安装在项目目录下的话，其实直接可以把 `node_modules` 下对应的文件夹删除即可，如果是全局安装的话，那还是使用命令进行卸载吧，比如卸载我们上面安装的 express-generator ： `npm uninstall express-generator -g`。同样这里的 `-g` 是说卸载全局安装的 express-generator 包。
 
-### 4.5 yarn
-
-我们在4.1节提到 Semantic Versioning 这个概念，但是这个约定全凭开发者去自觉遵守显然不现实。在之前的开发中，我使用supertest 这个包来做单元测试，当时安装的是 2.0.0 版本，过了几天我新建了一个项目使用 npm install 来安装依赖的时候被安装的是2.0.1版本。按理来说依照规则，小版本变更应该是用来修改bug的，没想到我运行单元测试之后直接在 supertest 中报了语法错误。去网上一查，当前报错代码在 node 4.x中才能避免，而我用的是 0.10.x，然后手动查看了一下 supertest 的 package.json 文件，发现它在这一个小版本改动中悄悄的将 engine 属性的 node 版本改为>=4.0.0。单纯使用一个包都可能会导致风险，更不用说在一个庞大的项目中使用大量的依赖，那个时候可真叫牵一发而动全身。
-
-[yarn](https://yarnpkg.com) 正是 facebook 的开发人员在开发 React Native 的时候实在无法忍受第三方包版本号变更带来的兼容问题，怒而开发之。
-
-> 需要注意的yarn需要 node 版本大于4.0.0。
-
-yarn 很多命令和 npm相似，比如说 `yarn init` 对应 `npm init` 来初始化项目， `yarn install` 对应 `npm install` 来读取配置文件安装依赖包。
-
-不过通过 `yarn install` 安装过程中，yarn 将下载下来的包都缓存到了本地（这个缓存路径在windows下默认为C:\Users\\[user]\AppData\Local\Yarn\cache），下次如果换个项目再安装相同包，并且版本号也跟之前安装的一样的话，它就直接从缓存中读取出来。同时，yarn 在安装包的时候是并行的，而 npm 在安装包时串行的，必须第一个包安装完成之后才能安装第二个包。所以综上两点，yarn 安装包的速度要比 npm 快。
-
-我们通过 `npm install [pakcage] --save` 来将依赖包安装到当前项目下，同时将配置写入 package.json 文件，在 yarn 中 使用 `yarn add [package]` 即可，如果你要想全局安装包可以用 `yarn global add [package]` (之前我们通过**命令4.2.3**设置过全局包安装的路径，yarn 也会读取这个设置)。此外 yarn global 还有一些很有用的命令，大家可以参见[这里](https://yarnpkg.com/en/docs/cli/global)。
-
-不过我们通过 `yarn add [package]` 后，他还会在当前目录下生成或者修改一个 yarn.lock 文件。例如我们运行 `yarn add express` 后就会发现文件 yarn.lock 中内容如下：
-
-```
-# THIS IS AN AUTOGENERATED FILE. DO NOT EDIT THIS FILE DIRECTLY.
-# yarn lockfile v1
-
-
-accepts@~1.3.3:
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/accepts/-/accepts-1.3.3.tgz#c3ca7434938648c3e0d9c1e328dd68b622c284ca"
-  dependencies:
-    mime-types "~2.1.11"
-    negotiator "0.6.1"
-
-array-flatten@1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/array-flatten/-/array-flatten-1.1.1.tgz#9a5f699051b1e7073328f2a008968b64ea2955d2"
-
-content-disposition@0.5.1:
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/content-disposition/-/content-disposition-0.5.1.tgz#87476c6a67c8daa87e32e87616df883ba7fb071b"
-```
-
-**代码 4.5.1 yarn.lock示例**  
-
-你会发现里面罗列了express各个依赖的版本号（ version 字段），下载地址（ resolved 字段），我们仅仅截取了前面几行，因为 express 包中依赖关系比较复杂，生成的这个 lock 文件也比较长。项目初始化的老兄，通过 yarn add 的方式安装好包之后，需要将这个 yarn.lock 提交到版本库，这样你的小伙伴通过 `yarn install` 安装的各个依赖就和初始化的老兄用的一样了，这样就避免了团队中各个开发者通过 npm install 安装到本地的包的版本号不一致而导致的各种难以排查的问题了。
-
-更多关于 npm 和 yarn 的对比可以参见[官方文档](https://yarnpkg.com/en/docs/migrating-from-npm)。
-
-不过我们在使用 yarn 的时候，因为 yarn 在底层依然得使用 npm 进行安装，所以依然无法避免因网络原因导致的包无法下载的问题，不过我们可以直接将 npm 的安装源设置为 cnpm 提供的安装源：
-
-```shell
-yarn config set registry https://registry.npmmirror.com
-```
-
-**命令4.5.1**  
-
-> 如果之前通过 **命令 4.2.3** 命令设置过第三方源，那么这个设置的优先级会大于通过 yarn 命令设置的优先级。特别是 npm 命令和 yarn 命令设置的源地址不同的时候，你会发现明明 yarn 切换到了淘宝源，运行 yarn add 后源地址却不是淘宝源的。其实通过 yarn 命令切换源后，它会在 ~/.yarnrc 中写入新的源的配置，同样使用 config 命令切换源后，它会写入 ~/.npmrc 中。运行 yarn add 时，它会先读取 ~/.npmrc 中的配置，再读取 ~/.yarnrc 的配置。所以解决问题的思路就是要么删除 ~/.npmrc 中关于 registry 的配置，要么将其改成跟 yarn 中配置的源地址一致。
-
-同时你可以通过命令来设置 yarn 命令安装的包的路径：
-
-```shell
-yarn config set global-folder "d:\yarn"
-```
-
-**命令 4.5.2**
-
-设置完后，记得将对应的 ```d:/yarn/global/bin``` 添加到环境变量，这样全局安装的命令行程序才能被从终端上找得到。
-
-当然与 npm 命令对应的，也可以设置缓存路径：
-
-```shell
-yarn config set cache-folder "D:\yarn_cache"
-```
-
-**命令 4.5.3**
-
-使用 yarn 的还有一个好处是，当前项目版本是锁定的 yarn.lock 文件中的（从 node 6 开始，也有类似的功能，有一个 package.lock 的文件来锁定版本号）。这样带来的好处是，假设 package.json 中定义的某个版本号是 ^1.0.0，按理来说 1.0.0 和 1.n.m 都是符合这个版本约束的，两个开发者在协作开发的时候，如果两人安装的小版本号不一致，就会导致未知问题。yarn.lock 的一个重要作用就是，就是将各个包用的版本号一开始就锁死。例如在 **代码 4.2.1** 中，yarn.lock 规定 accepts 用的是 1.3.3，多个开发者在协作开发时，从代码仓库中检出项目代码，初始化运行 yarn install 后安装的 accepts 也会是 1.3.3，即使当前 accepts 包有最新的版本 1.4.x，也不会被安装。
-
-随着项目的开发迭代，各个包的版本难免会被更新，更新 yarn.lock 的某个包的版本号大体有如下几种方法。
-
-直接使用 `yarn add packageName@x.y.z`， 这样 yarn.lock 和 package.json 都会被更新，且 package.json 中的包版本号会被写死为 `x.y.z`，而不是我们常见的  `^a.b.c` 格式。
-
-使用 `yarn upgrade-interactive --latest` , 需要手动选择升级的依赖包，按空格键选择，a 键切换所有，i 键反选选择。这种方式如果升级的包的版本号中主版本号没有变，则只会更改 yarn.lock，不会更改 package.json。比如说当前安装版本是 1.1.0，升级到版本是 1.20，则用这个命令后，package.json 不改变；当前安装版本为 1.1.0，升级到版本是 2.0.0，则用这个命令后，package.json 和 yarn.lock 都会更改。
-
 ### 4.6 pnpm
 
-yarn 自从升级到 2.x 之后，命令的使用方式做了很多大改动，不同我们通过 npm install yarn 安装的 yarn 依然还是 1.x 版本，但是 1.x 版本官方已经不再维护导致出现的 bug 得不到修复，所以在新启动的项目中不推荐使用 yarn 来维护。
-
-pnpm 作为最近几年的后起之秀，在包管理这块拥有更新的理念。类似于 npm 和 yarn，在项目中安装包的时候，都需要将包文件实实在在的写入到项目中的 node_modules 文件夹下，但是 pnpm 采用的是文件链接的形式，真正的文件存储在其公共文件夹中，这个文件夹是所有项目所共享的，这中方式极大加快了包的安装的速度。所以在新项目中，可以使用 pnpm 来作为自己的包管理器。我们可以通过 `npm install pnpm -g` 来全局安装 pnpm。
+pnpm 作为最近几年的后起之秀，在包管理这块拥有更新的理念。类似于 npm ，在项目中安装包的时候，都需要将包文件实实在在的写入到项目中的 node_modules 文件夹下，但是 pnpm 采用的是文件链接的形式，真正的文件存储在其公共文件夹中，这个文件夹是所有项目所共享的，这中方式极大加快了包的安装的速度。所以在新项目中，可以使用 pnpm 来作为自己的包管理器。我们可以通过 `npm install pnpm -g` 来全局安装 pnpm。
 
 > 很多其他语言的包管理器也是采用类似链接的方式，比如说 Java 中的 maven。
 
