@@ -1,4 +1,5 @@
 /output
+/build
 .sass-cache
 /config/kitabu.yml
 /_book

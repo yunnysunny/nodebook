@@ -11,7 +11,7 @@ module.exports = {
       lang: 'zh-CN',
     },
   },
-  dest: 'output',
+  dest: process.env.BUILD_OUTPUT || 'output',
   head: [
     [
       'script', // js 文件
